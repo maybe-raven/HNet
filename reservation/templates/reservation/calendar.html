@@ -25,20 +25,31 @@
 
 
 <ul class="weekdays">
+  <li>Sunday</li>
   <li>Monday</li>
   <li>Tuesday</li>
   <li>Wednesday</li>
   <li>Thursday</li>
   <li>Friday</li>
   <li>Saturday</li>
-  <li>Sunday</li>
 </ul>
 
 <div class="calendar">
 
 <table class="calbox">
-  <tr>
-    <td>1
+<tr>
+{% for item in week_one %}
+  {% if item == "none" %}
+    <td class="hidden">{{ item }}
+          <ul>
+            <li>none</li>
+            <li>none</li>
+            <li>none</li>
+            <li>none</li>
+          </ul>
+      </td>
+  {% else %}
+    <td>{{ item }}
       <a href="{% url 'reservation:overview' %}" class="infobox" style="text-decoration:none;color: black;">
         <ul>
           <li>appointment 1</li>
@@ -48,65 +59,136 @@
         </ul>
       </a>
     </td>
-    <td>2
-      <div class="infobox">
+  {% endif %}
+{% endfor %}
+</tr>
+<tr>
+{% for item in week_two %}
+  {% if item == "none" %}
+    <td class="hidden">{{ item }}
+          <ul>
+            <li>none</li>
+            <li>none</li>
+            <li>none</li>
+            <li>none</li>
+          </ul>
+      </td>
+  {% else %}
+    <td>{{ item }}
+      <a href="{% url 'reservation:overview' %}" class="infobox" style="text-decoration:none;color: black;">
         <ul>
           <li>appointment 1</li>
           <li>appointment 2</li>
           <li>appointment 3</li>
           <li>appointment 4</li>
         </ul>
-       </div>
+      </a>
     </td>
-    <td>3</td>
-    <td>4</td>
-    <td>5</td>
-    <td>6</td>
-    <td>7</td>
-  </tr>
-  <tr>
-    <td>8</td>
-    <td>9</td>
-    <td>10</td>
-    <td>11</td>
-    <td>12</td>
-    <td>13</td>
-    <td>14</td>
-  </tr>
-  <tr>
-    <td>15</td>
-    <td>16</td>
-    <td>17</td>
-    <td>18</td>
-    <td>19</td>
-    <td>20</td>
-    <td>21</td>
-  </tr>
-  <tr>
-    <td>22</td>
-    <td>23</td>
-    <td>24</td>
-    <td>25</td>
-    <td>26</td>
-    <td>25</td>
-    <td>28</td>
-  </tr>
-  <tr>
-    <td>29</td>
-    <td>30</td>
-    <td>31</td>
-    <td></td>
-    <td></td>
-    <td></td>
-    <td></td>
-  </tr>
+    {% endif %}
+{% endfor %}
+</tr>
+   <tr>
+{% for item in week_three %}
+     {% if item == "none" %}
+    <td class="hidden">{{ item }}
+          <ul>
+            <li>none</li>
+            <li>none</li>
+            <li>none</li>
+            <li>none</li>
+          </ul>
+      </td>
+  {% else %}
+    <td>{{ item }}
+      <a href="{% url 'reservation:overview' %}" class="infobox" style="text-decoration:none;color: black;">
+        <ul>
+          <li>appointment 1</li>
+          <li>appointment 2</li>
+          <li>appointment 3</li>
+          <li>appointment 4</li>
+        </ul>
+      </a>
+    </td>
+       {% endif %}
+{% endfor %}
+</tr>
+   <tr>
+{% for item in week_four %}
+     {% if item == "none" %}
+    <td class="hidden">{{ item }}
+          <ul>
+            <li>none</li>
+            <li>none</li>
+            <li>none</li>
+            <li>none</li>
+          </ul>
+      </td>
+  {% else %}
+    <td>{{ item }}
+      <a href="{% url 'reservation:overview' %}" class="infobox" style="text-decoration:none;color: black;">
+        <ul>
+          <li>appointment 1</li>
+          <li>appointment 2</li>
+          <li>appointment 3</li>
+          <li>appointment 4</li>
+        </ul>
+      </a>
+    </td>
+       {% endif %}
+{% endfor %}
+</tr>
+   <tr>
+{% for item in week_five %}
+     {% if item == "none" %}
+    <td class="hidden">{{ item }}
+          <ul>
+            <li>none</li>
+            <li>none</li>
+            <li>none</li>
+            <li>none</li>
+          </ul>
+      </td>
+  {% else %}
+    <td>{{ item }}
+      <a href="{% url 'reservation:overview' %}" class="infobox" style="text-decoration:none;color: black;">
+        <ul>
+          <li>appointment 1</li>
+          <li>appointment 2</li>
+          <li>appointment 3</li>
+          <li>appointment 4</li>
+        </ul>
+      </a>
+    </td>
+       {% endif %}
+{% endfor %}
+</tr>
+<tr>
+{% for item in week_six %}
+  {% if item == "none" %}
+    <td class="hidden">{{ item }}
+          <ul>
+            <li>none</li>
+            <li>none</li>
+            <li>none</li>
+            <li>none</li>
+          </ul>
+      </td>
+  {% else %}
+    <td>{{ item }}
+      <a href="{% url 'reservation:overview' %}" class="infobox" style="text-decoration:none;color: black;">
+        <ul>
+          <li>appointment 1</li>
+          <li>appointment 2</li>
+          <li>appointment 3</li>
+          <li>appointment 4</li>
+        </ul>
+      </a>
+    </td>
+    {% endif %}
+{% endfor %}
+</tr>
 </table>
-
 </div>
 
-<h1>List</h1>
-{% for item in days %}
-  <li></li>
-{% endfor %}
 </body>
 </html>

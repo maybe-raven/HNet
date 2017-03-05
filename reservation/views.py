@@ -15,6 +15,12 @@ from account.models import Patient, Doctor, ProfileInformation
 @login_required
 def calendar(request, month=timezone.now().month, year=timezone.now().year):
     days = calculate_day(str(month), str(year))
+    week_one = days[0]
+    week_two = days[1]
+    week_three = days[2]
+    week_four = days[3]
+    week_five = days[4]
+    week_six = days[5]
 
     month = int(month)
     year = int(year)
@@ -38,7 +44,8 @@ def calendar(request, month=timezone.now().month, year=timezone.now().year):
 
     context = {'year': year, 'month_name': month_name,
                'prev_month': prev_month, 'prev_year': prev_year, 'next_month': next_month,
-               'next_year': next_year, 'days': days}
+               'next_year': next_year, 'week_one':week_one, 'week_two':week_two,
+               'week_three':week_three, 'week_four':week_four, 'week_five':week_five, 'week_six': week_six}
 
     profile_information = ProfileInformation.from_user(request.user)
     if profile_information is not None:
@@ -162,11 +169,92 @@ def calculate_day(month, year):
         counter = 30
 
     count = 1
-    days = []
-    for i in range(0, int(final)):
-        days.append("nothing")
-    for i in range(int(final), counter + int(final)):
-        days.append(count)
+    days_one = []
+    days_two = []
+    days_three = []
+    days_four = []
+    days_five = []
+    days_six = []
+
+
+    if(int(final) == 0):
+        final = 7
+
+    for i in range(0, int(final)-1):
+        days_one.append("none")
+
+
+    for i in range(0, 7 - (int(final)-1)):
+        days_one.append(count)
         count += 1
+
+    for i in range(0, 7):
+        days_two.append(count)
+        count += 1
+
+
+    for i in range(0, 7):
+        days_three.append(count)
+        count += 1
+
+    for i in range(0, 7):
+        days_four.append(count)
+        count += 1
+    print('before',int(counter))
+    counter -= (21 + (7-(final-1)))
+    print('after',int(counter))
+    if(int(counter) - 7 < 0 and int(counter) > 0):
+        for i in range(0, int(counter)):
+            days_five.append(count)
+            count += 1
+        for i in range(int(counter), 7):
+            days_five.append("none")
+        for i in range(0, 7):
+            days_six.append("none")
+    elif(int(counter) == 0):
+        for i in range(0, 7):
+            days_five.append("none")
+            days_six.append("none")
+    else:
+        for i in range(0, 7):
+            days_five.append(count)
+            count += 1
+        counter -= 7
+        print(int(counter))
+        if (int(counter) - 7 < 0 and int(counter) > 0):
+            for i in range(0, int(counter)):
+                days_six.append(count)
+                count += 1
+            for i in range(int(counter), 7):
+                days_six.append("none")
+
+    days = [days_one, days_two, days_three, days_four, days_five, days_six]
+
+    print('days_one')
+    for i in range(0, len(days_one)):
+        print(days_one[i])
+
+    print('days_two')
+    for i in range(0, len(days_two)):
+        print(days_two[i])
+
+    print('days_three')
+    for i in range(0, len(days_three)):
+        print(days_three[i])
+
+    print('days_four')
+    for i in range(0, len(days_four)):
+        print(days_four[i])
+
+    print('days_five')
+    for i in range(0, len(days_five)):
+        print(days_five[i])
+
+    print('days_six')
+    for i in range(0, len(days_six)):
+        print(days_six[i])
+
+
+
 
     return days

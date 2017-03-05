@@ -60,7 +60,7 @@ body {font-family: Verdana, sans-serif;}
 
 .calendar {
     width: 100%;
-    height: 650px;
+    height: 780px;
 }
 
 .calbox{
@@ -95,4 +95,8 @@ body {font-family: Verdana, sans-serif;}
 
 .nounder {
     text-decoration: none;
+}
+
+td.hidden {
+    visibility: hidden;
 }
