@@ -56,4 +56,5 @@ class Appointment(models.Model):
     class Meta:
         permissions = (
             ('cancel_appointment', 'Can cancel appointment'),
+            ('view_appointment', 'Can view appointments'),
         )

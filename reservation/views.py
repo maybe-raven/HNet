@@ -13,6 +13,7 @@ from account.models import Patient, Doctor, ProfileInformation
 
 
 @login_required
+@permission_required('reservation.view_appointment')
 def calendar(request, month=timezone.now().month, year=timezone.now().year):
     days = calculate_day(str(month), str(year))
     week_one = days[0]
@@ -39,13 +40,12 @@ def calendar(request, month=timezone.now().month, year=timezone.now().year):
         next_month = month + 1
         next_year = year
 
-
     month_name = datetime.date(1900, int(month), 1).strftime('%B')
 
     context = {'year': year, 'month_name': month_name,
                'prev_month': prev_month, 'prev_year': prev_year, 'next_month': next_month,
-               'next_year': next_year, 'week_one':week_one, 'week_two':week_two,
-               'week_three':week_three, 'week_four':week_four, 'week_five':week_five, 'week_six': week_six}
+               'next_year': next_year, 'week_one': week_one, 'week_two': week_two,
+               'week_three': week_three, 'week_four': week_four, 'week_five': week_five, 'week_six': week_six}
 
     profile_information = ProfileInformation.from_user(request.user)
     if profile_information is not None:
@@ -146,24 +146,24 @@ def cancel_appointment(request, appointment_id):
 
 
 def calculate_day(month, year):
-    if(int(month) == 2 or int(month) == 1):
+    if (int(month) == 2 or int(month) == 1):
         year = int(year) - 1
         month = int(month) + 12
 
-    final = 1 + (2*int(month)) + (3*(int(month) + 1)/5) + int(year) + math.floor(int(year)/4) - \
-            math.floor(int(year)/100) + math.floor(int(year)/400) + 2
+    final = 1 + (2 * int(month)) + (3 * (int(month) + 1) / 5) + int(year) + math.floor(int(year) / 4) - \
+            math.floor(int(year) / 100) + math.floor(int(year) / 400) + 2
 
-    remainder = math.floor(final/7)
+    remainder = math.floor(final / 7)
     remainder *= 7
     final -= remainder
 
     thirtyone_months = ["12", "13", "3", "5", "7", "8", "10"]
 
-    if((int(year)/4 and int(month) == 14) or (month == 14 and int(year)/100 and int(year)/400)):
+    if ((int(year) / 4 and int(month) == 14) or (month == 14 and int(year) / 100 and int(year) / 400)):
         counter = 29
-    if(month == 14):
+    if (month == 14):
         counter = 28
-    elif(month in thirtyone_months or month == 13):
+    elif (month in thirtyone_months or month == 13):
         counter = 31
     else:
         counter = 30
@@ -176,22 +176,19 @@ def calculate_day(month, year):
     days_five = []
     days_six = []
 
-
-    if(int(final) == 0):
+    if (int(final) == 0):
         final = 7
 
-    for i in range(0, int(final)-1):
+    for i in range(0, int(final) - 1):
         days_one.append("none")
 
-
-    for i in range(0, 7 - (int(final)-1)):
+    for i in range(0, 7 - (int(final) - 1)):
         days_one.append(count)
         count += 1
 
     for i in range(0, 7):
         days_two.append(count)
         count += 1
-
 
     for i in range(0, 7):
         days_three.append(count)
@@ -200,10 +197,10 @@ def calculate_day(month, year):
     for i in range(0, 7):
         days_four.append(count)
         count += 1
-    print('before',int(counter))
-    counter -= (21 + (7-(final-1)))
-    print('after',int(counter))
-    if(int(counter) - 7 < 0 and int(counter) > 0):
+    print('before', int(counter))
+    counter -= (21 + (7 - (final - 1)))
+    print('after', int(counter))
+    if (int(counter) - 7 < 0 and int(counter) > 0):
         for i in range(0, int(counter)):
             days_five.append(count)
             count += 1
@@ -211,7 +208,7 @@ def calculate_day(month, year):
             days_five.append("none")
         for i in range(0, 7):
             days_six.append("none")
-    elif(int(counter) == 0):
+    elif (int(counter) == 0):
         for i in range(0, 7):
             days_five.append("none")
             days_six.append("none")
@@ -253,8 +250,5 @@ def calculate_day(month, year):
     print('days_six')
     for i in range(0, len(days_six)):
         print(days_six[i])
-
-
-
 
     return days
