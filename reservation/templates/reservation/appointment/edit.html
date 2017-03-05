@@ -1,0 +1,11 @@
+<h1>Update appointment</h1>
+
+{% if message %}
+<p>{{ message }}</p>
+{% endif %}
+
+<form method="post" action="{% url 'reservation:edit' form.instance.id %}">
+    {% csrf_token %}
+    {{ form.as_table }}
+    <input type="submit" value="Save">
+</form>

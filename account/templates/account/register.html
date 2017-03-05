@@ -1,0 +1,11 @@
+<h1>Register</h1>
+
+<form method="post" action="{% url 'account:register' %}">
+    {% csrf_token %}
+    <table>
+        {{ user_form.as_table }}
+        {{ profile_information_form.as_table }}
+        {{ patient_form.as_table }}
+    </table>
+    <input type="submit" value="Register">
+</form>
