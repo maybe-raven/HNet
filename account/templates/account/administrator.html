@@ -1,0 +1,10 @@
+<form method="post" actio="{% url 'account:create_administrator' %}">
+    {% csrf_token %}
+    <table>
+        {{ user_form.as_table }}
+        {{ profile_information_form.as_table }}
+    </table>
+
+    <input type="submit" value="Create Account"/>
+    <a href="#" onclick="window.history.back(); return false;">Cancel</a>
+</form>

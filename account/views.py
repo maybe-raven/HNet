@@ -4,7 +4,7 @@ from django.shortcuts import render, redirect
 from django.contrib import auth
 from django.contrib.auth.decorators import login_required, permission_required
 from .forms import UserCreationForm, UserChangeForm, ProfileInformationForm, PatientCreationForm, PatientChangeForm
-from .models import ProfileInformation
+from .models import ProfileInformation, get_account_from_user
 from hnet.logger import CreateLogEntry
 
 
@@ -75,22 +75,29 @@ def patient(request):
 
 
 @login_required()
-@permission_required('account.add_administrator', 'account.add_profileinformation')
-def administrators(request):
+@permission_required('account.add_administrator')
+@permission_required('account.add_profileinformation')
+def create_administrators(request):
+    profile_information = ProfileInformation.from_user(request.user)
+    if profile_information is None or profile_information.account_type != ProfileInformation.ADMINISTRATOR:
+        raise PermissionDenied()
+
     if request.method == 'POST':
         user_form = UserCreationForm(request.POST)
         profile_information_form = ProfileInformationForm(request.POST)
         if user_form.is_valid() and profile_information_form.is_valid():
-            user = user_form.save_as_administrator_with_profile_information(user_form, profile_information_form)
+            user_form.save_as_administrator_by_creator_with_profile_information(
+                get_account_from_user(request.user),
+                profile_information_form
+            )
 
-            auth.login(request, user)
             CreateLogEntry(request.user.username, "Administrator account registered.")
-            return redirect(reverse('account:register_done'))
+            return render(request, 'account/administrator_done.html')
     else:
         user_form = UserCreationForm()
         profile_information_form = ProfileInformationForm()
 
-    return render(request, 'account/register.html',
+    return render(request, 'account/administrator.html',
                   {'user_form': user_form, 'profile_information_form': profile_information_form})
 
 
