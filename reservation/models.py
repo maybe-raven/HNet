@@ -1,5 +1,6 @@
+from datetime import date, timedelta
 from django.db import models
-from account.models import Patient, Doctor
+from account.models import Patient, Doctor, get_account_from_user
 
 
 class Location(models.Model):
@@ -52,6 +53,31 @@ class Appointment(models.Model):
 
     def accessible_by_user(self, user):
         return self.patient.user == user or self.doctor.user == user
+
+    @classmethod
+    def get_for_user_in_year_in_month(cls, user, year, month):
+        return user.appointment_set.filter(date__year=year).filter(date__month=month).order_by('date', 'start_time')
+
+    @classmethod
+    def get_for_user_in_week_starting_at_date(cls, user, starting_date):
+        """
+        Get the list of appointments this user have in the week starting at the given date.
+        :param user: A user object.
+        :param starting_date: A datetime.date object representing the first day of the week.
+        :return: The list of appointments this user have in the week;
+                 Or, an empty list if the user doesn't have any appointment;
+                 Or, None if the user is a type of account that's not supposed to have any appointment.
+        """
+
+        account = get_account_from_user(user)
+        try:
+            return account.appointment_set.filter(date__gte=starting_date).filter(date__lt=starting_date + timedelta(days=7)).order_by('date', 'start_time')
+        except AttributeError:
+            return None
+
+    @classmethod
+    def get_for_user_in_date(cls, user, date):
+        return user.appointment_set.filter(date=date).order_by('start_time')
 
     class Meta:
         permissions = (

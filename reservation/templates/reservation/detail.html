@@ -1,6 +1,6 @@
-<h1>Appointments for {{ single_appointment.date_time.date }}</h1>
+<h1>{{ appointment.title }}</h1>
 
-{% for item in appointment %}
+
 <h4><a href="{% url 'reservation:edit' item.id %}">Appointment Name</a></h4>
     <p>Patient Name: {{ item.patient }}<br />
     Doctor Name: {{ item.doctor }}<br />

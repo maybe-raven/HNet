@@ -1,194 +1,66 @@
-{% load staticfiles %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="{% static 'css/calendar.css' %}">
-    <script src="https://use.fontawesome.com/4c272d4bbc.js"></script>
-    <title>Appointment Calendar</title>
-</head>
-<body>
+{% extends 'index/base.html' %}
+{% block title %}HealthNet|Appointment Calendar{% endblock %}
+{% block header %}Appointment Calendar{% endblock %}
+{% block content %}
+<br/>
+<div class="container">
 
-<h1>Appointment Calendar</h1>
+    <div class="month" style="text-align: center;">
+        <table>
+            <tr>
+                <td class="prev"><a href="{% url 'reservation:calendar' prev_month prev_year %}"
+                                    style="text-decoration: none;color: white;">&#10094;</a></td>
+                <td class="monthhead">{{ month_name }} {{ year}} {{ last_month }}</td>
+                <td class="next"><a href="{% url 'reservation:calendar' next_month next_year %}"
+                                    style="text-decoration: none;color: white;">&#10095;</a></td>
+            </tr>
+        </table>
+        <a href="{% url 'reservation:overview_today' %}" style="color:white;">Today</a>
+    </div>
+    <ul class="weekdays">
+        <li>Sunday</li>
+        <li>Monday</li>
+        <li>Tuesday</li>
+        <li>Wednesday</li>
+        <li>Thursday</li>
+        <li>Friday</li>
+        <li>Saturday</li>
+    </ul>
 
-<div class="month">
-  <table>
-    <tr>
-      <td class="prev"><a href="{% url 'reservation:calendar' prev_month prev_year %}" style="text-decoration: none;color: white;">&#10094;</a></td>
-      <td class="monthhead">{{ month_name }} {{ year}} {{ last_month }}</td>
-        <td class="next"><a href="{% url 'reservation:calendar' next_month next_year %}" style="text-decoration: none;color: white;">&#10095;</a></td>
-    </tr>
-  </table>
+    <div class="calendar">
+
+        <table class="calbox">
+
+            {% for week in week_list %}
+            <tr>
+                {% for day in week %}
+                {% if day == "none" %}
+                <td style="background-color:#1988B5; border:none;"><p style="color: #1988B5">{{ day }}</p>
+
+                </td>
+                {% else %}
+                <td style="background-color:#ddd">{{ day }}
+                    <a href="{% url 'reservation:overview' day month year %}" class="infobox"
+                       style="text-decoration:none;color:black;display:block;">
+                        <ul style="background-color:#ddd;">
+                            {% for appointment in appointment_list %}
+                            {% if appointment.date.day == day %}
+                            {% if appointment.date.month == month %}
+                            <li>{{ appointment.title }}</li>
+                            {% endif %}
+                            {% endif %}
+                            {% endfor %}
+                        </ul>
+                    </a>
+                </td>
+
+                {% endif %}
+                {% endfor %}
+            </tr>
+            {% endfor %}
+
+        </table>
+    </div>
 </div>
 
-
-
-
-<ul class="weekdays">
-  <li>Sunday</li>
-  <li>Monday</li>
-  <li>Tuesday</li>
-  <li>Wednesday</li>
-  <li>Thursday</li>
-  <li>Friday</li>
-  <li>Saturday</li>
-</ul>
-
-<div class="calendar">
-
-<table class="calbox">
-<tr>
-{% for item in week_one %}
-  {% if item == "none" %}
-    <td class="hidden">{{ item }}
-          <ul>
-            <li>none</li>
-            <li>none</li>
-            <li>none</li>
-            <li>none</li>
-          </ul>
-      </td>
-  {% else %}
-    <td>{{ item }}
-      <a href="{% url 'reservation:overview' %}" class="infobox" style="text-decoration:none;color: black;">
-        <ul>
-          <li>appointment 1</li>
-          <li>appointment 2</li>
-          <li>appointment 3</li>
-          <li>appointment 4</li>
-        </ul>
-      </a>
-    </td>
-  {% endif %}
-{% endfor %}
-</tr>
-<tr>
-{% for item in week_two %}
-  {% if item == "none" %}
-    <td class="hidden">{{ item }}
-          <ul>
-            <li>none</li>
-            <li>none</li>
-            <li>none</li>
-            <li>none</li>
-          </ul>
-      </td>
-  {% else %}
-    <td>{{ item }}
-      <a href="{% url 'reservation:overview' %}" class="infobox" style="text-decoration:none;color: black;">
-        <ul>
-          <li>appointment 1</li>
-          <li>appointment 2</li>
-          <li>appointment 3</li>
-          <li>appointment 4</li>
-        </ul>
-      </a>
-    </td>
-    {% endif %}
-{% endfor %}
-</tr>
-   <tr>
-{% for item in week_three %}
-     {% if item == "none" %}
-    <td class="hidden">{{ item }}
-          <ul>
-            <li>none</li>
-            <li>none</li>
-            <li>none</li>
-            <li>none</li>
-          </ul>
-      </td>
-  {% else %}
-    <td>{{ item }}
-      <a href="{% url 'reservation:overview' %}" class="infobox" style="text-decoration:none;color: black;">
-        <ul>
-          <li>appointment 1</li>
-          <li>appointment 2</li>
-          <li>appointment 3</li>
-          <li>appointment 4</li>
-        </ul>
-      </a>
-    </td>
-       {% endif %}
-{% endfor %}
-</tr>
-   <tr>
-{% for item in week_four %}
-     {% if item == "none" %}
-    <td class="hidden">{{ item }}
-          <ul>
-            <li>none</li>
-            <li>none</li>
-            <li>none</li>
-            <li>none</li>
-          </ul>
-      </td>
-  {% else %}
-    <td>{{ item }}
-      <a href="{% url 'reservation:overview' %}" class="infobox" style="text-decoration:none;color: black;">
-        <ul>
-          <li>appointment 1</li>
-          <li>appointment 2</li>
-          <li>appointment 3</li>
-          <li>appointment 4</li>
-        </ul>
-      </a>
-    </td>
-       {% endif %}
-{% endfor %}
-</tr>
-   <tr>
-{% for item in week_five %}
-     {% if item == "none" %}
-    <td class="hidden">{{ item }}
-          <ul>
-            <li>none</li>
-            <li>none</li>
-            <li>none</li>
-            <li>none</li>
-          </ul>
-      </td>
-  {% else %}
-    <td>{{ item }}
-      <a href="{% url 'reservation:overview' %}" class="infobox" style="text-decoration:none;color: black;">
-        <ul>
-          <li>appointment 1</li>
-          <li>appointment 2</li>
-          <li>appointment 3</li>
-          <li>appointment 4</li>
-        </ul>
-      </a>
-    </td>
-       {% endif %}
-{% endfor %}
-</tr>
-<tr>
-{% for item in week_six %}
-  {% if item == "none" %}
-    <td class="hidden">{{ item }}
-          <ul>
-            <li>none</li>
-            <li>none</li>
-            <li>none</li>
-            <li>none</li>
-          </ul>
-      </td>
-  {% else %}
-    <td>{{ item }}
-      <a href="{% url 'reservation:overview' %}" class="infobox" style="text-decoration:none;color: black;">
-        <ul>
-          <li>appointment 1</li>
-          <li>appointment 2</li>
-          <li>appointment 3</li>
-          <li>appointment 4</li>
-        </ul>
-      </a>
-    </td>
-    {% endif %}
-{% endfor %}
-</tr>
-</table>
-</div>
-
-</body>
-</html>
+{% endblock %}

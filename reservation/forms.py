@@ -6,18 +6,23 @@ from reservation.models import Appointment
 
 
 class BaseAppointmentForm(forms.ModelForm):
+    """
+    A form for the Appointment model that doesn't have either of the two participants fields.
+    This form is not meant to be used directly, but rather subclassed.
+    """
+
     def clean_date(self):
         date = self.cleaned_data['date']
+        # Validate that the appointment isn't set to a date in the past.
         if date < datetime.datetime.now().date():
             raise forms.ValidationError('Cannot schedule appointment with a past date.')
 
         return date
 
     def clean(self):
-        """
-        This validates that the provided appointment time does not conflict with another already existing appointment.
-        """
         cleaned_data = super(BaseAppointmentForm, self).clean()
+
+        # Validate that the provided appointment time does not conflict with another already existing appointment.
 
         # Make sure the data required for this validation process are valid,
         # otherwise don't even bother running this validation
@@ -53,7 +58,18 @@ class BaseAppointmentForm(forms.ModelForm):
 
 
 class AppointmentFormForPatient(BaseAppointmentForm):
+    """
+    An Appointment form for patient users.
+    This form contains the 'doctor' field, which is the other participant of the appointment.
+    The value for the 'patient' field should be supplied when saving.
+    """
+
     def save(self, creator=None, commit=True):
+        """
+        Save the object with the given creator as the 'patient' participant.
+        :param creator: The patient participant.
+        """
+
         if creator is not None:
             appointment = super(AppointmentFormForPatient, self).save(commit=False)
             appointment.patient = creator.patient
@@ -71,7 +87,18 @@ class AppointmentFormForPatient(BaseAppointmentForm):
 
 
 class AppointmentFormForDoctor(BaseAppointmentForm):
+    """
+    An appointment form for doctor users.
+    This form contains the 'patient' field, which is the other participant of the appointment.
+    The value for the 'doctor' field should be supplied when saving.
+    """
+
     def save(self, creator=None, commit=True):
+        """
+        Save the object with the given creator as the 'doctor' participant.
+        :param creator: The doctor participant.
+        """
+
         if creator is not None:
             appointment = super(AppointmentFormForDoctor, self).save(commit=False)
             appointment.doctor = creator.doctor

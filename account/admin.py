@@ -1,8 +1,8 @@
 from django.contrib import admin
-from . import models
+from .models import ProfileInformation, Patient, Doctor, Nurse, Administrator
 
-admin.site.register(models.ProfileInformation)
-admin.site.register(models.Patient)
-admin.site.register(models.Doctor)
-admin.site.register(models.Nurse)
-admin.site.register(models.Administrator)
+admin.site.register(ProfileInformation)
+admin.site.register(Patient)
+admin.site.register(Doctor)
+admin.site.register(Nurse)
+admin.site.register(Administrator)

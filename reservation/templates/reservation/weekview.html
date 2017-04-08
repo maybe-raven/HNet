@@ -1,0 +1,31 @@
+{% extends 'index/base.html' %}
+{% block title %}HealthNet| Weekview Calendar{% endblock %}
+{% block header %}Weekview Calendar{% endblock %}
+
+{% block content %}
+
+<div class="container" style="margin-top:74px">
+  <div class="row seven-cols">
+    <div class="col-md-1 dayview">Sunday</div>
+    <div class="col-md-1 dayview">Monday</div>
+    <div class="col-md-1 dayview">Tuesday</div>
+    <div class="col-md-1 dayview">Wednesday</div>
+    <div class="col-md-1 dayview">Thursday</div>
+    <div class="col-md-1 dayview">Friday</div>
+    <div class="col-md-1 dayview">Saturday</div>
+  </div>
+  <div class="row seven-cols">
+    <div class="col-md-1 dayblock">1</div>
+    <div class="col-md-1 dayblock">2</div>
+    <div class="col-md-1 dayblock">3</div>
+    <div class="col-md-1 dayblock">4</div>
+    <div class="col-md-1 dayblock">5</div>
+    <div class="col-md-1 dayblock">6</div>
+    <div class="col-md-1 dayblock">7</div>
+  </div>
+
+</div>
+
+<p>In each day will be setup to look like appointment_type: start_time-end_time</p>
+
+{% endblock %}

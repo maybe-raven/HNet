@@ -3,6 +3,7 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required, user_passes_test
 from account.models import ProfileInformation
 from hnet.logger import CreateLogEntry
+from .forms import StephenLoginForm
 
 
 def index(request):
@@ -27,9 +28,17 @@ def index(request):
 
 
 def test_user_in_group(user, group_name):
+    """
+    Test whether or not the given user is in the given group.
+    """
+
     if user:
         return user.groups.filter(name=group_name)
     return False
+
+
+def log(request):
+    return render(request, 'index/log.html')
 
 
 # TODO: add group verification
@@ -44,14 +53,14 @@ def patient(request):
 @user_passes_test(lambda u: test_user_in_group(u, 'Doctor'))
 def doctor(request):
     CreateLogEntry(request.user.username, "Doctor logged in.")
-    return render(request, 'index/doctor.html')
+    return render(request, 'index/administrator.html')
 
 
 @login_required
 @user_passes_test(lambda u: test_user_in_group(u, 'Nurse'))
 def nurse(request):
     CreateLogEntry(request.user.username, "Nurse logged in.")
-    return render(request, 'index/nurse.html')
+    return render(request, 'index/administrator.html')
 
 
 @login_required
@@ -59,3 +68,13 @@ def nurse(request):
 def administrator(request):
     CreateLogEntry(request.user.username, "Administrator logged in.")
     return render(request, 'index/administrator.html')
+
+
+def stephen(request):
+    if request.method == 'POST':
+        form = StephenLoginForm(request.POST)
+        if form.is_valid():
+            return render(request, 'index/stephen.html')
+    else:
+        form = StephenLoginForm()
+    return render(request, 'index/stephen_login.html', {'form': form})

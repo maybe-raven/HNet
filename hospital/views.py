@@ -1,3 +1,5 @@
 from django.shortcuts import render
 
-# Create your views here.
+
+def logView(request):
+    return render(request, 'hospital/viewlog.html')

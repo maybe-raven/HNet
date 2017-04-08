@@ -1,14 +1,28 @@
-<h1>Appointments for {{ single_appointment.date_time.date }}</h1>
+{% extends 'index/base.html' %}
+{% block title %}Hnet|Appointment Overview{% endblock %}
+{% block header %}Appointments for {{ month_name }} {{ date.day }}, {{ date.year }}{% endblock %}
+{% block content %}
 
-{% for item in appointment %}
-<h4><a href="{% url 'reservation:edit' item.id %}">item.title</a></h4>
-    <p>Patient Name: {{ item.patient }}<br />
-    Doctor Name: {{ item.doctor }}<br />
-    Room: {{ item.room }}<br />
-    Time: {{ item.date_time.time }}</p>
 
+<button class="button"><a href="{% url 'reservation:create' %}" >Create</a></button>
+<button class="button">
+    <a href="{% url 'reservation:calendar' date.month date.year %}" >Calendar</a>
+</button>
+<button class="button"><a href="{% url 'index:index' %}">Dashboard</a></button>
+
+{% for appointment in appointment_list %}
+<h4>{{ appointment.title }}</h4>
+<p>Patient Name: {{ appointment.patient }}<br/>
+    Doctor Name: {{ appointment.doctor }}<br/>
+    Room: {{ appointment.location }}<br/>
+    Time: {{ appointment.start_time }} - {{ appointment.end_time }}</p>
+<a href="{% url 'reservation:edit' appointment.id %}" class="btn btn-default btn-lg inactive" role="button">Edit</a>
+{% if can_cancel %}
+<a href="{% url 'reservation:cancel' appointment.id %}" class="btn btn-default btn-lg inactive" role="button">Cancel</a>
+{% endif %}
+{% empty %}
+<p>You have no appointments. Click 'Create' to schedule an appointment.</p>
 {% endfor %}
 
-
-<button><a href="{% url 'reservation:create' %}" style="text-decoration:none">Create</a></button>
-
+<br/>
+{% endblock %}
