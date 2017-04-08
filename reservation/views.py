@@ -5,7 +5,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import Http404
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
-from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
 from reservation.models import Appointment
 from reservation.forms import AppointmentFormForPatient, AppointmentFormForDoctor
 from account.models import Patient, Doctor, ProfileInformation
@@ -14,6 +14,7 @@ from hnet.logger import CreateLogEntry
 
 @login_required
 @permission_required('reservation.view_appointment')
+@user_passes_test(lambda u: not u.is_superuser)
 def calendar(request, month=datetime.date.today().month, year=datetime.date.today().year):
     month = int(month)
     year = int(year)
@@ -64,6 +65,7 @@ def calendar(request, month=datetime.date.today().month, year=datetime.date.toda
 
 @login_required()
 @permission_required('reservation.view_appointment')
+@user_passes_test(lambda u: not u.is_superuser)
 def weekview(request, day=datetime.date.today().day, month=datetime.date.today().month,
              year=datetime.date.today().year):
     day = int(day)
@@ -86,6 +88,7 @@ def weekview(request, day=datetime.date.today().day, month=datetime.date.today()
 
 @login_required
 @permission_required('reservation.view_appointment')
+@user_passes_test(lambda u: not u.is_superuser)
 def overview(request, day=None, month=None, year=None):
     if day is None or month is None or year is None:
         date = datetime.date.today()
@@ -118,12 +121,9 @@ def overview(request, day=None, month=None, year=None):
 
 @login_required
 @permission_required('reservation.add_appointment')
+@user_passes_test(lambda u: not u.is_superuser)
 def create_appointment(request):
     profile_information = ProfileInformation.from_user(request.user)
-
-    if profile_information is None:
-        raise PermissionDenied()
-
     account_type = profile_information.account_type
     if account_type == ProfileInformation.PATIENT:
         form_type = AppointmentFormForPatient

@@ -1,8 +1,7 @@
-from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
 from django.shortcuts import render, redirect
 from django.contrib import auth
-from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
 from .forms import UserCreationForm, UserChangeForm, ProfileInformationForm, PatientCreationForm, PatientChangeForm
 from .models import ProfileInformation, get_account_from_user
 from hnet.logger import CreateLogEntry
@@ -36,11 +35,9 @@ def register_done(request):
 
 @login_required
 @permission_required('account.change_profileinformation')
+@user_passes_test(lambda u: not u.is_superuser)
 def profile(request):
     profile_information = ProfileInformation.from_user(request.user)
-    if profile_information is None or profile_information.account_type != ProfileInformation.PATIENT:
-        raise PermissionDenied()
-
     if request.method == 'POST':
         user_form = UserChangeForm(request.POST, instance=request.user)
         profile_information_form = ProfileInformationForm(request.POST, instance=profile_information)
@@ -57,11 +54,8 @@ def profile(request):
 
 @login_required
 @permission_required('account.change_patient')
+@user_passes_test(lambda u: not u.is_superuser)
 def patient(request):
-    profile_information = ProfileInformation.from_user(request.user)
-    if profile_information is None or profile_information.account_type != ProfileInformation.PATIENT:
-        raise PermissionDenied()
-
     if request.method == 'POST':
         form = PatientChangeForm(request.POST, instance=request.user.patient)
         if form.is_valid():
@@ -77,11 +71,8 @@ def patient(request):
 @login_required()
 @permission_required('account.add_administrator')
 @permission_required('account.add_profileinformation')
+@user_passes_test(lambda u: not u.is_superuser)
 def create_administrators(request):
-    profile_information = ProfileInformation.from_user(request.user)
-    if profile_information is None or profile_information.account_type != ProfileInformation.ADMINISTRATOR:
-        raise PermissionDenied()
-
     if request.method == 'POST':
         user_form = UserCreationForm(request.POST)
         profile_information_form = ProfileInformationForm(request.POST)
