@@ -2,7 +2,6 @@ import datetime
 import math
 
 from django.shortcuts import render, redirect, get_object_or_404
-from django.utils import timezone
 from django.http import Http404
 from django.core.exceptions import PermissionDenied
 from django.core.urlresolvers import reverse
@@ -10,14 +9,19 @@ from django.contrib.auth.decorators import login_required, permission_required
 from reservation.models import Appointment
 from reservation.forms import AppointmentFormForPatient, AppointmentFormForDoctor
 from account.models import Patient, Doctor, ProfileInformation
+from hnet.logger import CreateLogEntry
 
 
 @login_required
-def calendar(request, month=timezone.now().month, year=timezone.now().year):
-    days = calculate_day(str(month), str(year))
-
+@permission_required('reservation.view_appointment')
+def calendar(request, month=datetime.date.today().month, year=datetime.date.today().year):
     month = int(month)
     year = int(year)
+
+    if not is_month_valid(month) or not is_year_valid(year):
+        raise Http404()
+
+    week_list = calculate_day(str(month), str(year))
 
     if month == 1:
         prev_month = 12
@@ -33,40 +37,83 @@ def calendar(request, month=timezone.now().month, year=timezone.now().year):
         next_month = month + 1
         next_year = year
 
+    month_name = datetime.date(1900, month, 1).strftime('%B')
 
-    month_name = datetime.date(1900, int(month), 1).strftime('%B')
-
-    context = {'year': year, 'month_name': month_name,
+    context = {'year': year, 'month': month, 'month_name': month_name,
                'prev_month': prev_month, 'prev_year': prev_year, 'next_month': next_month,
-               'next_year': next_year, 'days': days}
+               'next_year': next_year, 'week_list': week_list}
 
     profile_information = ProfileInformation.from_user(request.user)
     if profile_information is not None:
         account_type = profile_information.account_type
         if account_type == ProfileInformation.PATIENT:
-            appointments = request.user.patient.appointment_set.all()
+            appointments = Appointment.get_for_user_in_year_in_month(request.user.patient, year, month)
+            if appointments is None:
+                raise Http404()
             context['appointment_list'] = appointments
             return render(request, 'reservation/calendar.html', context)
         elif account_type == ProfileInformation.DOCTOR:
-            appointments = request.user.doctor.appointment_set.all()
+            appointments = Appointment.get_for_user_in_year_in_month(request.user.doctor, year, month)
+            if appointments is None:
+                raise Http404()
             context['appointment_list'] = appointments
             return render(request, 'reservation/calendar.html', context)
 
-    return Http404()
+    raise PermissionDenied()
 
 
-def overview(request):
-    single_appointment = Appointment.objects.all()[0]
-    appointment = Appointment.objects.order_by('date_time').all()
-    return render(request, 'reservation/overview.html',
-                  {'appointment': appointment, 'single_appointment': single_appointment})
+@login_required()
+@permission_required('reservation.view_appointment')
+def weekview(request, day=datetime.date.today().day, month=datetime.date.today().month,
+             year=datetime.date.today().year):
+    day = int(day)
+    month = int(month)
+    year = int(year)
+
+    week_starting_date = datetime.date(day=day, month=month, year=year)
+    weekday = week_starting_date.isoweekday()
+    if weekday != 7:
+        week_starting_date -= datetime.timedelta(days=weekday)
+    week_ending_date = week_starting_date + datetime.timedelta(days=6)
+
+    appointments = Appointment.get_for_user_in_week_starting_at_date(request.user, week_starting_date)
+
+    # 'start_date' and 'end_date' are `datetime.date` objects representing the dates at the start and end of the week.
+    context = {'start_date': week_starting_date, 'end_date': week_ending_date, 'appointment_list': appointments}
+
+    return render(request, 'reservation/weekview.html', context)
 
 
-def detail(request, appointment_id):
-    single_appointment = Appointment.objects.all()[0]
-    appointment = Appointment.objects.order_by('date_time').all()
-    return render(request, 'reservation/detail.html',
-                  {'appointment': appointment, 'single_appointment': single_appointment})
+@login_required
+@permission_required('reservation.view_appointment')
+def overview(request, day=None, month=None, year=None):
+    if day is None or month is None or year is None:
+        date = datetime.date.today()
+    else:
+        try:
+            date = datetime.date(int(year), int(month), int(day))
+        except ValueError:
+            raise Http404()
+
+    month_name = datetime.date(1900, date.month, 1).strftime('%B')
+
+    context = {'month_name': month_name, 'date': date,
+               'can_cancel': request.user.has_perm('reservation.cancel_appointment')}
+
+    profile_information = ProfileInformation.from_user(request.user)
+    if profile_information is not None:
+        account_type = profile_information.account_type
+        if account_type == ProfileInformation.PATIENT:
+            appointments = Appointment.get_for_user_in_date(request.user.patient, date)
+            context['appointment_list'] = appointments
+            return render(request, 'reservation/overview.html', context)
+        elif account_type == ProfileInformation.DOCTOR:
+            appointments = Appointment.get_for_user_in_date(request.user.doctor, date)
+            context['appointment_list'] = appointments
+
+            return render(request, 'reservation/overview.html', context)
+
+    raise PermissionDenied()
 
 
 @login_required
@@ -88,6 +135,7 @@ def create_appointment(request):
     if request.method == 'POST':
         form = form_type(request.POST)
         if form.is_valid():
+            CreateLogEntry(request.user.username, "Appointment created.")
             form.save(request.user)
             return redirect(reverse('reservation:create_done'))
     else:
@@ -113,6 +161,7 @@ def edit_appointment(request, appointment_id):
     if request.method == 'POST':
         form = AppointmentFormForDoctor(request.POST, instance=appointment)
         if form.is_valid():
+            CreateLogEntry(request.user.username, "Appointment edited.")
             form.save()
             return render(request, 'reservation/appointment/edit.html', {'form': form, 'message': 'All changes saved.'})
     else:
@@ -132,41 +181,103 @@ def cancel_appointment(request, appointment_id):
     if request.method == 'POST':
         appointment.cancelled = True
         appointment.save()
+        CreateLogEntry(request.user.username, "Appointment canceled.")
 
-        return render(request, 'reservation/appointment/delete_done.html')
+        return render(request, 'reservation/appointment/cancel_done.html')
     else:
-        return render(request, 'reservation/appointment/delete.html', {'appointment': appointment})
+        return render(request, 'reservation/appointment/cancel.html', {'appointment': appointment})
+
+
+def is_month_valid(month):
+    """Test whether or not the given month is a valid value."""
+
+    return 1 <= month <= 12
+
+
+def is_year_valid(year):
+    """Test whether or not the given year is a valid value."""
+
+    return 1000 < year < 9999
 
 
 def calculate_day(month, year):
-    if(int(month) == 2 or int(month) == 1):
+    if int(month) == 2 or int(month) == 1:
         year = int(year) - 1
         month = int(month) + 12
 
-    final = 1 + (2*int(month)) + (3*(int(month) + 1)/5) + int(year) + math.floor(int(year)/4) - \
-            math.floor(int(year)/100) + math.floor(int(year)/400) + 2
+    final = 1 + (2 * int(month)) + (3 * (int(month) + 1) / 5) + int(year) + math.floor(int(year) / 4) - \
+            math.floor(int(year) / 100) + math.floor(int(year) / 400) + 2
 
-    remainder = math.floor(final/7)
+    remainder = math.floor(final / 7)
     remainder *= 7
     final -= remainder
 
     thirtyone_months = ["12", "13", "3", "5", "7", "8", "10"]
 
-    if((int(year)/4 and int(month) == 14) or (month == 14 and int(year)/100 and int(year)/400)):
+    if (int(year) / 4 and int(month) == 14) or (month == 14 and int(year) / 100 and int(year) / 400):
         counter = 29
-    if(month == 14):
+    if month == 14:
         counter = 28
-    elif(month in thirtyone_months or month == 13):
+    elif month in thirtyone_months or month == 13:
         counter = 31
     else:
         counter = 30
 
     count = 1
-    days = []
-    for i in range(0, int(final)):
-        days.append("nothing")
-    for i in range(int(final), counter + int(final)):
-        days.append(count)
+    days_one = []
+    days_two = []
+    days_three = []
+    days_four = []
+    days_five = []
+    days_six = []
+
+    if (int(final) == 0):
+        final = 7
+
+    for i in range(0, int(final) - 1):
+        days_one.append("none")
+
+    for i in range(0, 7 - (int(final) - 1)):
+        days_one.append(count)
         count += 1
+
+    for i in range(0, 7):
+        days_two.append(count)
+        count += 1
+
+    for i in range(0, 7):
+        days_three.append(count)
+        count += 1
+
+    for i in range(0, 7):
+        days_four.append(count)
+        count += 1
+    counter -= (21 + (7 - (final - 1)))
+    if int(counter) - 7 < 0 and int(counter) > 0:
+        for i in range(0, int(counter)):
+            days_five.append(count)
+            count += 1
+        for i in range(int(counter), 7):
+            days_five.append("none")
+        for i in range(0, 7):
+            days_six.append("none")
+    elif int(counter) == 0:
+        for i in range(0, 7):
+            days_five.append("none")
+            days_six.append("none")
+    else:
+        for i in range(0, 7):
+            days_five.append(count)
+            count += 1
+        counter -= 7
+        print(int(counter))
+        if int(counter) - 7 < 0 and int(counter) > 0:
+            for i in range(0, int(counter)):
+                days_six.append(count)
+                count += 1
+            for i in range(int(counter), 7):
+                days_six.append("none")
+
+    days = [days_one, days_two, days_three, days_four, days_five, days_six]
 
     return days

@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 
 class ProfileInformation(models.Model):
     """
-    An abstract model that describes a user with basic profile information.
+    A model that describes the basic profile information of a user.
     """
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile_information')
 
@@ -38,6 +38,10 @@ class ProfileInformation(models.Model):
 
     @classmethod
     def from_user(cls, user):
+        """
+        Attempt to get the profile information of the given user.
+        :return: The profile information if it exist; otherwise, None.
+        """
         try:
             return user.profile_information
         except (ProfileInformation.DoesNotExist, AttributeError):
@@ -55,17 +59,19 @@ class AbstractUser(models.Model):
 
 
 class Patient(AbstractUser):
-    preferred_hospitals = models.ForeignKey(Hospital, related_name='+')
+    preferred_hospital = models.ForeignKey(Hospital, related_name='+')
 
     medical_information = models.TextField(blank=True)
 
     proof_of_insurance = models.TextField()
 
-    emergency_contact = models.ForeignKey('self', null=True, blank=True,
-                                          help_text='You have the option to link with a registered patient as an emergency contact.',
-                                          on_delete=models.PROTECT)
+    emergency_contact = models.ForeignKey('self', null=True, blank=True, on_delete=models.PROTECT,
+                                          help_text='You have the option to link with a registered patient '
+                                                    'as an emergency contact.')
     emergency_contact_phone = models.CharField(max_length=10, null=True, blank=True,
-                                               help_text='The phone number of an unregistered emergency contact. You must provide this if you do not link with a registered patient.')
+                                               help_text='The phone number of an unregistered emergency contact. '
+                                                         'You must provide this if you do not '
+                                                         'link with a registered patient.')
 
 
 class Administrator(AbstractUser):
@@ -82,3 +88,23 @@ class Nurse(AbstractUser):
     hospital = models.ForeignKey(Hospital, on_delete=models.PROTECT)
 
     treatment_sessions = models.ManyToManyField(TreatmentSession, blank=True)
+
+
+def get_account_from_user(user):
+    """
+    Get the correct account object associated with the given user, or None if it doesn't have an associated account object.
+    The account object is one of four types: `Patient`, `Administrator`, `Doctor`, or `Nurse`.
+    :param user: A User object.
+    :return:
+    """
+
+    profile_information = ProfileInformation.from_user(user)
+    if profile_information is not None:
+        if profile_information.account_type == ProfileInformation.PATIENT:
+            return user.patient
+        elif profile_information.account_type == ProfileInformation.DOCTOR:
+            return user.doctor
+        elif profile_information.account_type == ProfileInformation.NURSE:
+            return user.nurse
+        elif profile_information.account_type == ProfileInformation.ADMINISTRATOR:
+            return user.administrator

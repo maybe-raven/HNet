@@ -2,6 +2,8 @@ from django.forms import RegexField
 
 
 class PhoneField(RegexField):
+    """A form field that accepts a phone number."""
+
     def __init__(self, *args, **kwargs):
         error_messages = kwargs.get('error_messages') or {}
         error_messages['invalid'] = 'Please enter a valid phone number.'

@@ -1,6 +1,7 @@
 from django.db import models
 from hospital.models import Hospital, TreatmentSession
 from account.models import Doctor
+from hnet.logger import CreateLogEntry
 
 
 class DiagnosisCategory(models.Model):

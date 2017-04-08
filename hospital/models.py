@@ -2,12 +2,12 @@ from django.db import models
 
 
 class Hospital(models.Model):
-    """
-    A model that describes the basic information of a hospital.
-    """
+    """A model that describes the basic information of a hospital."""
+
     name = models.CharField(max_length=30)
     location = models.CharField(max_length=200)
 
+    """A flag indicating whether or not this hospital is operational. Remove a hospital by setting this flag to False."""
     operational = models.BooleanField(default=True)
 
     def __str__(self):
