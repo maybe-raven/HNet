@@ -3,6 +3,9 @@
     <table>
         {{ user_form.as_table }}
         {{ profile_information_form.as_table }}
+        {% if administrator_form %}
+        {{ administrator_form.as_table }}
+        {% endif %}
     </table>
 
     <input type="submit" value="Create Account"/>

@@ -47,6 +47,30 @@ class UserCreationForm(auth_forms.UserCreationForm):
 
         return user
 
+    def save_as_administrator_with_profile_information(self, administrator_form, profile_information_form):
+        """
+        Saves the information in this form and the given forms as a new administrator.
+        :param administrator_form: An `AdministratorForm` object. 
+        :param profile_information_form: A `ProfileInformationForm` object.
+        :return: The newly created and saved `User` object (not `Administrator` object).
+        """
+
+        user = self.save()
+        administrator_group = Group.objects.get(name='Administrator')
+        user.groups.add(administrator_group)
+        user.save()
+
+        profile_information = profile_information_form.save(commit=False)
+        profile_information.account_type = ProfileInformation.ADMINISTRATOR
+        profile_information.user = user
+        profile_information.save()
+
+        new_administrator = administrator_form.save(commit=False)
+        new_administrator.user = user
+        new_administrator.save()
+
+        return user
+
     def save_as_administrator_by_creator_with_profile_information(self, creator, profile_information_form):
         """
         Saves the information in this form and the given form as a new administrator.
@@ -171,3 +195,11 @@ class PatientChangeForm(PatientCreationForm):
                 raise forms.ValidationError('Your emergency contact cannot be yourself.')
 
         return self.cleaned_data['emergency_contact']
+
+
+class AdministratorForm(forms.ModelForm):
+    """A form used for obtaining patient-specific information. """
+
+    class Meta:
+        model = Administrator
+        fields = ['hospital']

@@ -2,8 +2,8 @@ from django.core.urlresolvers import reverse
 from django.shortcuts import render, redirect
 from django.contrib import auth
 from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
-from .forms import UserCreationForm, UserChangeForm, ProfileInformationForm, PatientCreationForm, PatientChangeForm
-from .models import ProfileInformation, get_account_from_user
+from .forms import UserCreationForm, UserChangeForm, ProfileInformationForm, PatientCreationForm, PatientChangeForm, AdministratorForm
+from .models import ProfileInformation, Administrator, get_account_from_user
 from hnet.logger import CreateLogEntry
 
 
@@ -71,25 +71,34 @@ def patient(request):
 @login_required()
 @permission_required('account.add_administrator')
 @permission_required('account.add_profileinformation')
-@user_passes_test(lambda u: not u.is_superuser)
 def create_administrators(request):
+    creator = get_account_from_user(request.user)
+    administrator_form = None
+
     if request.method == 'POST':
         user_form = UserCreationForm(request.POST)
         profile_information_form = ProfileInformationForm(request.POST)
-        if user_form.is_valid() and profile_information_form.is_valid():
-            user_form.save_as_administrator_by_creator_with_profile_information(
-                get_account_from_user(request.user),
-                profile_information_form
-            )
 
-            CreateLogEntry(request.user.username, "Administrator account registered.")
-            return render(request, 'account/administrator/create_done.html')
+        if user_form.is_valid() and profile_information_form.is_valid():
+            if isinstance(creator, Administrator):
+                user_form.save_as_administrator_by_creator_with_profile_information(creator, profile_information_form)
+                CreateLogEntry(request.user.username, "Administrator account registered.")
+                return render(request, 'account/administrator/create_done.html')
+            else:
+                administrator_form = AdministratorForm(request.POST)
+                if administrator_form.is_valid():
+                    user_form.save_as_administrator_with_profile_information(administrator_form, profile_information_form)
+                    CreateLogEntry(request.user.username, "Administrator account registered.")
+                    return render(request, 'account/administrator/create_done.html')
+
     else:
         user_form = UserCreationForm()
         profile_information_form = ProfileInformationForm()
+        if not isinstance(creator, Administrator):
+            administrator_form = AdministratorForm()
 
     return render(request, 'account/administrator/create.html',
-                  {'user_form': user_form, 'profile_information_form': profile_information_form})
+                  {'user_form': user_form, 'profile_information_form': profile_information_form, 'administrator_form': administrator_form})
 
 
 @login_required()
