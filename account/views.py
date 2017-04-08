@@ -25,13 +25,13 @@ def register(request):
         profile_information_form = ProfileInformationForm()
         patient_form = PatientCreationForm()
 
-    return render(request, 'account/register.html',
+    return render(request, 'account/patient/register.html',
                   {'user_form': user_form, 'profile_information_form': profile_information_form,
                    'patient_form': patient_form})
 
 
 def register_done(request):
-    return render(request, 'account/register_done.html')
+    return render(request, 'account/patient/register_done.html')
 
 
 @login_required
@@ -47,12 +47,12 @@ def profile(request):
         if profile_information_form.is_valid():
             profile_information_form.save()
             CreateLogEntry(request.user.username, "Changed profile information.")
-            return render(request, 'account/profile.html', {'profile_information_form': profile_information_form, 'user_form': user_form, 'message': 'All changes saved.'})
+            return render(request, 'account/common/profile.html', {'profile_information_form': profile_information_form, 'user_form': user_form, 'message': 'All changes saved.'})
     else:
         user_form = UserChangeForm(instance=request.user)
         profile_information_form = ProfileInformationForm(instance=profile_information)
 
-    return render(request, 'account/profile.html', {'profile_information_form': profile_information_form, 'user_form': user_form})
+    return render(request, 'account/common/profile.html', {'profile_information_form': profile_information_form, 'user_form': user_form})
 
 
 @login_required
@@ -67,11 +67,11 @@ def patient(request):
         if form.is_valid():
             form.save()
             CreateLogEntry(request.user.username, "Changed medical information.")
-            return render(request, 'account/patient.html', {'form': form, 'message': 'All changes saved.'})
+            return render(request, 'account/patient/patient.html', {'form': form, 'message': 'All changes saved.'})
     else:
         form = PatientChangeForm(instance=request.user.patient)
 
-    return render(request, 'account/patient.html', {'form': form})
+    return render(request, 'account/patient/patient.html', {'form': form})
 
 
 @login_required()
@@ -92,12 +92,12 @@ def create_administrators(request):
             )
 
             CreateLogEntry(request.user.username, "Administrator account registered.")
-            return render(request, 'account/administrator_done.html')
+            return render(request, 'account/administrator/create_done.html')
     else:
         user_form = UserCreationForm()
         profile_information_form = ProfileInformationForm()
 
-    return render(request, 'account/administrator.html',
+    return render(request, 'account/administrator/create.html',
                   {'user_form': user_form, 'profile_information_form': profile_information_form})
 
 
