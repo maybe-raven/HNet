@@ -18,7 +18,7 @@ def register(request):
 
             auth.login(request, user)
             CreateLogEntry(request.user.username, "Patient account registered.")
-            return redirect(reverse('account:register_done'))
+            return render(request, 'account/patient/register_done.html')
     else:
         user_form = UserCreationForm()
         profile_information_form = ProfileInformationForm()
@@ -27,10 +27,6 @@ def register(request):
     return render(request, 'account/patient/register.html',
                   {'user_form': user_form, 'profile_information_form': profile_information_form,
                    'patient_form': patient_form})
-
-
-def register_done(request):
-    return render(request, 'account/patient/register_done.html')
 
 
 @login_required
