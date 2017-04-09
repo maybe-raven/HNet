@@ -7,7 +7,7 @@ from .models import ProfileInformation, Administrator, get_account_from_user
 from hnet.logger import CreateLogEntry
 
 
-def register(request):
+def register_patient(request):
     if request.method == 'POST':
         user_form = UserCreationForm(request.POST)
         profile_information_form = ProfileInformationForm(request.POST)
