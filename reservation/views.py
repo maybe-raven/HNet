@@ -78,8 +78,10 @@ def weekview(request, day=datetime.date.today().day, month=datetime.date.today()
 
     appointments = Appointment.get_for_user_in_week_starting_at_date(request.user, week_starting_date)
 
+    week = get_week(week_starting_date.day, week_ending_date.day)
     # 'start_date' and 'end_date' are `datetime.date` objects representing the dates at the start and end of the week.
-    context = {'start_date': week_starting_date, 'end_date': week_ending_date, 'appointment_list': appointments}
+    context = {'appointment_list': appointments, 'week': week, 'start_day': week_starting_date,
+               'end_day': week_ending_date}
 
     return render(request, 'reservation/weekview.html', context)
 
@@ -198,6 +200,27 @@ def is_year_valid(year):
     """Test whether or not the given year is a valid value."""
 
     return 1000 < year < 9999
+
+
+def get_week(start_day, end_day):
+    weekday = []
+    counter = start_day
+    if start_day < end_day:
+        while counter != end_day + 1:
+            weekday.append(counter)
+            counter += 1
+    else:
+        day_index = 6
+        while end_day != 0:
+            weekday[day_index] = end_day
+            end_day -= 1
+        temp_index = day_index
+        day_index = 0
+        while day_index != temp_index:
+            weekday[day_index] = start_day
+            start_day += 1
+
+    return weekday
 
 
 def calculate_day(month, year):

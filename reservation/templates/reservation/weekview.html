@@ -1,38 +1,58 @@
 {% extends 'index/base.html' %}
 {% load week_tags %}
-{% block title %}HealthNet| Weekview Calendar{% endblock %}
+{% block title %}Weekview Calendar{% endblock %}
 {% block header %}Weekview Calendar{% endblock %}
 
 {% block content %}
 
 <div class="container" style="margin-top:74px">
-  <div class="row seven-cols">
-    <div class="col-md-1 dayview">Sunday</div>
-    <div class="col-md-1 dayview">Monday</div>
-    <div class="col-md-1 dayview">Tuesday</div>
-    <div class="col-md-1 dayview">Wednesday</div>
-    <div class="col-md-1 dayview">Thursday</div>
-    <div class="col-md-1 dayview">Friday</div>
-    <div class="col-md-1 dayview">Saturday</div>
-  </div>
-  <div class="row seven-cols">
-    <div class="col-md-1 dayblock">1</div>
-    <div class="col-md-1 dayblock">2</div>
-    <div class="col-md-1 dayblock">3</div>
-    <div class="col-md-1 dayblock">4</div>
-    <div class="col-md-1 dayblock">5</div>
-    <div class="col-md-1 dayblock">6</div>
-    <div class="col-md-1 dayblock">7</div>
-  </div>
+    <div class="month" style="text-align: center; margin-left:-14px; margin-right:-14px;">
+        <table>
+            <tr>
+                <td class="prev"><a href="#"
+                                    style="text-decoration: none;color: white;">&#10094;</a></td>
+                <td class="monthhead"style="font-size:">{{ start_day }} - {{ end_day }}</td>
+                <td class="next"><a href="#"
+                                    style="text-decoration: none;color: white;">&#10095;</a></td>
+            </tr>
+        </table>
+        <a href="#" style="color:white;">Today</a>
+    </div>
+    <div class="row seven-cols">
+        <div class="col-md-1 dayview">Sunday</div>
+        <div class="col-md-1 dayview">Monday</div>
+        <div class="col-md-1 dayview">Tuesday</div>
+        <div class="col-md-1 dayview">Wednesday</div>
+        <div class="col-md-1 dayview">Thursday</div>
+        <div class="col-md-1 dayview">Friday</div>
+        <div class="col-md-1 dayview">Saturday</div>
+    </div>
+
+    <div class="col-xs-12" style="height:50px;"></div>
+
+    <div class="row seven-cols">
+        {% for day in week %}
+        <div class="col-md-1 dayblock">{{ day }}
+            <a href="{% url 'reservation:overview' day start_day.month start_day.year %}" class="infobox"
+                       style="text-decoration:none;color:black;display:block;">
+                        <ul style="background-color:#ddd;">
+                            {% for appointment in appointments %}
+                            {% if appointment.date.day == day %}
+                            {% if appointment.date.month == month %}
+                            <li>{{ appointment.title }}</li>
+                            {% endif %}
+                            {% endif %}
+                            {% endfor %}
+                        </ul>
+                    </a>
+        </div>
+        {% endfor %}
+    </div>
 
 </div>
 
-{% get_week start_day=start_date.day|end_day=end_date.day %}
-{% for day in weekdays %}
-<div class="row seven-cols">
-  <div class="col-md-1 dayblock">{{ day }}</div>
 </div>
-{% endfor %}
+
 
 <p>In each day will be setup to look like appointment_type: start_time-end_time</p>
 
