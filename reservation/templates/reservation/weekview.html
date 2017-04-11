@@ -1,5 +1,4 @@
 {% extends 'index/base.html' %}
-{% load week_tags %}
 {% block title %}Weekview Calendar{% endblock %}
 {% block header %}Weekview Calendar{% endblock %}
 
@@ -9,14 +8,14 @@
     <div class="month" style="text-align: center; margin-left:-14px; margin-right:-14px;">
         <table>
             <tr>
-                <td class="prev"><a href="#"
+                <td class="prev"><a href="{% url 'reservation:weekview' last_week.day last_week.month last_week.year %}"
                                     style="text-decoration: none;color: white;">&#10094;</a></td>
                 <td class="monthhead"style="font-size:">{{ start_day }} - {{ end_day }}</td>
-                <td class="next"><a href="#"
+                <td class="next"><a href="{% url 'reservation:weekview' next_week.day next_week.month next_week.year %}"
                                     style="text-decoration: none;color: white;">&#10095;</a></td>
             </tr>
         </table>
-        <a href="#" style="color:white;">Today</a>
+        <a href="{% url 'reservation:overview_today' %}" style="color:white;">Today</a>
     </div>
     <div class="row seven-cols">
         <div class="col-md-1 dayview">Sunday</div>
@@ -32,12 +31,12 @@
 
     <div class="row seven-cols">
         {% for day in week %}
-        <div class="col-md-1 dayblock">{{ day }}
-            <a href="{% url 'reservation:overview' day start_day.month start_day.year %}" class="infobox"
+        <div class="col-md-1 dayblock">{{ day.day }}
+            <a href="{% url 'reservation:overview' day.day day.month day.year %}" class="infobox"
                        style="text-decoration:none;color:black;display:block;">
                         <ul style="background-color:#ddd;">
                             {% for appointment in appointments %}
-                            {% if appointment.date.day == day %}
+                            {% if appointment.date.day == day.day %}
                             {% if appointment.date.month == month %}
                             <li>{{ appointment.title }}</li>
                             {% endif %}
