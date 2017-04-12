@@ -1,2 +1,9 @@
-<p>You have been successfully logged out.</p>
-<a href="/">Return to home page.</a>
+<script>
+    function redirect(){
+       window.location.href = "{% url 'reservation:calendar_now' %}";
+    }
+
+    setTimeout(redirect, 3000); //3000 is equivalent to 3 seconds
+</script>
+<p>You have been successfully logged out. If you are not redirected in 3 seconds
+    <a href="{% url '/' %}">click here.</a> </p>

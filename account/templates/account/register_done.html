@@ -1,2 +1,9 @@
-<p>Your account has been registered.</p>
-<a href="{% url 'index:index' %}">Go to your dashboard.</a>
+<script>
+    function redirect(){
+       window.location.href = "{% url 'reservation:calendar_now' %}";
+    }
+
+    setTimeout(redirect, 3000); //3000 is equivalent to 3 seconds
+</script>
+<p>Your account has been registered. If you are not redirected in 3 seconds
+    <a href="{% url 'index:index' %}">click here.</a> </p>
