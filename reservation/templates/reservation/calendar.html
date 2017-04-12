@@ -42,11 +42,12 @@
                 <td style="background-color:#ddd">{{ day }}
                     <a href="{% url 'reservation:overview' day month year %}" class="infobox"
                        style="text-decoration:none;color:black;display:block;">
-                        <ul style="background-color:#ddd;">
+                        <ul style="background-color:#ddd; padding-left:15px;">
                             {% for appointment in appointment_list %}
                             {% if appointment.date.day == day %}
                             {% if appointment.date.month == month %}
-                            <li>{{ appointment.title }}</li>
+                            <li>{{ appointment.title }}: <p style="font-size:10px;">{{ appointment.start_time }}
+                                -{{appointment.end_time }}</p></li>
                             {% endif %}
                             {% endif %}
                             {% endfor %}
