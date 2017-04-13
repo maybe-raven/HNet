@@ -2,7 +2,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
 from django.db.utils import OperationalError
-from account.models import Patient, ProfileInformation, Administrator
+from account.models import Patient, ProfileInformation, Administrator, Doctor
 from reservation.models import Appointment
 
 
@@ -35,6 +35,7 @@ class Command(BaseCommand):
             profile_information_content_type = ContentType.objects.get_for_model(ProfileInformation)
             appointment_content_type = ContentType.objects.get_for_model(Appointment)
             administrator_content_type = ContentType.objects.get_for_model(Administrator)
+            doctor_content_type = ContentType.objects.get_for_model(Doctor)
 
 
             # Try to get all the permissions
@@ -56,6 +57,8 @@ class Command(BaseCommand):
                                                                  content_type=appointment_content_type)
             add_administrator_permission = Permission.objects.get(codename='add_administrator',
                                                                   content_type=administrator_content_type)
+            add_doctor_permission = Permission.objects.get(codename='add_doctor',
+                                                           content_type=doctor_content_type)
         except (Permission.DoesNotExist, OperationalError):
             raise CommandError('Operation cannot be completed. Did you forget to do database migration?')
 
@@ -79,10 +82,10 @@ class Command(BaseCommand):
         doctor_group.save()
 
         # Set up Administrator group
-        administrator_group = Group(name='Administrators')
+        administrator_group = Group(name='Administrator')
         administrator_group.save()
 
-        administrator_group.permissions = [add_administrator_permission, add_profile_information_permission]
+        administrator_group.permissions = [add_administrator_permission, add_doctor_permission, add_profile_information_permission]
         administrator_group.save()
 
         self.stdout.write(self.style.SUCCESS('Successfully set up all required groups.'))
