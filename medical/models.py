@@ -32,9 +32,8 @@ class Test(models.Model):
 
 
 class Drug(models.Model):
-    hospital = models.ForeignKey(Hospital, on_delete=models.PROTECT)
     name = models.CharField(max_length=30)
-    quantity = models.IntegerField()
+    description = models.TextField()
 
 
 class Prescription(models.Model):
