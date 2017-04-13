@@ -117,28 +117,18 @@ def doctor(request):
 @login_required()
 @permission_required('account.add_nurse', 'account.add_profileinformation')
 def nurse(request):
-    creator = get_account_from_user(request.user)
-        nurse_form = None
-        
-        if request.method == 'POST':
-            user_form = UserCreationForm(request.POST)
-            profile_information_form = ProfileInformationForm(request.POST)
-                
-            if user_form.is_valid() and profile_information_form.is_valid():
-                if isinstance(creator, Administrator):
-                    user_form.save_as_nurse_by_creator_with_profile_information(creator profile_information_form)
-                    CreateLogEntry(request.user.username, "Nurse account registered.")
-                    return render(request, 'account/nurse/nurse.html')
-                else:
-                    nurse_form = NurseCreationForm(request.POST)
-                    if doctor_form.is_valid():
-                        user_form.save_as_nurse_with_profile_information(nurse_form, profile_information_form)
-                        CreateLogEntry(request.user.username, "Nurse account registered.")
-                        return render(request, 'account/nurse/nurse.html')
+    if request.method == 'POST':
+        user_form = UserCreationForm(request.POST)
+        profile_information_form = ProfileInformationForm(request.POST)
+        if user_form.is_valid() and profile_information_form.is_valid():
+            user = user_form.save_as_nurse_with_profile_information(user_form, profile_information_form)
+
+            auth.login(request, user)
+            CreateLogEntry(request.user.username, "Nurse account registered.")
+            return redirect(reverse('account:register_done'))
         else:
             user_form = UserCreationForm()
             profile_information_form = ProfileInformationForm()
-            if not isinstance(creator, Administrator):
-                nurse_form = NurseCreationForm()
-        
-        return render(request, 'account/register.html',{'user_form': user_form, 'profile_information_form': profile_information_form})
+
+        return render(request, 'account/register.html',
+                      {'user_form': user_form, 'profile_information_form': profile_information_form})
