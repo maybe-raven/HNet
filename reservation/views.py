@@ -80,8 +80,12 @@ def weekview(request, day=datetime.date.today().day, month=datetime.date.today()
 
     appointments = Appointment.get_for_user_in_week_starting_at_date(request.user, week_starting_date)
 
+    week = get_week(week_starting_date, week_ending_date)
+    last_week = week_starting_date - datetime.timedelta(days=1)
+    next_week = week_ending_date + datetime.timedelta(days=1)
     # 'start_date' and 'end_date' are `datetime.date` objects representing the dates at the start and end of the week.
-    context = {'start_date': week_starting_date, 'end_date': week_ending_date, 'appointment_list': appointments}
+    context = {'appointment_list': appointments, 'week': week, 'start_day': week_starting_date,
+               'end_day': week_ending_date, 'next_week': next_week, 'last_week': last_week}
 
     return render(request, 'reservation/weekview.html', context)
 
@@ -198,6 +202,40 @@ def is_year_valid(year):
     """Test whether or not the given year is a valid value."""
 
     return 1000 < year < 9999
+
+
+def get_week(start_day, end_day):
+    # keep original date object
+    start_date = start_day
+    end_date = end_day
+    # grab days for beginning and end of week
+    start_day = start_day.day
+    end_day = end_day.day
+    counter = start_day
+    if start_day < end_day:
+        weekday = []
+        while counter != end_day + 1:
+            weekday.append(start_date)
+            start_date += datetime.timedelta(days=1)
+            counter += 1
+    else:
+        weekday = [0] * 7
+        day_index = 6
+        while end_day >= 1 and day_index >= 0:
+            weekday[day_index] = end_date
+            end_date -= datetime.timedelta(days=1)
+            end_day -= 1
+            day_index -= 1
+
+        temp_index = 0
+        while day_index >= 0:
+            weekday[temp_index] = start_date
+            start_date += datetime.timedelta(days=1)
+            day_index -= 1
+            temp_index += 1
+
+
+    return weekday
 
 
 def calculate_day(month, year):

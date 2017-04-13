@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="{% static 'css/bootstrap-theme.css' %}">
     <link rel="shortcut icon" href="{% static 'css/favicon (1).ico' %}">
     <script src="https://use.fontawesome.com/4c272d4bbc.js"></script>
-    <title>{% block title %}HealthNet{% endblock %}</title>
+    <title>HealthNet | {% block title %}Home{% endblock %}</title>
 </head>
 <body style="background-color:#1988B5">
 
@@ -59,7 +59,8 @@
 
             <ul class="nav navbar-nav navbar-right">
                 {% if user.is_authenticated %}
-                <li><a href="{% url 'account:logout' %}"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
+                <li><a href="{% url 'account:logout' %}"><span class="glyphicon glyphicon-log-out"></span> Logout</a>
+                </li>
                 {% else %}
                 <li><a href="{% url 'account:register_patient' %}"><span class="glyphicon glyphicon-user"></span> Sign Up</a>
                 </li>
@@ -69,7 +70,6 @@
         </div><!--/.nav-collapse -->
     </div>
 </nav>
-
 
 {% block content %}
 {% endblock %}
