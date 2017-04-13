@@ -3,7 +3,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth import forms as auth_forms
 from django.contrib.auth.models import Group, User
 
-from .models import Patient, Administrator, ProfileInformation
+from .models import Patient, Administrator, ProfileInformation, Doctor
 from .fields import PhoneField
 
 
@@ -97,11 +97,12 @@ class UserCreationForm(auth_forms.UserCreationForm):
 
         return user
 
-    def save_as_doctor_with_profile_information(self, user_form, profile_information_form):
+    def save_as_doctor_with_profile_information(self, doctor_form, profile_information_form):
         """
-        Saves the information in this form and the given form as a new doctor
-        :param user_form:
-        :param profile_information_form:
+        Saves the information in this form and the given form as a new doctor.
+        This is used if the creator is a superuser.
+        :param doctor_form: A 'DoctorForm' object
+        :param profile_information_form: A 'ProfileInformationForm' object
         :return: The newly created and saved user object (not doctor object)
         """
         user = self.save()
@@ -114,9 +115,34 @@ class UserCreationForm(auth_forms.UserCreationForm):
         profile_information.user = user
         profile_information.save()
 
-        administrator = user_form.save(commit=False)
-        administrator.user = user
-        administrator.save()
+        new_doctor = doctor_form.save(commit=False)
+        new_doctor.user = user
+        new_doctor.save()
+
+        return user
+
+    def save_as_doctor_by_creator_with_profile_information(self, creator, profile_information_form):
+        """
+        Saves the information in this form and the given form as a new doctor.
+        This is used if the creator is an Administrator for a given hospital.
+        :param creator: The 'Administrator' object that is creating the account
+        :param profile_information_form: A 'ProfileInformationForm' object
+        :return: The newly created and saved user object (not doctor object)
+        """
+        user = self.save()
+        doctor_group = Group.objects.get(name='Doctor')
+        user.groups.add(doctor_group)
+        user.save()
+
+        profile_information = profile_information_form.save(commit=False)
+        profile_information.account_type = ProfileInformation.DOCTOR
+        profile_information.user = user
+        profile_information.save()
+
+        new_doctor = Doctor()
+        new_doctor.user = user
+        new_doctor.hospital = creator.hospital
+        new_doctor.save()
 
         return user
 
@@ -195,6 +221,15 @@ class PatientChangeForm(PatientCreationForm):
                 raise forms.ValidationError('Your emergency contact cannot be yourself.')
 
         return self.cleaned_data['emergency_contact']
+
+
+class DoctorCreationForm(forms.ModelForm):
+    """A form used for obtaining doctor-specific information."""
+
+    class Meta:
+        model = Doctor
+        # Will have to be modified because Doctors can work for multiple hospitals
+        fields = ['hospital']
 
 
 class AdministratorForm(forms.ModelForm):

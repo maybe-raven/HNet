@@ -1,0 +1,13 @@
+{% extends 'index/base.html' %}
+{% block title %}Doctor Register{% endblock %}
+{% block header %}Doctor Registration Page{% endblock %}
+{% block content %}
+
+<div class="maincontent">
+    <div class="whitebox">
+        {{ user_form.as_table }}
+        <p>A new doctor account has been created.</p>
+    </div>
+</div>
+
+{% endblock %}

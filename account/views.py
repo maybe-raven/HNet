@@ -2,7 +2,7 @@ from django.core.urlresolvers import reverse
 from django.shortcuts import render, redirect
 from django.contrib import auth
 from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
-from .forms import UserCreationForm, UserChangeForm, ProfileInformationForm, PatientCreationForm, PatientChangeForm, AdministratorForm
+from .forms import UserCreationForm, UserChangeForm, ProfileInformationForm, PatientCreationForm, PatientChangeForm, AdministratorForm, DoctorCreationForm
 from .models import ProfileInformation, Administrator, get_account_from_user
 from hnet.logger import CreateLogEntry
 
@@ -40,12 +40,17 @@ def profile(request):
         if profile_information_form.is_valid():
             profile_information_form.save()
             CreateLogEntry(request.user.username, "Changed profile information.")
-            return render(request, 'account/common/profile.html', {'profile_information_form': profile_information_form, 'user_form': user_form, 'message': 'All changes saved.'})
+            return render(request, 'account/common/profile.html',
+                          {'profile_information_form': profile_information_form,
+                           'user_form': user_form,
+                           'message': 'All changes saved.'})
     else:
         user_form = UserChangeForm(instance=request.user)
         profile_information_form = ProfileInformationForm(instance=profile_information)
 
-    return render(request, 'account/common/profile.html', {'profile_information_form': profile_information_form, 'user_form': user_form})
+    return render(request, 'account/common/profile.html',
+                  {'profile_information_form': profile_information_form,
+                   'user_form': user_form})
 
 
 @login_required
@@ -94,27 +99,42 @@ def create_administrators(request):
             administrator_form = AdministratorForm()
 
     return render(request, 'account/administrator/create.html',
-                  {'user_form': user_form, 'profile_information_form': profile_information_form, 'administrator_form': administrator_form})
+                  {'user_form': user_form,
+                   'profile_information_form': profile_information_form,
+                   'administrator_form': administrator_form})
 
 
 @login_required()
-@permission_required('account.add_doctor', 'account.add_profileinformation')
+@permission_required('account.add_doctor')
+@permission_required('account.add_profileinformation')
 def doctor(request):
+    creator = get_account_from_user(request.user)
+    doctor_form = None
+
     if request.method == 'POST':
         user_form = UserCreationForm(request.POST)
         profile_information_form = ProfileInformationForm(request.POST)
+
         if user_form.is_valid() and profile_information_form.is_valid():
-            user = user_form.save_as_doctor_with_profile_information(user_form, profile_information_form)
+            if isinstance(creator, Administrator):
+                user_form.save_as_doctor_by_creator_with_profile_information(creator, profile_information_form)
+                CreateLogEntry(request.user.username, "Doctor account registered.")
+                return render(request, 'account/doctor/doctor.html')
+            else:
+                doctor_form = DoctorCreationForm(request.POST)
+                if doctor_form.is_valid():
+                    user_form.save_as_doctor_with_profile_information(doctor_form, profile_information_form)
+                    CreateLogEntry(request.user.username, "Doctor account registered.")
+                    return render(request, 'account/doctor/doctor.html')
+    else:
+        user_form = UserCreationForm()
+        profile_information_form = ProfileInformationForm()
+        if not isinstance(creator, Administrator):
+            doctor_form = DoctorCreationForm()
 
-            auth.login(request, user)
-            CreateLogEntry(request.user.username, "Doctor account registered.")
-            return redirect(reverse('account:register_done'))
-        else:
-            user_form = UserCreationForm()
-            profile_information_form = ProfileInformationForm()
-
-        return render(request, 'account/administrator.html',
-                      {'user_form': user_form, 'profile_information_form': profile_information_form})
+    return render(request, 'account/doctor/doctor.html',
+                  {'user_form': user_form, 'profile_information_form': profile_information_form,
+                   'doctor_form': doctor_form})
 
 
 @login_required()
