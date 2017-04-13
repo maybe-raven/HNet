@@ -32,17 +32,18 @@ class Test(models.Model):
 
 
 class Drug(models.Model):
-    hospital = models.ForeignKey(Hospital, on_delete=models.PROTECT)
     name = models.CharField(max_length=30)
-    quantity = models.IntegerField()
-
+    description = models.TextField
 
 class Prescription(models.Model):
     diagnosis = models.ForeignKey(Diagnosis, on_delete=models.CASCADE)
     doctor = models.ForeignKey(Doctor, on_delete=models.PROTECT)
     drug = models.ForeignKey(Drug, on_delete=models.PROTECT)
-    quantity = models.IntegerField(default=1)
 
     instruction = models.TextField()
 
     timestamp = models.DateTimeField(auto_now=True)
+
+class UpdateDrug(models.Model):
+    name = models.CharField(max_length=30)
+    description = models.TextField
