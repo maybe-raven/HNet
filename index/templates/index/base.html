@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="{% static 'css/bootstrap-theme.css' %}">
     <link rel="shortcut icon" href="{% static 'css/favicon (1).ico' %}">
     <script src="https://use.fontawesome.com/4c272d4bbc.js"></script>
-    <title>{% block title %}HealthNet{% endblock %}</title>
+    <title>HealthNet | {% block title %}Home{% endblock %}</title>
 </head>
 <body style="background-color:#1988B5">
 
@@ -51,7 +51,7 @@
                        aria-expanded="false">Calendar <span class="caret"></span></a>
                     <ul class="dropdown-menu">
                         <li><a href="{% url 'reservation:create' %}">Schedule Appointment</a></li>
-                        <li><a href="{% url 'reservation:weekview' %}">Weekview Calendar</a></li>
+                        <li><a href="{% url 'reservation:weekview_now' %}">Weekview Calendar</a></li>
                     </ul>
                 </li>
                 {% endif %}
@@ -59,9 +59,10 @@
 
             <ul class="nav navbar-nav navbar-right">
                 {% if user.is_authenticated %}
-                <li><a href="{% url 'account:logout' %}"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
+                <li><a href="{% url 'account:logout' %}"><span class="glyphicon glyphicon-log-out"></span> Logout</a>
+                </li>
                 {% else %}
-                <li><a href="{% url 'account:register' %}"><span class="glyphicon glyphicon-user"></span> Sign Up</a>
+                <li><a href="{% url 'account:register_patient' %}"><span class="glyphicon glyphicon-user"></span> Sign Up</a>
                 </li>
                 <li><a href="{% url 'account:login' %}"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
                 {% endif %}
@@ -69,7 +70,6 @@
         </div><!--/.nav-collapse -->
     </div>
 </nav>
-
 
 {% block content %}
 {% endblock %}

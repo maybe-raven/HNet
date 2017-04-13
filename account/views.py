@@ -2,8 +2,7 @@ from django.core.urlresolvers import reverse
 from django.shortcuts import render, redirect
 from django.contrib import auth
 from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
-from .forms import UserCreationForm, UserChangeForm, ProfileInformationForm, PatientCreationForm, PatientChangeForm, \
-    AdministratorForm, DoctorCreationForm
+from .forms import UserCreationForm, UserChangeForm, ProfileInformationForm, PatientCreationForm, PatientChangeForm, AdministratorForm, DoctorCreationForm
 from .models import ProfileInformation, Administrator, get_account_from_user
 from hnet.logger import CreateLogEntry
 
@@ -42,14 +41,16 @@ def profile(request):
             profile_information_form.save()
             CreateLogEntry(request.user.username, "Changed profile information.")
             return render(request, 'account/common/profile.html',
-                          {'profile_information_form': profile_information_form, 'user_form': user_form,
+                          {'profile_information_form': profile_information_form,
+                           'user_form': user_form,
                            'message': 'All changes saved.'})
     else:
         user_form = UserChangeForm(instance=request.user)
         profile_information_form = ProfileInformationForm(instance=profile_information)
 
     return render(request, 'account/common/profile.html',
-                  {'profile_information_form': profile_information_form, 'user_form': user_form})
+                  {'profile_information_form': profile_information_form,
+                   'user_form': user_form})
 
 
 @login_required
@@ -87,8 +88,7 @@ def create_administrators(request):
             else:
                 administrator_form = AdministratorForm(request.POST)
                 if administrator_form.is_valid():
-                    user_form.save_as_administrator_with_profile_information(administrator_form,
-                                                                             profile_information_form)
+                    user_form.save_as_administrator_with_profile_information(administrator_form, profile_information_form)
                     CreateLogEntry(request.user.username, "Administrator account registered.")
                     return render(request, 'account/administrator/create_done.html')
 
@@ -99,7 +99,8 @@ def create_administrators(request):
             administrator_form = AdministratorForm()
 
     return render(request, 'account/administrator/create.html',
-                  {'user_form': user_form, 'profile_information_form': profile_information_form,
+                  {'user_form': user_form,
+                   'profile_information_form': profile_information_form,
                    'administrator_form': administrator_form})
 
 
