@@ -8,7 +8,7 @@ urlpatterns = [
     url(r'^logout/$', auth_views.logout, {'template_name': 'account/common/logout.html'}, name='logout'),
     url(r'^patient/register/$', views.register_patient, name='register_patient'),
     url(r'^administrator/create/$', views.create_administrators, name='create_administrator'),
-    url(r'^doctor/create/$', views.doctor, name='create_doctor'),
+    url(r'^doctor/create/$', views.register_doctor, name='create_doctor'),
     url(r'^profile/$', views.profile, name='profile'),
     url(r'^patient/$', views.patient, name='patient'),
 ]
