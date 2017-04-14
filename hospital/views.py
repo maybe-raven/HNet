@@ -1,5 +1,6 @@
 from django.shortcuts import render
-
+from hnet.logger import readLog
 
 def logView(request):
-    return render(request, 'hospital/viewlog.html')
+    log = readLog()
+    return render(request, 'hospital/viewlog.html', {"log": log})
