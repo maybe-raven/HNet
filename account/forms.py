@@ -233,7 +233,7 @@ class DoctorCreationForm(forms.ModelForm):
 
 
 class AdministratorForm(forms.ModelForm):
-    """A form used for obtaining patient-specific information. """
+    """A form used for obtaining administrator-specific information. """
 
     class Meta:
         model = Administrator
