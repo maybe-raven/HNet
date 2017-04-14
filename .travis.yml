@@ -9,6 +9,10 @@ env:
 install:
   - pip install Django==1.9
 
+before_script:
+  - python manage.py makemigrations
+  - python manage.py migrate
+
 script:
   - python manage.py test
  
