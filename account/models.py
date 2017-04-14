@@ -77,6 +77,11 @@ class Patient(AbstractUser):
 class Administrator(AbstractUser):
     hospital = models.ForeignKey(Hospital, on_delete=models.PROTECT)
 
+    class Meta:
+        permissions = (
+            ('view_log', 'can view activity log'),
+        )
+
 
 class Doctor(AbstractUser):
     hospital = models.ForeignKey(Hospital, on_delete=models.PROTECT)
