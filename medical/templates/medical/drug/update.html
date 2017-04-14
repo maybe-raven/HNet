@@ -1,0 +1,30 @@
+{% extends 'index/base.html' %}
+{% block title %}Hnet|Update Drug{% endblock %}
+{% block header %}Update Drug{% endblock %}
+{% block calendar %}Calendar <span class="caret"></span>{% endblock %}
+{% block profile %}Profile <span class="caret"></span>{% endblock %}
+{% block login %}
+    <li><a href="{% url 'accounts:logout' %}"><span class="glyphicon glyphicon-log-out"></span> Logout</a>/li>
+{% endblock %}
+{% block content %}
+    <div class="maincontent">
+        <div class="whitebox_small">
+            <form method="post" action="{% url 'medical:update_drug' %}"
+                {% csrf_token %}
+                    <table>
+                        {{ form.as_table}}
+                    </table>
+                    <div class="parentbutton">
+                        <div class="leftbutton">
+                            <input type="submit" value="Create" class="button"/>
+                        <\div>
+                        <div class="rightbutton">
+                            <a href="#" onclick="window.history.back(); return false;">
+                                <button class="button">Back</button>
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+{% endblcok %}
