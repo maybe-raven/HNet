@@ -27,13 +27,14 @@ def index(request):
         return render(request, 'index/index.html')
 
 
-def test_user_in_group(user, group_name):
+def test_user_account_type(user, account_type):
     """
-    Test whether or not the given user is in the given group.
+    Test whether or not the given user is the given account type.
     """
 
-    if user:
-        return user.groups.filter(name=group_name)
+    profile_information = ProfileInformation.from_user(user)
+    if profile_information is not None:
+        return profile_information.account_type == account_type
     return False
 
 
@@ -43,28 +44,28 @@ def log(request):
 
 # TODO: add group verification
 @login_required
-@user_passes_test(lambda u: test_user_in_group(u, 'Patient'))
+@user_passes_test(lambda u: test_user_account_type(u, ProfileInformation.PATIENT))
 def patient(request):
     CreateLogEntry(request.user.username, "Patient logged in.")
     return render(request, 'index/patient.html')
 
 
 @login_required()
-@user_passes_test(lambda u: test_user_in_group(u, 'Doctor'))
+@user_passes_test(lambda u: test_user_account_type(u, ProfileInformation.DOCTOR))
 def doctor(request):
     CreateLogEntry(request.user.username, "Doctor logged in.")
     return render(request, 'index/administrator.html')
 
 
 @login_required
-@user_passes_test(lambda u: test_user_in_group(u, 'Nurse'))
+@user_passes_test(lambda u: test_user_account_type(u, ProfileInformation.NURSE))
 def nurse(request):
     CreateLogEntry(request.user.username, "Nurse logged in.")
     return render(request, 'index/administrator.html')
 
 
 @login_required
-@user_passes_test(lambda u: test_user_in_group(u, 'Administrator'))
+@user_passes_test(lambda u: test_user_account_type(u, ProfileInformation.ADMINISTRATOR))
 def administrator(request):
     CreateLogEntry(request.user.username, "Administrator logged in.")
     return render(request, 'index/administrator.html')

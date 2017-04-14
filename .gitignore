@@ -1,5 +1,10 @@
+.DS_Store
 .idea
-db.sqlite3
+
 __pycache__
-migrations
+
+db.sqlite3
 activity.log
+
+*/migrations/*
+!*/migrations/__init__.py
