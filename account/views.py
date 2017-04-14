@@ -107,7 +107,7 @@ def create_administrators(request):
 @login_required()
 @permission_required('account.add_doctor')
 @permission_required('account.add_profileinformation')
-def doctor(request):
+def register_doctor(request):
     creator = get_account_from_user(request.user)
     doctor_form = None
 
@@ -119,13 +119,13 @@ def doctor(request):
             if isinstance(creator, Administrator):
                 user_form.save_as_doctor_by_creator_with_profile_information(creator, profile_information_form)
                 CreateLogEntry(request.user.username, "Doctor account registered.")
-                return render(request, 'account/doctor/doctor.html')
+                return render(request, 'account/doctor/register_done.html')
             else:
                 doctor_form = DoctorCreationForm(request.POST)
                 if doctor_form.is_valid():
                     user_form.save_as_doctor_with_profile_information(doctor_form, profile_information_form)
                     CreateLogEntry(request.user.username, "Doctor account registered.")
-                    return render(request, 'account/doctor/doctor.html')
+                    return render(request, 'account/doctor/register_done.html')
     else:
         user_form = UserCreationForm()
         profile_information_form = ProfileInformationForm()
