@@ -1,0 +1,16 @@
+language: python
+
+python:
+  - "3.5"
+
+env:
+  - DJANGO=1.9
+
+install:
+  - pip install Django==1.9
+
+script:
+  - python manage.py test
+ 
+notifications:
+  email: false
