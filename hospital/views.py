@@ -6,7 +6,7 @@ from hnet.logger import CreateLogEntry
 
 
 @login_required
-@permission_required('hospital.change_treatmentsession')
+@permission_required('hospital.discharge_patient')
 @user_passes_test(lambda u: not u.is_superuser)
 def discharge_patient(request, treatmentsession_id):
     session = get_object_or_404(TreatmentSession, pk=treatmentsession_id)
