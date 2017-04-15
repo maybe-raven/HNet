@@ -35,8 +35,14 @@ class Test(models.Model):
     description = models.TextField()
     results = models.TextField()
     notes = models.TextField()
+    released = models.BooleanField(default=False)
 
     timestamp = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        permissions = (
+            ('request_test', 'Can request tests'),
+        )
 
 
 class Drug(models.Model):

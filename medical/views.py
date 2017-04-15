@@ -5,7 +5,6 @@ from django.shortcuts import render, get_object_or_404
 from django.core.urlresolvers import reverse
 from account.models import Patient
 from .models import Drug, Diagnosis
-from .forms import DrugForm, DiagnosisForm
 from hnet.logger import CreateLogEntry
 
 
@@ -77,3 +76,8 @@ def update_diagnosis(request, diagnosis_id):
 
     return render(request, 'medical/diagnosis/update.html',
                   {'form': form, 'message': message})
+
+
+@login_required
+@permission_required('medical.request_test')
+@user_passes_test(lambda u: not u.is_superuser)

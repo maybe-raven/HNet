@@ -1,5 +1,6 @@
 from django import forms
-from .models import Drug, Diagnosis
+from .models import Drug, Diagnosis, Test
+from account.models import Patient
 
 
 class DrugForm(forms.ModelForm):
@@ -24,3 +25,37 @@ class DiagnosisForm(forms.ModelForm):
     class Meta:
         model = Diagnosis
         fields = ['summary']
+
+
+class TestForm(forms.ModelForm):
+    """
+    A form for obtaining information for a medical test.
+    """
+    def save_for_diagnosis(self, doctor, diagnosis):
+        test = self.save(commit=False)
+        test.doctor = doctor
+        test.diagnosis = diagnosis
+        test.save()
+
+        return test
+
+    class Meta:
+        model = Test
+        fields = ['description']
+
+
+class TestResultsForm(forms.ModelForm):
+    """
+    A form for obtaining test results in text form.
+    """
+    def save_for_patient(self, patient):
+        results = self.save(commit=False)
+        patient.medical_information = results
+        patient.save()
+        results.save()
+
+        return results
+
+    class Meta:
+        model = Test
+        fields = ['results']
