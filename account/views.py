@@ -2,7 +2,8 @@ from django.core.urlresolvers import reverse
 from django.shortcuts import render, redirect
 from django.contrib import auth
 from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
-from .forms import UserCreationForm, UserChangeForm, ProfileInformationForm, PatientCreationForm, PatientChangeForm, AdministratorForm, DoctorCreationForm
+from .forms import UserCreationForm, UserChangeForm, ProfileInformationForm, PatientCreationForm, PatientChangeForm, \
+    AdministratorForm, DoctorCreationForm
 from .models import ProfileInformation, Administrator, get_account_from_user
 from hnet.logger import CreateLogEntry
 

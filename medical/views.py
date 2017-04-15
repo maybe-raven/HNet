@@ -1,4 +1,4 @@
-from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
 from django.shortcuts import render
 from .forms import DrugForm
 from account.models import ProfileInformation, get_account_from_user, Patient
@@ -22,6 +22,7 @@ def add_drug(request):
 
 @login_required
 @permission_required('medical.view_prescription')
+@user_passes_test(lambda u: not u.is_superuser)
 def view_prescriptions(request):
     patient = get_account_from_user(request.user)
     prescriptions = Prescription.objects.all()
@@ -34,19 +35,16 @@ def view_prescriptions(request):
 
 @login_required
 @permission_required('account.view_patients')
+@user_passes_test(lambda u: not u.is_superuser)
 def view_patients(request):
     nurse = get_account_from_user(request.user)
     hospital = nurse.hospital
     list_patients = []
-    # for patients in patients if hospital == hospital add to list
     patients = Patient.objects.all()
-    #for patient in patients:
-     #   if patient.preferred_hospital
+    for patient in patients:
+        if patient.preferred_hospital == hospital:
+            list_patients.append(patient)
 
+    context = {'patient_list': list_patients}
 
-    # hospital = user.gethospital
-        #hospital =
-    # patients = hospital.getpatients
-    #
-    #
-    return render(request, 'patient/nurse_view_patients.html')
+    return render(request, 'patient/view_patients.html', context)
