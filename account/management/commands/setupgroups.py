@@ -17,10 +17,11 @@ class Command(BaseCommand):
             # we can always say 'y' to the prompt and let it handle the update of groups and permissions in the database
             if Group.objects.count() > 0:
                 while True:
-                    self.stdout.write(self.style.WARNING('You have existing groups in the database. '
+                    self.stdout.write(self.style.NOTICE('You have existing groups in the database. '
                                                          'Continuing will remove all of them, '
                                                          'and create and set up only those required by the application.\n'
                                                          'Are you sure you want to continue? (y or n)'))
+
                     response = input()
                     if response == 'n':
                         print('No changes are made.')
@@ -68,7 +69,7 @@ class Command(BaseCommand):
             change_diagnosis_permission = Permission.objects.get(codename='change_diagnosis',
                                                                  content_type=diagnosis_content_type)
             remove_drug_permission = Permission.objects.get(codename='remove_drug',
-                                                             content_type=drug_content_type)
+                                                            content_type=drug_content_type)
         except (Permission.DoesNotExist, OperationalError):
             raise CommandError('Operation cannot be completed. Did you forget to do database migration?')
 
@@ -91,6 +92,10 @@ class Command(BaseCommand):
                                     view_appointment_permission, add_diagnosis_permission,
                                     change_diagnosis_permission]
         doctor_group.save()
+
+        # Set up Nurse group.
+        nurse_group = Group(name='Nurse')
+        nurse_group.save()
 
         # Set up Administrator group
         administrator_group = Group(name='Administrator')
