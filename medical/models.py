@@ -43,6 +43,13 @@ class Drug(models.Model):
     name = models.CharField(max_length=30)
     description = models.TextField()
 
+    active = models.BooleanField(default=True)
+
+    class Meta:
+        permissions = (
+            ('remove_drug', 'Can remove drugs'),
+        )
+
 
 class Prescription(models.Model):
     diagnosis = models.ForeignKey(Diagnosis, on_delete=models.CASCADE)
