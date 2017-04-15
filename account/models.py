@@ -73,6 +73,11 @@ class Patient(AbstractUser):
                                                          'You must provide this if you do not '
                                                          'link with a registered patient.')
 
+    class Meta:
+        permissions = (
+            ('view_patients', 'Can view patients'),
+        )
+
 
 class Administrator(AbstractUser):
     hospital = models.ForeignKey(Hospital, on_delete=models.PROTECT)

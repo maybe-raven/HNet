@@ -1,0 +1,13 @@
+{% extends 'index/base.html' %}
+{% block title %}Prescriptions{% endblock %}
+{% block header %}Your Prescriptions{% endblock %}
+
+{% block content %}
+<div class="container" style="margin-top:75px;">
+    {% for prescription in prescription_list %}
+    <p style="font-size:50px;">{{ prescription }}</p>
+    {% endfor %}
+    <p></p>
+</div>
+
+{% endblock %}
