@@ -75,7 +75,7 @@ class Command(BaseCommand):
             change_diagnosis_permission = Permission.objects.get(codename='change_diagnosis',
                                                                  content_type=diagnosis_content_type)
             remove_drug_permission = Permission.objects.get(codename='remove_drug',
-                                                             content_type=drug_content_type)
+                                                            content_type=drug_content_type)
         except (Permission.DoesNotExist, OperationalError):
             raise CommandError('Operation cannot be completed. Did you forget to do database migration?')
 
@@ -103,7 +103,7 @@ class Command(BaseCommand):
         doctor_group.permissions = [change_profile_information_permission, add_appointment_permission,
                                     cancel_appointment_permission, change_appointment_permission,
                                     view_appointment_permission, add_diagnosis_permission,
-                                    change_diagnosis_permission]
+                                    change_diagnosis_permission, view_patients_permission, view_prescription_permission]
         doctor_group.save()
 
         # Set up Administrator group
