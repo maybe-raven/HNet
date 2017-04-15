@@ -3,8 +3,9 @@ from django.contrib.auth.decorators import login_required, permission_required, 
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.core.urlresolvers import reverse
-from account.models import Patient
-from .models import Drug, Diagnosis
+from account.models import Patient, get_account_from_user
+from .models import Drug, Diagnosis, Test
+from .forms import DrugForm, DiagnosisForm, TestForm, TestResultsForm
 from hnet.logger import CreateLogEntry
 
 
@@ -21,7 +22,7 @@ def add_drug(request):
 
     return render(request, 'medical/drug/add.html', {'form': form})
 
-  
+
 @permission_required('medical.remove_drug')
 @user_passes_test(lambda u: not u.is_superuser)
 def remove_drug(request, drug_id):
@@ -38,7 +39,7 @@ def remove_drug(request, drug_id):
     else:
         return render(request, 'medical/drug/remove.html', {'drug': drug})
 
-      
+
 @login_required
 @permission_required('medical.add_diagnosis')
 def create_diagnosis(request, patient_id):
@@ -81,3 +82,16 @@ def update_diagnosis(request, diagnosis_id):
 @login_required
 @permission_required('medical.request_test')
 @user_passes_test(lambda u: not u.is_superuser)
+def request_test(request, diagnosis_id):
+    diagnosis = get_object_or_404(Diagnosis, pk=diagnosis_id)
+    doctor = get_account_from_user(request.user)
+
+    if request.method == 'POST':
+        test_form = TestForm(request.POST)
+        if test_form.is_valid():
+            test_form.save_for_diagnosis(doctor, diagnosis)
+            CreateLogEntry(request.user.username, "Test requested.")
+            return render(request, 'medical/test/requested.html')
+    else:
+        test_form = TestForm()
+        return render(request, 'medical/test/request.html', {'test_form': test_form})
