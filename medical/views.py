@@ -94,4 +94,4 @@ def request_test(request, diagnosis_id):
             return render(request, 'medical/test/requested.html')
     else:
         test_form = TestForm()
-        return render(request, 'medical/test/request.html', {'test_form': test_form})
+        return render(request, 'medical/test/request.html', {'test_form': test_form, 'diagnosis': diagnosis})
