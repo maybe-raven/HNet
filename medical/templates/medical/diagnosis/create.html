@@ -5,6 +5,10 @@
 {% block content %}
     <div class="maincontent">
         <div class="whitebox">
+            <h3 style="text-align: center">
+                New diagnosis for {{ patient.user.first_name }} {{ patient.user.last_name }}
+            </h3>
+
             <form method="post" actio="{% url 'medical:create_diagnosis' patient.id %}">
                 {% csrf_token %}
                 <table>
