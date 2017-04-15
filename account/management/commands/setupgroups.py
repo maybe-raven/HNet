@@ -3,7 +3,7 @@ from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
 from django.db.utils import OperationalError
 from account.models import Patient, ProfileInformation, Administrator, Doctor
-from medical.models import Drug
+from medical.models import Drug, Prescription
 from hospital.models import AdmitPatient
 from reservation.models import Appointment
 
@@ -40,6 +40,7 @@ class Command(BaseCommand):
             doctor_content_type = ContentType.objects.get_for_model(Doctor)
             drug_content_type = ContentType.objects.get_for_model(Drug)
             admission_content_type = ContentType.objects.get_for_model(AdmitPatient)
+            prescription_content_type = ContentType.objects.get_for_model(Prescription)
 
 
             # Try to get all the permissions
@@ -69,6 +70,8 @@ class Command(BaseCommand):
                                                          content_type=administrator_content_type)
             admit_patient_permission = Permission.objects.get(codename='admit_patient',
                                                               content_type=admission_content_type)
+            add_prescription_permission = Permission.objects.get(codename='add_prescription',
+                                                                 content_type=prescription_content_type)
         except (Permission.DoesNotExist, OperationalError):
             raise CommandError('Operation cannot be completed. Did you forget to do database migration?')
 
@@ -88,7 +91,8 @@ class Command(BaseCommand):
 
         doctor_group.permissions = [change_profile_information_permission, add_appointment_permission,
                                     cancel_appointment_permission, change_appointment_permission,
-                                    view_appointment_permission,admit_patient_permission]
+                                    view_appointment_permission,admit_patient_permission,
+                                    add_prescription_permission]
         doctor_group.save()
 
         # Set up Administrator group

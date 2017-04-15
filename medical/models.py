@@ -45,3 +45,10 @@ class Prescription(models.Model):
     instruction = models.TextField()
 
     timestamp = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        permissions = (
+            ('add_prescription', 'can add prescription'),
+            ('remove_prescription', 'can remove prescription'),
+            ('change_prescription', 'can change prescription'),
+        )
