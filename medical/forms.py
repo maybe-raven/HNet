@@ -31,6 +31,7 @@ class TestForm(forms.ModelForm):
     """
     A form for obtaining information for a medical test.
     """
+
     def save_for_diagnosis(self, doctor, diagnosis):
         test = self.save(commit=False)
         test.doctor = doctor
@@ -48,13 +49,6 @@ class TestResultsForm(forms.ModelForm):
     """
     A form for obtaining test results in text form.
     """
-    def save_for_patient(self, patient):
-        results = self.save(commit=False)
-        patient.medical_information = results
-        patient.save()
-        results.save()
-
-        return results
 
     class Meta:
         model = Test

@@ -42,6 +42,7 @@ class Test(models.Model):
     class Meta:
         permissions = (
             ('request_test', 'Can request tests'),
+            ('upload_test_results', 'Can upload test results')
         )
 
 
