@@ -1,6 +1,6 @@
 from django.db import models
 from hospital.models import Hospital, TreatmentSession
-from account.models import Doctor
+from account.models import Doctor, Patient
 from hnet.logger import CreateLogEntry
 
 
@@ -12,12 +12,20 @@ class DiagnosisCategory(models.Model):
 
 
 class Diagnosis(models.Model):
-    treatment_session = models.OneToOneField(TreatmentSession, on_delete=models.CASCADE)
+    treatment_session = models.ForeignKey(TreatmentSession, on_delete=models.CASCADE, null=True)
 
+    patient = models.ForeignKey(Patient, on_delete=models.PROTECT, null=True)
     """A high level summary of this patient's condition, including any useful, medical information for the treatment"""
     summary = models.TextField(blank=True)
-
     category = models.ManyToManyField(DiagnosisCategory, blank=True)
+    creation_timestamp = models.DateTimeField(auto_now_add=True)
+    update_timestamp = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        if self.summary:
+            return self.summary
+        else:
+            return "Diagnosis created at %s" % self.creation_timestamp.ctime()
 
 
 class Test(models.Model):

@@ -33,40 +33,33 @@ def register_patient(request):
 @permission_required('account.change_profileinformation')
 @user_passes_test(lambda u: not u.is_superuser)
 def profile(request):
-    profile_information = ProfileInformation.from_user(request.user)
+    user = request.user
+    profile_information = user.profile_information
+    patient = user.patient
+
     if request.method == 'POST':
-        user_form = UserChangeForm(request.POST, instance=request.user)
+        user_form = UserChangeForm(request.POST, instance=user)
         profile_information_form = ProfileInformationForm(request.POST, instance=profile_information)
-        if profile_information_form.is_valid():
+        patient_form = PatientChangeForm(request.POST, instance=patient)
+        if user_form.is_valid() and profile_information_form.is_valid() and patient_form.is_valid():
+            user_form.save()
             profile_information_form.save()
+            patient_form.save()
             CreateLogEntry(request.user.username, "Changed profile information.")
-            return render(request, 'account/common/profile.html',
+            return render(request, 'account/patient/profile.html',
                           {'profile_information_form': profile_information_form,
                            'user_form': user_form,
+                           'patient_form': patient_form,
                            'message': 'All changes saved.'})
     else:
-        user_form = UserChangeForm(instance=request.user)
+        user_form = UserChangeForm(instance=user)
         profile_information_form = ProfileInformationForm(instance=profile_information)
+        patient_form = PatientChangeForm(instance=patient)
 
-    return render(request, 'account/common/profile.html',
+    return render(request, 'account/patient/profile.html',
                   {'profile_information_form': profile_information_form,
+                   'patient_form': patient_form,
                    'user_form': user_form})
-
-
-@login_required
-@permission_required('account.change_patient')
-@user_passes_test(lambda u: not u.is_superuser)
-def patient(request):
-    if request.method == 'POST':
-        form = PatientChangeForm(request.POST, instance=request.user.patient)
-        if form.is_valid():
-            form.save()
-            CreateLogEntry(request.user.username, "Changed medical information.")
-            return render(request, 'account/patient/patient.html', {'form': form, 'message': 'All changes saved.'})
-    else:
-        form = PatientChangeForm(instance=request.user.patient)
-
-    return render(request, 'account/patient/patient.html', {'form': form})
 
 
 @login_required()
