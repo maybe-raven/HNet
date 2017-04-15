@@ -10,5 +10,4 @@ urlpatterns = [
     url(r'^administrator/create/$', views.create_administrators, name='create_administrator'),
     url(r'^doctor/create/$', views.register_doctor, name='create_doctor'),
     url(r'^profile/$', views.profile, name='profile'),
-    url(r'^patient/$', views.patient, name='patient'),
 ]
