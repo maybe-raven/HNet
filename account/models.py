@@ -1,51 +1,13 @@
 from django.db import models
 from hospital.models import Hospital, TreatmentSession
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 
 
-class ProfileInformation(models.Model):
-    """
-    A model that describes the basic profile information of a user.
-    """
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile_information')
 
-    MALE = 'M'
-    FEMALE = 'F'
 
-    GENDER_CHOICES = (
-        (MALE, 'Male'),
-        (FEMALE, 'Female')
-    )
 
-    gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
 
-    PATIENT = 'P'
-    ADMINISTRATOR = 'A'
-    DOCTOR = 'D'
-    NURSE = 'N'
 
-    ACCOUNT_TYPE_CHOICES = (
-        (PATIENT, 'Patient'),
-        (ADMINISTRATOR, 'Administrator'),
-        (DOCTOR, 'Doctor'),
-        (NURSE, 'Nurse'),
-    )
-
-    account_type = models.CharField(max_length=1, choices=ACCOUNT_TYPE_CHOICES)
-
-    address = models.CharField(max_length=80)
-    phone = models.CharField(max_length=10)
-
-    @classmethod
-    def from_user(cls, user):
-        """
-        Attempt to get the profile information of the given user.
-        :return: The profile information if it exist; otherwise, None.
-        """
-        try:
-            return user.profile_information
-        except (ProfileInformation.DoesNotExist, AttributeError):
-            return None
 
 
 class AbstractUser(models.Model):
@@ -73,9 +35,12 @@ class Patient(AbstractUser):
                                                          'You must provide this if you do not '
                                                          'link with a registered patient.')
 
+    ACCOUNT_TYPE = 'P'
 
 class Administrator(AbstractUser):
     hospital = models.ForeignKey(Hospital, on_delete=models.PROTECT)
+
+    ACCOUNT_TYPE = 'A'
 
 
 class Doctor(AbstractUser):
@@ -83,12 +48,54 @@ class Doctor(AbstractUser):
 
     treatment_sessions = models.ManyToManyField(TreatmentSession, blank=True)
 
+    ACCOUNT_TYPE = 'D'
 
 class Nurse(AbstractUser):
     hospital = models.ForeignKey(Hospital, on_delete=models.PROTECT)
 
     treatment_sessions = models.ManyToManyField(TreatmentSession, blank=True)
 
+    ACCOUNT_TYPE = 'N'
+
+
+class ProfileInformation(models.Model):
+    """
+    A model that describes the basic profile information of a user.
+    """
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile_information')
+
+    MALE = 'M'
+    FEMALE = 'F'
+
+    GENDER_CHOICES = (
+        (MALE, 'Male'),
+        (FEMALE, 'Female')
+    )
+
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
+
+    ACCOUNT_TYPE_CHOICES = (
+        (Patient.ACCOUNT_TYPE, 'Patient'),
+        (Administrator.ACCOUNT_TYPE, 'Administrator'),
+        (Doctor.ACCOUNT_TYPE, 'Doctor'),
+        (Nurse.ACCOUNT_TYPE, 'Nurse'),
+    )
+
+    account_type = models.CharField(max_length=1, choices=ACCOUNT_TYPE_CHOICES)
+
+    address = models.CharField(max_length=80)
+    phone = models.CharField(max_length=10)
+
+    @classmethod
+    def from_user(cls, user):
+        """
+        Attempt to get the profile information of the given user.
+        :return: The profile information if it exist; otherwise, None.
+        """
+        try:
+            return user.profile_information
+        except (ProfileInformation.DoesNotExist, AttributeError):
+            return None
 
 def get_account_from_user(user):
     """
@@ -100,11 +107,11 @@ def get_account_from_user(user):
 
     profile_information = ProfileInformation.from_user(user)
     if profile_information is not None:
-        if profile_information.account_type == ProfileInformation.PATIENT:
+        if profile_information.account_type == Patient.ACCOUNT_TYPE:
             return user.patient
-        elif profile_information.account_type == ProfileInformation.DOCTOR:
+        elif profile_information.account_type == Doctor.ACCOUNT_TYPE:
             return user.doctor
-        elif profile_information.account_type == ProfileInformation.NURSE:
+        elif profile_information.account_type == Nurse.ACCOUNT_TYPE:
             return user.nurse
-        elif profile_information.account_type == ProfileInformation.ADMINISTRATOR:
+        elif profile_information.account_type == Administrator.ACCOUNT_TYPE:
             return user.administrator
