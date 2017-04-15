@@ -3,11 +3,40 @@ from hospital.models import Hospital, TreatmentSession
 from django.contrib.auth.models import User, Group
 
 
+def create_super_user(username, password):
+    """
+    Create & save a `User` object, and configure it to be a super user. 
+    :return: The newly created & saved `User` object.
+    """
+    super_user = User.objects.create_user(username, 'e@mail.com', password)
+    super_user.is_superuser = True
+    super_user.is_staff = True
+    super_user.save()
+    return super_user
 
 
+def create_default_account(username, password, account_class, hospital):
+    """
+    Create & save a `User`, a `ProfileInformation`, and an account object of the type specified by `account_class`.
+    The new account will be initialized with some predefined values.
+    Use this function to create accounts for testing. 
+    :param account_class: The model class of the account to create. 
+    Should be one of `Patient`, `Administrator`, `Doctor`, and `Nurse`. 
+    :param hospital: A `Hospital` object to associate this account with. 
+    :return: The newly created & saved `User` object. 
+    """
 
+    user = User.objects.create_user(username, 'e@mail.com', password)
+    user.first_name = 'First'
+    user.last_name = 'Last'
+    user.groups.add(account_class.get_group())
+    user.save()
 
+    ProfileInformation.create_default(user, account_class.ACCOUNT_TYPE)
 
+    account_class.create_default(user, hospital)
+
+    return user
 
 
 class AbstractUser(models.Model):
@@ -37,10 +66,46 @@ class Patient(AbstractUser):
 
     ACCOUNT_TYPE = 'P'
 
+    @classmethod
+    def get_group(cls):
+        return Group.objects.get(name='Patient')
+
+    @classmethod
+    def create_default(cls, user, hospital):
+        """
+        Create & save a `Patient` object with some predefined default value.
+        Use this function to create accounts for testing. 
+        :param user: A `User` object to associate this account with.
+        :param hospital: A `Hospital` object to associate this account with.
+        :return: A newly created and saved `Patient` object.
+        """
+
+        return Patient.objects.create(
+            user=user, medical_information='', proof_of_insurance='proof',
+            preferred_hospital=hospital, emergency_contact_phone='1234567890'
+        )
+
+
 class Administrator(AbstractUser):
     hospital = models.ForeignKey(Hospital, on_delete=models.PROTECT)
 
     ACCOUNT_TYPE = 'A'
+
+    @classmethod
+    def get_group(cls):
+        return Group.objects.get(name='Administrator')
+
+    @classmethod
+    def create_default(cls, user, hospital):
+        """
+        Create & save an `Administrator` object with some predefined default value.
+        Use this function to create accounts for testing. 
+        :param user: A `User` object to associate this account with.
+        :param hospital: A `Hospital` object to associate this account with.
+        :return: A newly created and saved `Administrator` object.
+        """
+
+        return Administrator.objects.create(user=user, hospital=hospital)
 
 
 class Doctor(AbstractUser):
@@ -50,12 +115,45 @@ class Doctor(AbstractUser):
 
     ACCOUNT_TYPE = 'D'
 
+    @classmethod
+    def get_group(cls):
+        return Group.objects.get(name='Doctor')
+
+    @classmethod
+    def create_default(cls, user, hospital):
+        """
+        Create & save a `Doctor` object with some predefined default value.
+        Use this function to create accounts for testing. 
+        :param user: A `User` object to associate this account with.
+        :param hospital: A `Hospital` object to associate this account with.
+        :return: A newly created and saved `Doctor` object.
+        """
+
+        return Doctor.objects.create(user=user, hospital=hospital)
+
+
 class Nurse(AbstractUser):
     hospital = models.ForeignKey(Hospital, on_delete=models.PROTECT)
 
     treatment_sessions = models.ManyToManyField(TreatmentSession, blank=True)
 
     ACCOUNT_TYPE = 'N'
+
+    @classmethod
+    def get_group(cls):
+        return Group.objects.get(name='Nurse')
+
+    @classmethod
+    def create_default(cls, user, hospital):
+        """
+        Create & save a `Nurse` object with some predefined default value.
+        Use this function to create accounts for testing. 
+        :param user: A `User` object to associate this account with.
+        :param hospital: A `Hospital` object to associate this account with.
+        :return: A newly created and saved `Nurse` object.
+        """
+
+        return Nurse.objects.create(user=user, hospital=hospital)
 
 
 class ProfileInformation(models.Model):
@@ -96,6 +194,14 @@ class ProfileInformation(models.Model):
             return user.profile_information
         except (ProfileInformation.DoesNotExist, AttributeError):
             return None
+
+    @classmethod
+    def create_default(cls, user, account_type):
+        return ProfileInformation.objects.create(
+            user=user, address='Test address', gender='M',
+            phone='1234567890', account_type=account_type
+        )
+
 
 def get_account_from_user(user):
     """
