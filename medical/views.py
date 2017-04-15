@@ -10,7 +10,17 @@ from hnet.logger import CreateLogEntry
 
 
 @login_required
+@permission_required('medical.view_drug')
+@user_passes_test(lambda u: not u.is_superuser)
+def list_drug(request):
+    drug_list = Drug.objects.filter(active=True).order_by('name')
+
+    return render(request, 'medical/drug/list.html', {'drug_list': drug_list})
+
+
+@login_required
 @permission_required('medical.add_drug')
+@user_passes_test(lambda u: not u.is_superuser)
 def add_drug(request):
     if request.method == 'POST':
         form = DrugForm(request.POST)
@@ -22,7 +32,7 @@ def add_drug(request):
 
     return render(request, 'medical/drug/add.html', {'form': form})
 
-  
+
 @permission_required('medical.remove_drug')
 @user_passes_test(lambda u: not u.is_superuser)
 def remove_drug(request, drug_id):
@@ -39,7 +49,7 @@ def remove_drug(request, drug_id):
     else:
         return render(request, 'medical/drug/remove.html', {'drug': drug})
 
-      
+
 @login_required
 @permission_required('medical.add_diagnosis')
 def create_diagnosis(request, patient_id):

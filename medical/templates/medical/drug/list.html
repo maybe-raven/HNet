@@ -1,0 +1,7 @@
+<ul>
+    {% for drug in drug_list %}
+        <li><a href="#">{{ drug }}</a><a href="{% url 'medical:remove_drug' drug.id %}" style="margin-left: 12px;">Remove</a></li>
+    {% endfor %}
+</ul>
+
+<a href="{% url 'medical:add_drug' %}">Add New Drug</a>
