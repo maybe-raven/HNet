@@ -3,8 +3,8 @@ from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
 from django.db.utils import OperationalError
 from account.models import Patient, ProfileInformation, Administrator, Doctor
-from medical.models import Drug
 from hospital.models import TreatmentSession
+from medical.models import Drug, Diagnosis
 from reservation.models import Appointment
 
 
@@ -40,6 +40,7 @@ class Command(BaseCommand):
             doctor_content_type = ContentType.objects.get_for_model(Doctor)
             drug_content_type = ContentType.objects.get_for_model(Drug)
             treatment_session_content_type = ContentType.objects.get_for_model(TreatmentSession)
+            diagnosis_content_type = ContentType.objects.get_for_model(Diagnosis)
 
             # Try to get all the permissions
             # This requires that the database has been migrated.
@@ -66,6 +67,12 @@ class Command(BaseCommand):
                                                          content_type=drug_content_type)
             discharge_patient_permission = Permission.objects.get(codename='discharge_patient',
                                                                   content_type=treatment_session_content_type)
+            add_diagnosis_permission = Permission.objects.get(codename='add_diagnosis',
+                                                              content_type=diagnosis_content_type)
+            change_diagnosis_permission = Permission.objects.get(codename='change_diagnosis',
+                                                                 content_type=diagnosis_content_type)
+            remove_drug_permission = Permission.objects.get(codename='remove_drug',
+                                                             content_type=drug_content_type)
         except (Permission.DoesNotExist, OperationalError):
             raise CommandError('Operation cannot be completed. Did you forget to do database migration?')
 
@@ -85,7 +92,8 @@ class Command(BaseCommand):
 
         doctor_group.permissions = [change_profile_information_permission, add_appointment_permission,
                                     cancel_appointment_permission, change_appointment_permission,
-                                    view_appointment_permission, discharge_patient_permission]
+                                    view_appointment_permission, discharge_patient_permission,
+                                    add_diagnosis_permission, change_diagnosis_permission]
         doctor_group.save()
 
         # Set up Administrator group
@@ -93,7 +101,8 @@ class Command(BaseCommand):
         administrator_group.save()
 
         administrator_group.permissions = [add_administrator_permission, add_doctor_permission,
-                                           add_profile_information_permission, add_drug_permission]
+                                           add_profile_information_permission, add_drug_permission,
+                                           remove_drug_permission]
         administrator_group.save()
 
         self.stdout.write(self.style.SUCCESS('Successfully set up all required groups.'))
