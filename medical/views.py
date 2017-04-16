@@ -1,13 +1,14 @@
 from urllib.parse import urlencode
 from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
-from django.http import HttpResponseRedirect
 from django.core.exceptions import PermissionDenied
+from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import render, get_object_or_404
 from django.core.urlresolvers import reverse
 from account.models import Patient, get_account_from_user
 from hospital.models import TreatmentSession
 from .models import Drug, Diagnosis, Test, Prescription
 from .forms import DrugForm, DiagnosisForm, TestForm, TestResultsForm, PrescriptionForm
+from medical.models import Prescription
 from hnet.logger import CreateLogEntry
 
 
@@ -134,6 +135,24 @@ def remove_drug(request, drug_id):
         return render(request, 'medical/drug/remove_done.html')
     else:
         return render(request, 'medical/drug/remove.html', {'drug': drug})
+
+
+@permission_required('medical.change_drug')
+@user_passes_test(lambda u: not u.is_superuser)
+def update_drug(request, drug_id):
+    drug = get_object_or_404(Drug, pk=drug_id)
+    if not drug.active:
+        raise Http404()
+
+    if request.method == 'POST':
+        form = DrugForm(request.POST, instance=drug)
+        if form.is_valid():
+            form.save()
+            return render(request, 'medical/drug/update.html', {'form': form, 'message': 'All changes saved.'})
+    else:
+        form = DrugForm(instance=drug)
+
+    return render(request, 'medical/drug/update.html', {'form': form})
 
 
 @permission_required('medical.view_diagnosis')

@@ -19,7 +19,7 @@
                 {% for drug in drug_list %}
                     <tr>
                         <th scope="row">{{ forloop.counter }}</th>
-                        <td><a href="#" style="font-size: 14pt;">{{ drug }}</a></td>
+                        <td><a href="{% url 'medical:update_drug' drug.id %}" style="font-size: 14pt;">{{ drug }}</a></td>
                         <td><a href="{% url 'medical:remove_drug' drug.id %}" style="margin-left: 24px;"
                                class="btn btn-danger btn-xs">Remove</a></td>
                     </tr>

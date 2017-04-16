@@ -6,6 +6,7 @@ urlpatterns = [
     url(r'^drug/$', views.list_drug, name='list_drug'),
     url(r'^drug/add/$', views.add_drug, name='add_drug'),
     url(r'^drug/remove/(?P<drug_id>[0-9]+)/$', views.remove_drug, name='remove_drug'),
+    url(r'^drug/update/(?P<drug_id>[0-9]+)/$', views.update_drug, name='update_drug'),
     url(r'^patient/$', views.view_patients, name='view_patients'),
     url(r'^patient/(?P<patient_id>[0-9]+)/$', views.view_medical_information, name='view_medical_information'),
     url(r'^diagnosis/create/(?P<patient_id>[0-9]+)/$', views.create_diagnosis, name='create_diagnosis'),
