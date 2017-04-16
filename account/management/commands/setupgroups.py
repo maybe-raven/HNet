@@ -94,7 +94,7 @@ class Command(BaseCommand):
                                                           content_type=drug_content_type)
             add_treatment_session = Permission.objects.get(codename='add_treatmentsession',
                                                            content_type=treatment_session_content_type)
-            release_test_results_permission = Permission.objects.get(codename='release_test_result',
+            release_test_results_permission = Permission.objects.get(codename='release_test_results',
                                                                      content_type=test_content_type)
         except (Permission.DoesNotExist, OperationalError):
             raise CommandError('Operation cannot be completed. Did you forget to do database migration?')
