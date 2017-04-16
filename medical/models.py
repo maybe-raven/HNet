@@ -45,9 +45,13 @@ class Drug(models.Model):
 
     active = models.BooleanField(default=True)
 
+    def __str__(self):
+        return self.name
+
     class Meta:
         permissions = (
             ('remove_drug', 'Can remove drugs'),
+            ('view_drug', 'Can view drugs'),
         )
 
 

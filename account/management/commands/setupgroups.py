@@ -19,9 +19,9 @@ class Command(BaseCommand):
             if Group.objects.count() > 0:
                 while True:
                     self.stdout.write(self.style.NOTICE('You have existing groups in the database. '
-                                                         'Continuing will remove all of them, '
-                                                         'and create and set up only those required by the application.\n'
-                                                         'Are you sure you want to continue? (y or n)'))
+                                                        'Continuing will remove all of them, '
+                                                        'and create and set up only those required by the application.\n'
+                                                        'Are you sure you want to continue? (y or n)'))
 
                     response = input()
                     if response == 'n':
@@ -74,6 +74,8 @@ class Command(BaseCommand):
                                                                  content_type=diagnosis_content_type)
             remove_drug_permission = Permission.objects.get(codename='remove_drug',
                                                             content_type=drug_content_type)
+            view_drug_permission = Permission.objects.get(codename='view_drug',
+                                                          content_type=drug_content_type)
         except (Permission.DoesNotExist, OperationalError):
             raise CommandError('Operation cannot be completed. Did you forget to do database migration?')
 
@@ -107,7 +109,7 @@ class Command(BaseCommand):
 
         administrator_group.permissions = [add_administrator_permission, add_doctor_permission,
                                            add_profile_information_permission, add_drug_permission,
-                                           remove_drug_permission]
+                                           remove_drug_permission, view_drug_permission]
         administrator_group.save()
 
         self.stdout.write(self.style.SUCCESS('Successfully set up all required groups.'))
