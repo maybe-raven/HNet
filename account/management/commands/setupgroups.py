@@ -2,10 +2,8 @@ from django.core.management.base import BaseCommand, CommandError
 from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
 from django.db.utils import OperationalError
-from account.models import Patient, ProfileInformation, Administrator, Doctor, Nurse
-from medical.models import Drug, Prescription
 from account.models import Patient, ProfileInformation, Administrator, Doctor
-from medical.models import Drug, Diagnosis, Test
+from medical.models import Drug, Diagnosis, Test, Prescription
 from hospital.models import TreatmentSession
 from reservation.models import Appointment
 
