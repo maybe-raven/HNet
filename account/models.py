@@ -1,51 +1,42 @@
 from django.db import models
 from hospital.models import Hospital, TreatmentSession
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 
 
-class ProfileInformation(models.Model):
+def create_super_user(username, password):
     """
-    A model that describes the basic profile information of a user.
+    Create & save a `User` object, and configure it to be a super user. 
+    :return: The newly created & saved `User` object.
     """
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile_information')
+    super_user = User.objects.create_user(username, 'e@mail.com', password)
+    super_user.is_superuser = True
+    super_user.is_staff = True
+    super_user.save()
+    return super_user
 
-    MALE = 'M'
-    FEMALE = 'F'
 
-    GENDER_CHOICES = (
-        (MALE, 'Male'),
-        (FEMALE, 'Female')
-    )
+def create_default_account(username, password, account_class, hospital):
+    """
+    Create & save a `User`, a `ProfileInformation`, and an account object of the type specified by `account_class`.
+    The new account will be initialized with some predefined values.
+    Use this function to create accounts for testing. 
+    :param account_class: The model class of the account to create. 
+    Should be one of `Patient`, `Administrator`, `Doctor`, and `Nurse`. 
+    :param hospital: A `Hospital` object to associate this account with. 
+    :return: The newly created & saved `User` object. 
+    """
 
-    gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
+    user = User.objects.create_user(username, 'e@mail.com', password)
+    user.first_name = 'First'
+    user.last_name = 'Last'
+    user.groups.add(account_class.get_group())
+    user.save()
 
-    PATIENT = 'P'
-    ADMINISTRATOR = 'A'
-    DOCTOR = 'D'
-    NURSE = 'N'
+    ProfileInformation.create_default(user, account_class.ACCOUNT_TYPE)
 
-    ACCOUNT_TYPE_CHOICES = (
-        (PATIENT, 'Patient'),
-        (ADMINISTRATOR, 'Administrator'),
-        (DOCTOR, 'Doctor'),
-        (NURSE, 'Nurse'),
-    )
+    account_class.create_default(user, hospital)
 
-    account_type = models.CharField(max_length=1, choices=ACCOUNT_TYPE_CHOICES)
-
-    address = models.CharField(max_length=80)
-    phone = models.CharField(max_length=10)
-
-    @classmethod
-    def from_user(cls, user):
-        """
-        Attempt to get the profile information of the given user.
-        :return: The profile information if it exist; otherwise, None.
-        """
-        try:
-            return user.profile_information
-        except (ProfileInformation.DoesNotExist, AttributeError):
-            return None
+    return user
 
 
 class AbstractUser(models.Model):
@@ -77,10 +68,48 @@ class Patient(AbstractUser):
         permissions = (
             ('view_patients', 'Can view patients'),
         )
+    ACCOUNT_TYPE = 'P'
+
+    @classmethod
+    def get_group(cls):
+        return Group.objects.get(name='Patient')
+
+    @classmethod
+    def create_default(cls, user, hospital):
+        """
+        Create & save a `Patient` object with some predefined default value.
+        Use this function to create accounts for testing. 
+        :param user: A `User` object to associate this account with.
+        :param hospital: A `Hospital` object to associate this account with.
+        :return: A newly created and saved `Patient` object.
+        """
+
+        return Patient.objects.create(
+            user=user, medical_information='', proof_of_insurance='proof',
+            preferred_hospital=hospital, emergency_contact_phone='1234567890'
+        )
 
 
 class Administrator(AbstractUser):
     hospital = models.ForeignKey(Hospital, on_delete=models.PROTECT)
+
+    ACCOUNT_TYPE = 'A'
+
+    @classmethod
+    def get_group(cls):
+        return Group.objects.get(name='Administrator')
+
+    @classmethod
+    def create_default(cls, user, hospital):
+        """
+        Create & save an `Administrator` object with some predefined default value.
+        Use this function to create accounts for testing. 
+        :param user: A `User` object to associate this account with.
+        :param hospital: A `Hospital` object to associate this account with.
+        :return: A newly created and saved `Administrator` object.
+        """
+
+        return Administrator.objects.create(user=user, hospital=hospital)
 
 
 class Doctor(AbstractUser):
@@ -88,11 +117,94 @@ class Doctor(AbstractUser):
 
     treatment_sessions = models.ManyToManyField(TreatmentSession, blank=True)
 
+    ACCOUNT_TYPE = 'D'
+
+    @classmethod
+    def get_group(cls):
+        return Group.objects.get(name='Doctor')
+
+    @classmethod
+    def create_default(cls, user, hospital):
+        """
+        Create & save a `Doctor` object with some predefined default value.
+        Use this function to create accounts for testing. 
+        :param user: A `User` object to associate this account with.
+        :param hospital: A `Hospital` object to associate this account with.
+        :return: A newly created and saved `Doctor` object.
+        """
+
+        return Doctor.objects.create(user=user, hospital=hospital)
+
 
 class Nurse(AbstractUser):
     hospital = models.ForeignKey(Hospital, on_delete=models.PROTECT)
 
     treatment_sessions = models.ManyToManyField(TreatmentSession, blank=True)
+
+    ACCOUNT_TYPE = 'N'
+
+    @classmethod
+    def get_group(cls):
+        return Group.objects.get(name='Nurse')
+
+    @classmethod
+    def create_default(cls, user, hospital):
+        """
+        Create & save a `Nurse` object with some predefined default value.
+        Use this function to create accounts for testing. 
+        :param user: A `User` object to associate this account with.
+        :param hospital: A `Hospital` object to associate this account with.
+        :return: A newly created and saved `Nurse` object.
+        """
+
+        return Nurse.objects.create(user=user, hospital=hospital)
+
+
+class ProfileInformation(models.Model):
+    """
+    A model that describes the basic profile information of a user.
+    """
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile_information')
+
+    MALE = 'M'
+    FEMALE = 'F'
+
+    GENDER_CHOICES = (
+        (MALE, 'Male'),
+        (FEMALE, 'Female')
+    )
+
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
+
+    ACCOUNT_TYPE_CHOICES = (
+        (Patient.ACCOUNT_TYPE, 'Patient'),
+        (Administrator.ACCOUNT_TYPE, 'Administrator'),
+        (Doctor.ACCOUNT_TYPE, 'Doctor'),
+        (Nurse.ACCOUNT_TYPE, 'Nurse'),
+    )
+
+    account_type = models.CharField(max_length=1, choices=ACCOUNT_TYPE_CHOICES)
+
+    address = models.CharField(max_length=80)
+    phone = models.CharField(max_length=10)
+
+    @classmethod
+    def from_user(cls, user):
+        """
+        Attempt to get the profile information of the given user.
+        :return: The profile information if it exist; otherwise, None.
+        """
+        try:
+            return user.profile_information
+        except (ProfileInformation.DoesNotExist, AttributeError):
+            return None
+
+    @classmethod
+    def create_default(cls, user, account_type):
+        return ProfileInformation.objects.create(
+            user=user, address='Test address', gender='M',
+            phone='1234567890', account_type=account_type
+        )
 
 
 def get_account_from_user(user):
@@ -105,11 +217,11 @@ def get_account_from_user(user):
 
     profile_information = ProfileInformation.from_user(user)
     if profile_information is not None:
-        if profile_information.account_type == ProfileInformation.PATIENT:
+        if profile_information.account_type == Patient.ACCOUNT_TYPE:
             return user.patient
-        elif profile_information.account_type == ProfileInformation.DOCTOR:
+        elif profile_information.account_type == Doctor.ACCOUNT_TYPE:
             return user.doctor
-        elif profile_information.account_type == ProfileInformation.NURSE:
+        elif profile_information.account_type == Nurse.ACCOUNT_TYPE:
             return user.nurse
-        elif profile_information.account_type == ProfileInformation.ADMINISTRATOR:
+        elif profile_information.account_type == Administrator.ACCOUNT_TYPE:
             return user.administrator
