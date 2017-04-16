@@ -7,7 +7,7 @@
     <div class="col-md-8 col-md-offset-2">
         <div id="jumbo" class="jumbotron">
             {% for patient in patient_list %}
-            <p><a href="#">{{ patient }}</a> {{ patient.id }}</p>
+            <p><a href="{% url 'medical:view_prescriptions' patient.id %}">{{ patient }}</a> {{ patient.id }}</p>
             {% endfor %}
         </div>
     </div>
