@@ -159,7 +159,7 @@ def request_test(request, diagnosis_id):
         if test_form.is_valid():
             test_form.save_for_diagnosis(doctor, diagnosis)
             CreateLogEntry(request.user.username, "Test requested.")
-            return render(request, 'medical/test/requested.html')
+            return render(request, 'medical/test/requested.html', {'diagnosis_id': diagnosis_id})
     else:
         test_form = TestForm()
         return render(request, 'medical/test/request.html', {'test_form': test_form, 'diagnosis': diagnosis})
@@ -176,7 +176,8 @@ def upload_test_result(request, test_id):
         if results_form.is_valid():
             results_form.save()
             CreateLogEntry(request.user.username, "Test results uploaded.")
-            return render(request, 'medical/test/uploaded.html')
+            return render(request, 'medical/test/uploaded.html', {'diagnosis_id': test.diagnosis.id})
     else:
-        results_form = TestResultsForm
-        return render(request, 'medical/test/upload.html', {'results_form': results_form, 'test': test})
+        results_form = TestResultsForm(instance=test)
+
+    return render(request, 'medical/test/upload.html', {'results_form': results_form, 'test': test})

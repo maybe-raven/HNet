@@ -3,10 +3,11 @@
 {% block header %}Request Test Page{% endblock %}
 {% block content %}
 
-<div class="maincontent">
-    <div class="whitebox">
-        <p>Test successfully requested.</p>
+    <div class="maincontent">
+        <div class="whitebox">
+            <p>Test successfully requested.</p>
+            <a href="{% url 'medical:update_diagnosis' diagnosis_id %}" class="button">Return to diagnosis</a>
+        </div>
     </div>
-</div>
 
 {% endblock %}

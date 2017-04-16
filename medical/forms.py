@@ -56,6 +56,13 @@ class TestResultsForm(forms.ModelForm):
     A form for obtaining test results in text form.
     """
 
+    def save(self, commit=True):
+        test = super(TestResultsForm, self).save(commit=commit)
+        test.uploaded = True
+        test.save()
+
+        return test
+
     class Meta:
         model = Test
         fields = ['results']

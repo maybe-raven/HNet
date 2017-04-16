@@ -50,9 +50,26 @@ class Test(models.Model):
     description = models.TextField()
     results = models.TextField()
     notes = models.TextField()
+
+    uploaded = models.BooleanField(default=False)
     released = models.BooleanField(default=False)
 
+    def status(self):
+        if self.released:
+            return 'released'
+        elif self.uploaded:
+            return 'uploaded'
+        else:
+            return 'pending'
+
     timestamp = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        line = self.description.split('\n')[0]
+        if len(line) < 77:
+            return line
+        else:
+            return line[:77] + '...'
 
     class Meta:
         permissions = (
