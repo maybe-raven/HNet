@@ -21,6 +21,12 @@ class Diagnosis(models.Model):
     creation_timestamp = models.DateTimeField(auto_now_add=True)
     update_timestamp = models.DateTimeField(auto_now=True)
 
+    def get_patient(self):
+        if self.patient:
+            return self.patient
+
+        return self.treatment_session.patient
+
     def __str__(self):
         if self.summary:
             return self.summary
@@ -35,8 +41,15 @@ class Test(models.Model):
     description = models.TextField()
     results = models.TextField()
     notes = models.TextField()
+    released = models.BooleanField(default=False)
 
     timestamp = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        permissions = (
+            ('request_test', 'Can request tests'),
+            ('upload_test_results', 'Can upload test results')
+        )
 
 
 class Drug(models.Model):

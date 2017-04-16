@@ -4,8 +4,8 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.core.urlresolvers import reverse
 from account.models import Patient
-from .models import Drug, Diagnosis
-from .forms import DrugForm, DiagnosisForm
+from .models import Drug, Diagnosis, Test
+from .forms import DrugForm, DiagnosisForm, TestForm, TestResultsForm
 from hnet.logger import CreateLogEntry
 
 
@@ -87,3 +87,41 @@ def update_diagnosis(request, diagnosis_id):
 
     return render(request, 'medical/diagnosis/update.html',
                   {'form': form, 'message': message})
+
+
+@login_required
+@permission_required('medical.request_test')
+@user_passes_test(lambda u: not u.is_superuser)
+def request_test(request, diagnosis_id):
+    diagnosis = get_object_or_404(Diagnosis, pk=diagnosis_id)
+    doctor = request.user.doctor
+
+    if doctor is None:
+        return render(request, 'medical/test/requested.html')
+
+    if request.method == 'POST':
+        test_form = TestForm(request.POST)
+        if test_form.is_valid():
+            test_form.save_for_diagnosis(doctor, diagnosis)
+            CreateLogEntry(request.user.username, "Test requested.")
+            return render(request, 'medical/test/requested.html')
+    else:
+        test_form = TestForm()
+        return render(request, 'medical/test/request.html', {'test_form': test_form, 'diagnosis': diagnosis})
+
+
+@login_required()
+@permission_required('medical.upload_test_results')
+@user_passes_test(lambda u: not u.is_superuser)
+def upload_test_result(request, test_id):
+    test = get_object_or_404(Test, pk=test_id)
+
+    if request.method == 'POST':
+        results_form = TestResultsForm(request.POST, instance=test)
+        if results_form.is_valid():
+            results_form.save()
+            CreateLogEntry(request.user.username, "Test results uploaded.")
+            return render(request, 'medical/test/uploaded.html')
+    else:
+        results_form = TestResultsForm
+        return render(request, 'medical/test/upload.html', {'results_form': results_form, 'test': test})
