@@ -1,5 +1,5 @@
 from django import forms
-from .models import AdmitPatient
+from .models import TreatmentSession
 
 
 class AdmissionForm(forms.ModelForm):
@@ -9,5 +9,5 @@ class AdmissionForm(forms.ModelForm):
     """
 
     class Meta:
-        model = AdmitPatient
-        fields = ['patient', 'reason']
+        model = TreatmentSession
+        fields = ['patient','treating_hospital', 'discharge_timestamp', 'previous_session', 'notes']

@@ -40,22 +40,3 @@ class TreatmentSession(models.Model):
     Any additional medical or non-medical notes about the patient that might help with any future treatment for this patient.
     """
     notes = models.TextField(blank=True)
-
-
-class AdmitPatient(models.Model):
-    """
-    A model that is used when a Patient is admitted to a hospital
-    """
-
-    patient = models.ForeignKey('account.Patient', on_delete=models.PROTECT)
-
-    """The time when the patient was admitted to the hospital and started his treatment."""
-    admission_timestamp = models.DateTimeField(auto_now_add=True)
-
-    """A high level summary of this patient's condition"""
-    reason = models.TextField(blank=True)
-
-    class Meta:
-        permissions = (
-            ('admit_patient', 'can admit patient'),
-        )
