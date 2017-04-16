@@ -56,7 +56,7 @@ def view_patients(request):
         if patient.preferred_hospital == hospital:
             list_patients.append(patient)
 
-    context = {'patient_list': list_patients}
+    context = {'patient_list': list_patients, 'hospital': hospital}
 
     return render(request, 'patient/view_patients.html', context)
 
