@@ -55,14 +55,14 @@ def patient(request):
 @user_passes_test(lambda u: test_user_account_type(u, Doctor.ACCOUNT_TYPE))
 def doctor(request):
     CreateLogEntry(request.user.username, "Doctor logged in.")
-    return render(request, 'index/administrator.html')
+    return render(request, 'index/doctor.html')
 
 
 @login_required
 @user_passes_test(lambda u: test_user_account_type(u, Nurse.ACCOUNT_TYPE))
 def nurse(request):
     CreateLogEntry(request.user.username, "Nurse logged in.")
-    return render(request, 'index/administrator.html')
+    return render(request, 'index/nurse.html')
 
 
 @login_required
