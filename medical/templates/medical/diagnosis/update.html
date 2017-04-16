@@ -51,7 +51,8 @@
                             <td>{{ test.status }}</td>
                             <td>
                                 {% if test.uploaded and not test.released %}
-                                    <a href="{% url 'medical:release_test_result' test.id %}" class="btn btn-success btn-xs">Publish</a>
+                                    <a href="{% url 'medical:release_test_result' test.id %}"
+                                       class="btn btn-success btn-xs">Publish</a>
                                 {% else %}
                                     <a href="#" class="btn btn-success btn-xs disabled" disabled>Publish</a>
                                 {% endif %}
@@ -65,9 +66,29 @@
             </div>
 
             <h3 style="text-align: center;">Prescriptions</h3>
-            {% for prescription in form.instance.prescription_set.all %}
-                {{ prescription }}
-            {% endfor %}
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>#</th>
+                    <td class="lead" style="font-weight: bold;">Drug</td>
+                    <td class="lead" style="font-weight: bold;">Prescribing Doctor</td>
+                    <td class="lead" style="font-weight: bold;">Amount (Unit)</td>
+                    <td class="lead" style="font-weight: bold;">Per</td>
+                </tr>
+                </thead>
+                <tbody>
+                {% for prescription in form.instance.prescription_set.all %}
+                    <tr>
+                        <th scope="row">{{ forloop.counter }}</th>
+                        <td><a href="#">{{ prescription.drug }}</a></td>
+                        <td>{{ prescription.doctor.full_name }}</td>
+                        <td>{{ prescription.amount }}</td>
+                        <td>{{ prescription.cycle_str }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+
         </div>
     </div>
 

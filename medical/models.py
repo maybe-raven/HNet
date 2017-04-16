@@ -99,8 +99,23 @@ class Prescription(models.Model):
     diagnosis = models.ForeignKey(Diagnosis, on_delete=models.CASCADE)
     doctor = models.ForeignKey(Doctor, on_delete=models.PROTECT)
     drug = models.ForeignKey(Drug, on_delete=models.PROTECT)
-    quantity = models.IntegerField(default=1)
     instruction = models.TextField()
+    amount = models.IntegerField(default=1)
+    cycle = models.IntegerField()
+
+    def cycle_str(self):
+        def decorate(multiple, unit):
+            if multiple == 1:
+                return unit
+            else:
+                return '%d %ss' % (multiple, unit)
+
+        if self.cycle % 30 == 0:
+            return '%s (%s)' % (decorate(self.cycle // 30, 'month'), decorate(self.cycle, 'day'))
+        elif self.cycle % 7 == 0:
+            return decorate(self.cycle // 7, 'week')
+        else:
+            return decorate(self.cycle, 'day')
 
     timestamp = models.DateTimeField(auto_now=True)
 

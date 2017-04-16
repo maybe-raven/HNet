@@ -45,6 +45,9 @@ class AbstractUser(models.Model):
     def __str__(self):
         return self.user.username
 
+    def full_name(self):
+        return '%s %s' % (self.user.first_name, self.user.last_name)
+
     class Meta:
         abstract = True
 
