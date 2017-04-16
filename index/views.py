@@ -4,6 +4,8 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from account.models import ProfileInformation
 from hnet.logger import CreateLogEntry
 from .forms import StephenLoginForm
+from hnet.logger import readLog
+
 
 
 def index(request):
@@ -39,7 +41,8 @@ def test_user_account_type(user, account_type):
 
 
 def log(request):
-    return render(request, 'index/log.html')
+    log = readLog()
+    return render(request, 'hospital/viewlog.html', {"log": log})
 
 
 # TODO: add group verification
