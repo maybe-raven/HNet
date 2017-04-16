@@ -12,7 +12,6 @@ install:
 before_script:
   - python manage.py makemigrations
   - python manage.py migrate
-  - python manage.py setupgroups
 
 script:
   - python manage.py test
