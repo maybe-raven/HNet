@@ -10,7 +10,17 @@ from hnet.logger import CreateLogEntry
 
 
 @login_required
+@permission_required('medical.view_drug')
+@user_passes_test(lambda u: not u.is_superuser)
+def list_drug(request):
+    drug_list = Drug.objects.filter(active=True).order_by('name')
+
+    return render(request, 'medical/drug/list.html', {'drug_list': drug_list})
+
+
+@login_required
 @permission_required('medical.add_drug')
+@user_passes_test(lambda u: not u.is_superuser)
 def add_drug(request):
     if request.method == 'POST':
         form = DrugForm(request.POST)
