@@ -62,32 +62,37 @@
                     </tbody>
                 </table>
 
-                <a href="{% url 'medical:request_test' form.instance.id %}" class="button">Request Test</a>
+                <a href="{% url 'medical:request_test' form.instance.id %}" class="btn btn-primary btn-lg">Request Test</a>
             </div>
 
-            <h3 style="text-align: center;">Prescriptions</h3>
-            <table class="table">
-                <thead>
-                <tr>
-                    <th>#</th>
-                    <td class="lead" style="font-weight: bold;">Drug</td>
-                    <td class="lead" style="font-weight: bold;">Prescribing Doctor</td>
-                    <td class="lead" style="font-weight: bold;">Amount (Unit)</td>
-                    <td class="lead" style="font-weight: bold;">Per</td>
-                </tr>
-                </thead>
-                <tbody>
-                {% for prescription in form.instance.prescription_set.all %}
+            <div style="text-align: center;">
+                <h3 style="text-align: center;">Prescriptions</h3>
+
+                <table class="table">
+                    <thead>
                     <tr>
-                        <th scope="row">{{ forloop.counter }}</th>
-                        <td><a href="#">{{ prescription.drug }}</a></td>
-                        <td>{{ prescription.doctor.full_name }}</td>
-                        <td>{{ prescription.amount }}</td>
-                        <td>{{ prescription.cycle_str }}</td>
+                        <th>#</th>
+                        <td class="lead" style="font-weight: bold;">Drug</td>
+                        <td class="lead" style="font-weight: bold;">Prescribing Doctor</td>
+                        <td class="lead" style="font-weight: bold;">Quantity Info</td>
                     </tr>
-                {% endfor %}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                    {% for prescription in form.instance.prescription_set.all %}
+                        <tr>
+                            <th scope="row">{{ forloop.counter }}</th>
+                            <td>
+                                <a href="{% url 'medical:edit_prescriptions' prescription.id %}">{{ prescription.drug }}</a>
+                            </td>
+                            <td>{{ prescription.doctor.full_name }}</td>
+                            <td>{{ prescription.quantity_info }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+
+                <a href="{% url 'medical:add_prescriptions' form.instance.id %}" class="btn btn-primary btn-lg">Add Prescription</a>
+            </div>
 
         </div>
     </div>

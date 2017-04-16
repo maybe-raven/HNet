@@ -1,5 +1,5 @@
 from django import forms
-from .models import Drug, Diagnosis, Test
+from .models import Drug, Diagnosis, Test, Prescription
 from account.models import Patient
 
 
@@ -66,3 +66,50 @@ class TestResultsForm(forms.ModelForm):
     class Meta:
         model = Test
         fields = ['results']
+
+
+class PrescriptionForm(forms.ModelForm):
+    def save_to_diagnosis_by_doctor(self, diagnosis, doctor, commit=True):
+        prescription = super(PrescriptionForm, self).save(commit=False)
+        prescription.diagnosis = diagnosis
+        prescription.doctor = doctor
+
+        if commit:
+            prescription.save()
+
+        return prescription
+
+    def clean_amount(self):
+        amount = self.cleaned_data.get('amount')
+        if amount is not None and amount <= 0:
+            raise forms.ValidationError('Cannot prescribe 0 or less units of drugs.')
+
+        return amount
+
+    def clean_cycle(self):
+        cycle = self.cleaned_data.get('cycle')
+        if cycle is not None and cycle <= 0:
+            raise forms.ValidationError('Invalid value. Cycle duration must be greater than 0.')
+
+        return cycle
+
+    def clean_repeats(self):
+        repeats = self.cleaned_data.get('repeats')
+        if repeats is not None and repeats <= 0:
+            raise forms.ValidationError('Invalid value. Repeat count must be greater than 0.')
+
+        return repeats
+
+    def clean(self):
+        cleaned_data = super(PrescriptionForm, self).clean()
+        repeats = self.cleaned_data.get('repeats')
+        cycle = self.cleaned_data.get('cycle')
+
+        if (repeats is None) != (cycle is None):
+            raise forms.ValidationError('Cycle and repeats must be given at the same time.')
+
+        return cleaned_data
+
+    class Meta:
+        model = Prescription
+        fields = ['drug', 'instruction', 'amount', 'cycle', 'repeats']

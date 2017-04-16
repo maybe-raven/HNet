@@ -1,7 +1,7 @@
 from django.db import models
+from datetime import date, timedelta
 from hospital.models import Hospital, TreatmentSession
 from account.models import Doctor, Patient
-from hnet.logger import CreateLogEntry
 
 
 class DiagnosisCategory(models.Model):
@@ -101,23 +101,49 @@ class Prescription(models.Model):
     drug = models.ForeignKey(Drug, on_delete=models.PROTECT)
     instruction = models.TextField()
     amount = models.IntegerField(default=1)
-    cycle = models.IntegerField()
+    cycle = models.IntegerField(null=True, blank=True, default=None)
+    repeats = models.IntegerField(null=True, blank=True, default=None)
+    creation_timestamp = models.DateTimeField(auto_now_add=True)
+
+    @staticmethod
+    def pluralize_with_abbreviation(factor, unit):
+        if factor == 1:
+            return unit
+        else:
+            return '%d %ss' % (factor, unit)
+
+    @staticmethod
+    def pluralize(factor, unit):
+        return ('%d %s' if factor == 1 else '%d %ss') % (factor, unit)
+
+    def amount_str(self):
+        return self.pluralize(self.amount, 'unit')
 
     def cycle_str(self):
-        def decorate(multiple, unit):
-            if multiple == 1:
-                return unit
-            else:
-                return '%d %ss' % (multiple, unit)
+        if not self.cycle:
+            return 'N/A'
 
         if self.cycle % 30 == 0:
-            return '%s (%s)' % (decorate(self.cycle // 30, 'month'), decorate(self.cycle, 'day'))
+            return '%s (%s)' % (self.pluralize_with_abbreviation(self.cycle // 30, 'month'), self.pluralize_with_abbreviation(self.cycle, 'day'))
         elif self.cycle % 7 == 0:
-            return decorate(self.cycle // 7, 'week')
+            return self.pluralize_with_abbreviation(self.cycle // 7, 'week')
         else:
-            return decorate(self.cycle, 'day')
+            return self.pluralize_with_abbreviation(self.cycle, 'day')
 
-    timestamp = models.DateTimeField(auto_now=True)
+    def quantity_info(self):
+        if self.cycle:
+            return '%s (refill every %s for %s)' % (self.amount_str(), self.cycle_str(), self.repeats_str())
+        else:
+            return '%s (one time)' % self.amount_str()
+
+    def repeats_str(self):
+        return self.pluralize(self.repeats, 'time')
+
+    def expiration_date(self):
+        return self.creation_timestamp.date() + timedelta(days=self.cycle)
+
+    def active(self):
+        return date.today() <= self.expiration_date()
 
     class Meta:
         permissions = (
