@@ -50,8 +50,8 @@
                             <td><a href="{% url 'medical:upload_test_result' test.id %}">{{ test }}</a></td>
                             <td>{{ test.status }}</td>
                             <td>
-                                {% if test.uploaded %}
-                                    <a href="#" class="btn btn-success btn-xs">Publish</a>
+                                {% if test.uploaded and not test.released %}
+                                    <a href="{% url 'medical:release_test_result' test.id %}" class="btn btn-success btn-xs">Publish</a>
                                 {% else %}
                                     <a href="#" class="btn btn-success btn-xs disabled" disabled>Publish</a>
                                 {% endif %}

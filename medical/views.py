@@ -176,8 +176,21 @@ def upload_test_result(request, test_id):
         if results_form.is_valid():
             results_form.save()
             CreateLogEntry(request.user.username, "Test results uploaded.")
-            return render(request, 'medical/test/uploaded.html', {'diagnosis_id': test.diagnosis.id})
+            return render(request, 'medical/test/uploaded.html', {'test': test})
     else:
         results_form = TestResultsForm(instance=test)
 
     return render(request, 'medical/test/upload.html', {'results_form': results_form, 'test': test})
+
+
+@permission_required('medical.release_test_results')
+@user_passes_test(lambda u: not u.is_superuser)
+def release_test_result(request, test_id):
+    test = get_object_or_404(Test, pk=test_id)
+
+    if request.method == 'POST':
+        test.released = True
+        test.save()
+        return render(request, 'medical/test/release_done.html', {'diagnosis_id': test.diagnosis.id})
+
+    return render(request, 'medical/test/release.html', {'test': test})
