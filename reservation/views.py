@@ -47,13 +47,13 @@ def calendar(request, month=datetime.date.today().month, year=datetime.date.toda
     profile_information = ProfileInformation.from_user(request.user)
     if profile_information is not None:
         account_type = profile_information.account_type
-        if account_type == ProfileInformation.PATIENT:
+        if account_type == Patient.ACCOUNT_TYPE:
             appointments = Appointment.get_for_user_in_year_in_month(request.user.patient, year, month)
             if appointments is None:
                 raise Http404()
             context['appointment_list'] = appointments
             return render(request, 'reservation/calendar.html', context)
-        elif account_type == ProfileInformation.DOCTOR:
+        elif account_type == Doctor.ACCOUNT_TYPE:
             appointments = Appointment.get_for_user_in_year_in_month(request.user.doctor, year, month)
             if appointments is None:
                 raise Http404()
@@ -110,11 +110,11 @@ def overview(request, day=None, month=None, year=None):
     profile_information = ProfileInformation.from_user(request.user)
     if profile_information is not None:
         account_type = profile_information.account_type
-        if account_type == ProfileInformation.PATIENT:
+        if account_type == Patient.ACCOUNT_TYPE:
             appointments = Appointment.get_for_user_in_date(request.user.patient, date)
             context['appointment_list'] = appointments
             return render(request, 'reservation/overview.html', context)
-        elif account_type == ProfileInformation.DOCTOR:
+        elif account_type == Doctor.ACCOUNT_TYPE:
             appointments = Appointment.get_for_user_in_date(request.user.doctor, date)
             context['appointment_list'] = appointments
 
@@ -129,9 +129,9 @@ def overview(request, day=None, month=None, year=None):
 def create_appointment(request):
     profile_information = ProfileInformation.from_user(request.user)
     account_type = profile_information.account_type
-    if account_type == ProfileInformation.PATIENT:
+    if account_type == Patient.ACCOUNT_TYPE:
         form_type = AppointmentFormForPatient
-    elif account_type == ProfileInformation.DOCTOR:
+    elif account_type == Doctor.ACCOUNT_TYPE:
         form_type = AppointmentFormForDoctor
     else:
         raise PermissionDenied()
