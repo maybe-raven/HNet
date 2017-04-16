@@ -3,7 +3,7 @@ from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
 from django.db.utils import OperationalError
 from account.models import Patient, ProfileInformation, Administrator, Doctor
-from medical.models import Drug
+from medical.models import Drug, Diagnosis
 from reservation.models import Appointment
 
 
@@ -38,7 +38,7 @@ class Command(BaseCommand):
             administrator_content_type = ContentType.objects.get_for_model(Administrator)
             doctor_content_type = ContentType.objects.get_for_model(Doctor)
             drug_content_type = ContentType.objects.get_for_model(Drug)
-
+            diagnosis_content_type = ContentType.objects.get_for_model(Diagnosis)
 
             # Try to get all the permissions
             # This requires that the database has been migrated.
@@ -84,7 +84,8 @@ class Command(BaseCommand):
 
         doctor_group.permissions = [change_profile_information_permission, add_appointment_permission,
                                     cancel_appointment_permission, change_appointment_permission,
-                                    view_appointment_permission]
+                                    view_appointment_permission, add_diagnosis_permission,
+                                    change_diagnosis_permission]
         doctor_group.save()
 
         # Set up Administrator group

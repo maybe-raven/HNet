@@ -1,6 +1,12 @@
-from django.contrib.auth.decorators import login_required, permission_required
-from django.shortcuts import render
-from .forms import DrugForm
+from urllib.parse import urlencode
+from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
+from django.http import HttpResponseRedirect
+from django.shortcuts import render, get_object_or_404
+from django.core.urlresolvers import reverse
+from account.models import Patient
+from .models import Drug, Diagnosis
+from .forms import DrugForm, DiagnosisForm
+from hnet.logger import CreateLogEntry
 
 
 @login_required
