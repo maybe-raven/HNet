@@ -78,7 +78,11 @@ class Prescription(models.Model):
     doctor = models.ForeignKey(Doctor, on_delete=models.PROTECT)
     drug = models.ForeignKey(Drug, on_delete=models.PROTECT)
     quantity = models.IntegerField(default=1)
-
     instruction = models.TextField()
 
     timestamp = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        permissions = (
+            ('view_prescription', 'Can view prescriptions'),
+        )

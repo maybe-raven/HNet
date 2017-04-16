@@ -1,0 +1,20 @@
+{% extends 'index/base.html' %}
+{% block title %}Patient{% endblock %}
+{% block header %}Prescriptions for {{ patient }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="col-md-8 col-md-offset-2">
+        <div id="jumbo" class="jumbotron" >
+            <h2 style="text-align:center;">Prescriptions</h2>
+            {% for prescription in prescription_list %}
+            <p>Prescribing Doctor: {{ prescription.doctor }}</p>
+            <p>Drug: {{ prescription.drug.name }}</p>
+            <p>Quantity Prescribed: {{ prescription.quantity }}</p>
+            <p>Instructions: {{ prescription.instruction }}</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}

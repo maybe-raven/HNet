@@ -1,3 +1,9 @@
+from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
+from django.shortcuts import render
+from .forms import DrugForm
+from account.models import ProfileInformation, get_account_from_user, Patient
+from medical.models import Prescription
+
 from urllib.parse import urlencode
 from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
 from django.http import HttpResponseRedirect
@@ -34,6 +40,38 @@ def add_drug(request):
     return render(request, 'medical/drug/add.html', {'form': form})
 
 
+
+@login_required
+@permission_required('medical.view_prescription')
+@user_passes_test(lambda u: not u.is_superuser)
+def view_prescriptions(request, patient_id):
+    patient = get_object_or_404(Patient, pk=patient_id)
+    prescriptions = Prescription.objects.all()
+    list_prescription = []
+    for prescription in prescriptions:
+        if prescription.diagnosis.treatment_session.patient == patient:
+            list_prescription.append(prescription)
+    context = {'prescription_list': list_prescription, 'patient': patient}
+    return render(request, 'patient/patient_overview.html', context)
+
+
+@login_required
+@permission_required('account.view_patients')
+@user_passes_test(lambda u: not u.is_superuser)
+def view_patients(request):
+    nurse = get_account_from_user(request.user)
+    hospital = nurse.hospital
+    list_patients = []
+    patients = Patient.objects.all()
+    for patient in patients:
+        if patient.preferred_hospital == hospital:
+            list_patients.append(patient)
+
+    context = {'patient_list': list_patients, 'hospital': hospital}
+
+    return render(request, 'patient/view_patients.html', context)
+
+
 @permission_required('medical.remove_drug')
 @user_passes_test(lambda u: not u.is_superuser)
 def remove_drug(request, drug_id):
@@ -49,7 +87,6 @@ def remove_drug(request, drug_id):
         return render(request, 'medical/drug/remove_done.html')
     else:
         return render(request, 'medical/drug/remove.html', {'drug': drug})
-
 
 @permission_required('medical.view_diagnosis')
 @permission_required('hospital.view_treatmentsession')

@@ -2,6 +2,8 @@ from django.core.management.base import BaseCommand, CommandError
 from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
 from django.db.utils import OperationalError
+from account.models import Patient, ProfileInformation, Administrator, Doctor, Nurse
+from medical.models import Drug, Prescription
 from account.models import Patient, ProfileInformation, Administrator, Doctor
 from medical.models import Drug, Diagnosis, Test
 from hospital.models import TreatmentSession
@@ -40,7 +42,7 @@ class Command(BaseCommand):
             administrator_content_type = ContentType.objects.get_for_model(Administrator)
             doctor_content_type = ContentType.objects.get_for_model(Doctor)
             drug_content_type = ContentType.objects.get_for_model(Drug)
-            treatment_session_content_type = ContentType.objects.get_for_model(TreatmentSession)
+            prescription_content_type = ContentType.objects.get_for_model(Prescription)
             diagnosis_content_type = ContentType.objects.get_for_model(Diagnosis)
             treatment_session_content_type = ContentType.objects.get_for_model(TreatmentSession)
             test_content_type = ContentType.objects.get_for_model(Test)
@@ -68,6 +70,10 @@ class Command(BaseCommand):
                                                            content_type=doctor_content_type)
             add_drug_permission = Permission.objects.get(codename='add_drug',
                                                          content_type=drug_content_type)
+            view_prescription_permission = Permission.objects.get(codename='view_prescription',
+                                                                  content_type=prescription_content_type)
+            view_patients_permission = Permission.objects.get(codename='view_patients',
+                                                              content_type=patient_content_type)
             discharge_patient_permission = Permission.objects.get(codename='discharge_patient',
                                                                   content_type=treatment_session_content_type)
             add_diagnosis_permission = Permission.objects.get(codename='add_diagnosis',
@@ -96,8 +102,16 @@ class Command(BaseCommand):
         patient_group.permissions = [change_patient_permission, change_profile_information_permission,
                                      add_appointment_permission,
                                      cancel_appointment_permission, change_appointment_permission,
-                                     view_appointment_permission]
+                                     view_appointment_permission, view_prescription_permission]
         patient_group.save()
+
+        # Set up Nurse group.
+        nurse_group = Group(name='Nurse')
+        nurse_group.save()
+
+        nurse_group.permissions = [view_prescription_permission, view_patients_permission,
+                                   view_diagnosis_permission, view_treatment_session_permission]
+        nurse_group.save()
 
         # Set up Doctor group.
         doctor_group = Group(name='Doctor')
@@ -108,15 +122,11 @@ class Command(BaseCommand):
                                     view_appointment_permission, add_diagnosis_permission,
                                     change_diagnosis_permission, request_test_permission,
                                     upload_test_results_permission, discharge_patient_permission,
-                                    view_diagnosis_permission, view_treatment_session_permission]
+                                    view_diagnosis_permission, view_treatment_session_permission,
+                                    view_patients_permission, view_prescription_permission]
+
+
         doctor_group.save()
-
-        # Set up Nurse group.
-        nurse_group = Group(name='Nurse')
-        nurse_group.save()
-
-        nurse_group.permissions = [view_diagnosis_permission, view_treatment_session_permission]
-        nurse_group.save()
 
         # Set up Administrator group
         administrator_group = Group(name='Administrator')
