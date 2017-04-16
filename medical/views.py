@@ -72,7 +72,6 @@ def view_patients(request):
     return render(request, 'patient/view_patients.html', context)
 
 
-
 @permission_required('medical.remove_drug')
 @user_passes_test(lambda u: not u.is_superuser)
 def remove_drug(request, drug_id):
@@ -88,8 +87,6 @@ def remove_drug(request, drug_id):
         return render(request, 'medical/drug/remove_done.html')
     else:
         return render(request, 'medical/drug/remove.html', {'drug': drug})
-
-
 
 @permission_required('medical.view_diagnosis')
 @permission_required('hospital.view_treatmentsession')
