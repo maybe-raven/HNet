@@ -45,6 +45,9 @@ class AbstractUser(models.Model):
     def __str__(self):
         return self.user.username
 
+    def full_name(self):
+        return '%s %s' % (self.user.first_name, self.user.last_name)
+
     class Meta:
         abstract = True
 
@@ -90,6 +93,9 @@ class Patient(AbstractUser):
             preferred_hospital=hospital, emergency_contact_phone='1234567890'
 
         )
+
+    def get_current_treatment_session(self):
+        return TreatmentSession.objects.filter(patient=self).filter(discharge_timestamp=None).first()
 
     class Meta:
         permissions = (

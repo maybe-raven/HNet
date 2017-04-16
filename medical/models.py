@@ -1,7 +1,7 @@
 from django.db import models
+from datetime import date, timedelta
 from hospital.models import Hospital, TreatmentSession
 from account.models import Doctor, Patient
-from hnet.logger import CreateLogEntry
 
 
 class DiagnosisCategory(models.Model):
@@ -29,7 +29,11 @@ class Diagnosis(models.Model):
 
     def __str__(self):
         if self.summary:
-            return self.summary.split('\n')[0][:80]
+            line = self.summary.split('\n')[0]
+            if len(line) < 97:
+                return line
+            else:
+                return line[:97] + '...'
         else:
             return "Diagnosis created at %s" % self.creation_timestamp.ctime()
 
@@ -46,14 +50,32 @@ class Test(models.Model):
     description = models.TextField()
     results = models.TextField()
     notes = models.TextField()
+
+    uploaded = models.BooleanField(default=False)
     released = models.BooleanField(default=False)
 
+    def status(self):
+        if self.released:
+            return 'released'
+        elif self.uploaded:
+            return 'uploaded'
+        else:
+            return 'pending'
+
     timestamp = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        line = self.description.split('\n')[0]
+        if len(line) < 77:
+            return line
+        else:
+            return line[:77] + '...'
 
     class Meta:
         permissions = (
             ('request_test', 'Can request tests'),
-            ('upload_test_results', 'Can upload test results')
+            ('upload_test_results', 'Can upload test results'),
+            ('release_test_results', 'Can release test results'),
         )
 
 
@@ -77,10 +99,51 @@ class Prescription(models.Model):
     diagnosis = models.ForeignKey(Diagnosis, on_delete=models.CASCADE)
     doctor = models.ForeignKey(Doctor, on_delete=models.PROTECT)
     drug = models.ForeignKey(Drug, on_delete=models.PROTECT)
-    quantity = models.IntegerField(default=1)
     instruction = models.TextField()
+    amount = models.IntegerField(default=1)
+    cycle = models.IntegerField(null=True, blank=True, default=None)
+    repeats = models.IntegerField(null=True, blank=True, default=None)
+    creation_timestamp = models.DateTimeField(auto_now_add=True)
 
-    timestamp = models.DateTimeField(auto_now=True)
+    @staticmethod
+    def pluralize_with_abbreviation(factor, unit):
+        if factor == 1:
+            return unit
+        else:
+            return '%d %ss' % (factor, unit)
+
+    @staticmethod
+    def pluralize(factor, unit):
+        return ('%d %s' if factor == 1 else '%d %ss') % (factor, unit)
+
+    def amount_str(self):
+        return self.pluralize(self.amount, 'unit')
+
+    def cycle_str(self):
+        if not self.cycle:
+            return 'N/A'
+
+        if self.cycle % 30 == 0:
+            return '%s (%s)' % (self.pluralize_with_abbreviation(self.cycle // 30, 'month'), self.pluralize_with_abbreviation(self.cycle, 'day'))
+        elif self.cycle % 7 == 0:
+            return self.pluralize_with_abbreviation(self.cycle // 7, 'week')
+        else:
+            return self.pluralize_with_abbreviation(self.cycle, 'day')
+
+    def quantity_info(self):
+        if self.cycle:
+            return '%s (refill every %s for %s)' % (self.amount_str(), self.cycle_str(), self.repeats_str())
+        else:
+            return '%s (one time)' % self.amount_str()
+
+    def repeats_str(self):
+        return self.pluralize(self.repeats, 'time')
+
+    def expiration_date(self):
+        return self.creation_timestamp.date() + timedelta(days=self.cycle)
+
+    def active(self):
+        return date.today() <= self.expiration_date()
 
     class Meta:
         permissions = (

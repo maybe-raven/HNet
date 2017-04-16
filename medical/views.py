@@ -1,13 +1,14 @@
 from urllib.parse import urlencode
 from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
+from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import render, get_object_or_404
 from django.core.urlresolvers import reverse
 from account.models import Patient, get_account_from_user
 from hospital.models import TreatmentSession
+from .models import Drug, Diagnosis, Test, Prescription
+from .forms import DrugForm, DiagnosisForm, TestForm, TestResultsForm, PrescriptionForm
 from medical.models import Prescription
-from .models import Drug, Diagnosis, Test
-from .forms import DrugForm, DiagnosisForm, TestForm, TestResultsForm
 from hnet.logger import CreateLogEntry
 
 
@@ -47,6 +48,59 @@ def view_prescriptions(request, patient_id):
             list_prescription.append(prescription)
     context = {'prescription_list': list_prescription, 'patient': patient}
     return render(request, 'patient/patient_overview.html', context)
+
+
+@permission_required('medical.add_prescription')
+@user_passes_test(lambda u: not u.is_superuser)
+def add_prescription(request, diagnosis_id):
+    diagnosis = get_object_or_404(Diagnosis, pk=diagnosis_id)
+
+    if request.method == 'POST':
+        form = PrescriptionForm(request.POST)
+        if form.is_valid():
+            form.save_to_diagnosis_by_doctor(diagnosis, request.user.doctor)
+            return render(request, 'medical/prescriptions/add_done.html', {'diagnosis_id': diagnosis_id})
+    else:
+        form = PrescriptionForm()
+
+    return render(request, 'medical/prescriptions/add.html', {'form': form, 'diagnosis_id': diagnosis_id})
+
+
+@permission_required('medical.change_prescription')
+@user_passes_test(lambda u: not u.is_superuser)
+def edit_prescription(request, prescription_id):
+    prescription = get_object_or_404(Prescription, pk=prescription_id)
+
+    doctor = request.user.doctor
+    if prescription.doctor != doctor:
+        raise PermissionDenied('Cannot edit prescriptions created by another doctor.')
+
+    if request.method == 'POST':
+        form = PrescriptionForm(request.POST, instance=prescription)
+        if form.is_valid():
+            form.save()
+            return render(request, 'medical/prescriptions/edit.html', {'form': form, 'message': 'All changes saved.'})
+    else:
+        form = PrescriptionForm(instance=prescription)
+
+    return render(request, 'medical/prescriptions/edit.html', {'form': form})
+
+
+@permission_required('medical.delete_prescription')
+@user_passes_test(lambda u: not u.is_superuser)
+def remove_prescription(request, prescription_id):
+    prescription = get_object_or_404(Prescription, pk=prescription_id)
+
+    doctor = request.user.doctor
+    if prescription.doctor != doctor:
+        raise PermissionDenied('Cannot delete prescriptions created by another doctor.')
+
+    if request.method == 'POST':
+        diagnosis_id = prescription.diagnosis.id
+        prescription.delete()
+        return render(request, 'medical/prescriptions/remove_done.html', {'diagnosis_id': diagnosis_id})
+
+    return render(request, 'medical/prescriptions/remove.html', {'prescription': prescription})
 
 
 @login_required
@@ -172,7 +226,7 @@ def request_test(request, diagnosis_id):
         if test_form.is_valid():
             test_form.save_for_diagnosis(doctor, diagnosis)
             CreateLogEntry(request.user.username, "Test requested.")
-            return render(request, 'medical/test/requested.html')
+            return render(request, 'medical/test/requested.html', {'diagnosis_id': diagnosis_id})
     else:
         test_form = TestForm()
         return render(request, 'medical/test/request.html', {'test_form': test_form, 'diagnosis': diagnosis})
@@ -189,7 +243,21 @@ def upload_test_result(request, test_id):
         if results_form.is_valid():
             results_form.save()
             CreateLogEntry(request.user.username, "Test results uploaded.")
-            return render(request, 'medical/test/uploaded.html')
+            return render(request, 'medical/test/uploaded.html', {'test': test})
     else:
-        results_form = TestResultsForm
-        return render(request, 'medical/test/upload.html', {'results_form': results_form, 'test': test})
+        results_form = TestResultsForm(instance=test)
+
+    return render(request, 'medical/test/upload.html', {'results_form': results_form, 'test': test})
+
+
+@permission_required('medical.release_test_results')
+@user_passes_test(lambda u: not u.is_superuser)
+def release_test_result(request, test_id):
+    test = get_object_or_404(Test, pk=test_id)
+
+    if request.method == 'POST':
+        test.released = True
+        test.save()
+        return render(request, 'medical/test/release_done.html', {'diagnosis_id': test.diagnosis.id})
+
+    return render(request, 'medical/test/release.html', {'test': test})
