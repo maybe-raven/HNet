@@ -46,4 +46,4 @@ class Prescription(models.Model):
 
 class UpdateDrug(models.Model):
     name = models.CharField(max_length=30)
-    description = models.TextField
+    description = models.TextField()
