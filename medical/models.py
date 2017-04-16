@@ -29,9 +29,14 @@ class Diagnosis(models.Model):
 
     def __str__(self):
         if self.summary:
-            return self.summary
+            return self.summary.split('\n')[0][:80]
         else:
             return "Diagnosis created at %s" % self.creation_timestamp.ctime()
+
+    class Meta:
+        permissions = (
+            ('view_diagnosis', 'Can view diagnoses'),
+        )
 
 
 class Test(models.Model):

@@ -42,6 +42,7 @@ class Command(BaseCommand):
             drug_content_type = ContentType.objects.get_for_model(Drug)
             treatment_session_content_type = ContentType.objects.get_for_model(TreatmentSession)
             diagnosis_content_type = ContentType.objects.get_for_model(Diagnosis)
+            treatment_session_content_type = ContentType.objects.get_for_model(TreatmentSession)
             test_content_type = ContentType.objects.get_for_model(Test)
 
             # Try to get all the permissions
@@ -75,6 +76,10 @@ class Command(BaseCommand):
                                                                  content_type=diagnosis_content_type)
             remove_drug_permission = Permission.objects.get(codename='remove_drug',
                                                             content_type=drug_content_type)
+            view_diagnosis_permission = Permission.objects.get(codename='view_diagnosis',
+                                                               content_type=diagnosis_content_type)
+            view_treatment_session_permission = Permission.objects.get(codename='view_treatmentsession',
+                                                                       content_type=treatment_session_content_type)
             request_test_permission = Permission.objects.get(codename='request_test',
                                                              content_type=test_content_type)
             upload_test_results_permission = Permission.objects.get(codename='upload_test_results',
@@ -102,11 +107,15 @@ class Command(BaseCommand):
                                     cancel_appointment_permission, change_appointment_permission,
                                     view_appointment_permission, add_diagnosis_permission,
                                     change_diagnosis_permission, request_test_permission,
-                                    upload_test_results_permission, discharge_patient_permission]
+                                    upload_test_results_permission, discharge_patient_permission,
+                                    view_diagnosis_permission, view_treatment_session_permission]
         doctor_group.save()
 
         # Set up Nurse group.
         nurse_group = Group(name='Nurse')
+        nurse_group.save()
+
+        nurse_group.permissions = [view_diagnosis_permission, view_treatment_session_permission]
         nurse_group.save()
 
         # Set up Administrator group
