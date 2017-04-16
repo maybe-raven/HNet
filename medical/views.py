@@ -4,6 +4,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.core.urlresolvers import reverse
 from account.models import Patient
+from hospital.models import TreatmentSession
 from .models import Drug, Diagnosis
 from .forms import DrugForm, DiagnosisForm
 from hnet.logger import CreateLogEntry
@@ -22,7 +23,7 @@ def add_drug(request):
 
     return render(request, 'medical/drug/add.html', {'form': form})
 
-  
+
 @permission_required('medical.remove_drug')
 @user_passes_test(lambda u: not u.is_superuser)
 def remove_drug(request, drug_id):
@@ -39,7 +40,24 @@ def remove_drug(request, drug_id):
     else:
         return render(request, 'medical/drug/remove.html', {'drug': drug})
 
-      
+
+@permission_required('medical.view_diagnosis')
+@permission_required('hospital.view_treatmentsession')
+def view_medical_information(request, patient_id):
+    patient = get_object_or_404(Patient, pk=patient_id)
+
+    medical_information = list(Diagnosis.objects.filter(patient=patient).filter(treatment_session=None))
+    medical_information.extend(TreatmentSession.objects.filter(patient=patient))
+
+    medical_information.sort(
+        reverse=True,
+        key=lambda item: item.creation_timestamp if isinstance(item, Diagnosis) else item.admission_timestamp
+    )
+
+    return render(request, 'medical/patient/medical_information.html',
+                  {'medical_information': medical_information, 'patient': patient})
+
+
 @login_required
 @permission_required('medical.add_diagnosis')
 def create_diagnosis(request, patient_id):
