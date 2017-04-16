@@ -41,22 +41,17 @@ class Test(models.Model):
 
 class Drug(models.Model):
     name = models.CharField(max_length=30)
-    description = models.TextField()
-
-    active = models.BooleanField(default=True)
-
-    class Meta:
-        permissions = (
-            ('remove_drug', 'Can remove drugs'),
-        )
-
+    description = models.TextField
 
 class Prescription(models.Model):
     diagnosis = models.ForeignKey(Diagnosis, on_delete=models.CASCADE)
     doctor = models.ForeignKey(Doctor, on_delete=models.PROTECT)
     drug = models.ForeignKey(Drug, on_delete=models.PROTECT)
-    quantity = models.IntegerField(default=1)
 
     instruction = models.TextField()
 
     timestamp = models.DateTimeField(auto_now=True)
+
+class UpdateDrug(models.Model):
+    name = models.CharField(max_length=30)
+    description = models.TextField()
