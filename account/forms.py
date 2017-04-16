@@ -274,5 +274,5 @@ class NurseForm(forms.ModelForm):
     """A form used for obtaining nurse-specific information. """
 
     class Meta:
-        model = Administrator
+        model = Nurse
         fields = ['hospital']
