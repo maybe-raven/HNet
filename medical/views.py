@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required, permission_required, 
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.core.urlresolvers import reverse
-from account.models import Patient, User, get_account_from_user
+from account.models import Patient
 from .models import Drug, Diagnosis, Test
 from .forms import DrugForm, DiagnosisForm, TestForm, TestResultsForm
 from hnet.logger import CreateLogEntry
@@ -105,15 +105,11 @@ def request_test(request, diagnosis_id):
 @user_passes_test(lambda u: not u.is_superuser)
 def upload_test_result(request, test_id):
     test = get_object_or_404(Test, pk=test_id)
-    patient = test.diagnosis.patient
 
     if request.method == 'POST':
         results_form = TestResultsForm(request.POST, instance=test)
         if results_form.is_valid():
             results_form.save()
-            results_header = "\n\nTEST #" + test_id + " RESULTS:\n"
-            patient.medical_information = patient.medical_information + results_header + test.results
-            patient.save()
             CreateLogEntry(request.user.username, "Test results uploaded.")
             return render(request, 'medical/test/uploaded.html')
     else:
