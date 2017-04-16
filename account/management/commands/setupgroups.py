@@ -91,6 +91,8 @@ class Command(BaseCommand):
                                                                     content_type=test_content_type)
             view_drug_permission = Permission.objects.get(codename='view_drug',
                                                           content_type=drug_content_type)
+            change_drug_permission = Permission.objects.get(codename='change_drug',
+                                                            content_type=drug_content_type)
             add_nurse_permission = Permission.objects.get(codename='add_nurse',
                                                           content_type=nurse_content_type)
         except (Permission.DoesNotExist, OperationalError):
@@ -135,7 +137,7 @@ class Command(BaseCommand):
         administrator_group.permissions = [add_administrator_permission, add_doctor_permission,
                                            add_profile_information_permission, add_drug_permission,
                                            remove_drug_permission, view_drug_permission,
-                                           add_nurse_permission]
+                                           change_drug_permission, add_nurse_permission]
         administrator_group.save()
 
         self.stdout.write(self.style.SUCCESS('Successfully set up all required groups.'))
