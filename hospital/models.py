@@ -44,4 +44,5 @@ class TreatmentSession(models.Model):
     class Meta:
         permissions = (
             ('view_treatmentsession', 'Can view treatment sessions'),
+            ('discharge_patient', 'Can discharge patient'),
         )
