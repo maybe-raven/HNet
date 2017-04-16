@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand, CommandError
 from django.db.utils import OperationalError
+from django.db.models.deletion import ProtectedError
 from django.contrib.auth.models import Group, User
 from account.models import Doctor, Nurse, Patient, Administrator, ProfileInformation, \
     create_default_account, create_super_user
@@ -80,3 +81,8 @@ class Command(BaseCommand):
             raise CommandError('Operation cannot be completed. Did you forget to do database migration?')
         except Group.DoesNotExist:
             raise CommandError('Operation cannot be completed. Did you forget to run setupgroups?')
+        except ProtectedError:
+            raise CommandError('Operation cannot be completed. Failed to remove existing records. '
+                               'There\'re some records in the database referencing the existing records. '
+                               'If you\'re sure you\'re OK with wiping the entire database, '
+                               'try running `python manage.py flush`.')
