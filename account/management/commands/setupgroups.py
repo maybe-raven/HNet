@@ -110,7 +110,8 @@ class Command(BaseCommand):
         nurse_group = Group(name='Nurse')
         nurse_group.save()
 
-        nurse_group.permissions = [view_prescription_permission, view_patients_permission]
+        nurse_group.permissions = [view_prescription_permission, view_patients_permission,
+                                   view_diagnosis_permission, view_treatment_session_permission]
         nurse_group.save()
 
         # Set up Doctor group.
@@ -125,13 +126,6 @@ class Command(BaseCommand):
                                     view_diagnosis_permission, view_treatment_session_permission,
                                     view_patients_permission, view_prescription_permission]
         doctor_group.save()
-
-        # Set up Nurse group.
-        nurse_group = Group(name='Nurse')
-        nurse_group.save()
-
-        nurse_group.permissions = [view_diagnosis_permission, view_treatment_session_permission]
-        nurse_group.save()
 
         # Set up Administrator group
         administrator_group = Group(name='Administrator')
