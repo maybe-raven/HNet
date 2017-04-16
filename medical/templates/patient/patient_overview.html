@@ -1,0 +1,14 @@
+{% extends 'index/base.html' %}
+{% block title %}Patient{% endblock %}
+{% block header %}{{ patient }}% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="col-md-8 col-md-offset-2">
+        <div id="jumbo" class="jumbotron">
+            <p>{{ patient }}</p>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

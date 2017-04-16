@@ -1,10 +1,8 @@
-
 from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
 from django.shortcuts import render
 from .forms import DrugForm
 from account.models import ProfileInformation, get_account_from_user, Patient
 from medical.models import Prescription
-
 
 from urllib.parse import urlencode
 from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
@@ -15,7 +13,6 @@ from account.models import Patient
 from .models import Drug, Diagnosis
 from .forms import DrugForm, DiagnosisForm
 from hnet.logger import CreateLogEntry
-
 
 
 @login_required
@@ -36,15 +33,16 @@ def add_drug(request):
 @login_required
 @permission_required('medical.view_prescription')
 @user_passes_test(lambda u: not u.is_superuser)
-def view_prescriptions(request):
-    patient = get_account_from_user(request.user)
+def view_prescriptions(request, patient_id):
+    patient = get_object_or_404(Patient, pk=patient_id)
     prescriptions = Prescription.objects.all()
     list_prescription = []
     for prescription in prescriptions:
         if prescription.diagnosis.treatment_session.patient == patient:
             list_prescription.append(prescription)
-    context = {'prescription_list': list_prescription}
-    return render(request, 'patient/patient_prescriptions.html', context)
+    context = {'prescription_list': list_prescription, 'patient': patient}
+    return render(request, 'patient/patient_overview.html', context)
+
 
 @login_required
 @permission_required('account.view_patients')
@@ -62,7 +60,7 @@ def view_patients(request):
 
     return render(request, 'patient/view_patients.html', context)
 
-  
+
 @permission_required('medical.remove_drug')
 @user_passes_test(lambda u: not u.is_superuser)
 def remove_drug(request, drug_id):
@@ -79,7 +77,7 @@ def remove_drug(request, drug_id):
     else:
         return render(request, 'medical/drug/remove.html', {'drug': drug})
 
-      
+
 @login_required
 @permission_required('medical.add_diagnosis')
 def create_diagnosis(request, patient_id):
@@ -117,4 +115,3 @@ def update_diagnosis(request, diagnosis_id):
 
     return render(request, 'medical/diagnosis/update.html',
                   {'form': form, 'message': message})
-
