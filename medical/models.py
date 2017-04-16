@@ -21,6 +21,12 @@ class Diagnosis(models.Model):
     creation_timestamp = models.DateTimeField(auto_now_add=True)
     update_timestamp = models.DateTimeField(auto_now=True)
 
+    def get_patient(self):
+        if self.patient:
+            return self.patient
+
+        return self.treatment_session.patient
+
     def __str__(self):
         if self.summary:
             return self.summary

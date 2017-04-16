@@ -6,7 +6,7 @@
     <div class="maincontent">
         <div class="whitebox">
             <h3 style="text-align: center">
-                New Test For: {{ patient.user.first_name }} {{ patient.user.last_name }}
+                New Test For: {{ diagnosis.get_patient.user.first_name }} {{ diagnosis.get_patient.user.last_name }}
             </h3>
 
             <form method="post" action="{% url 'medical:request_test' diagnosis.id %}">
