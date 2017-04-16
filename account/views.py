@@ -9,6 +9,9 @@ from hnet.logger import CreateLogEntry
 
 
 def register_patient(request):
+    if request.user.is_authenticated():
+        return redirect('/')
+
     if request.method == 'POST':
         user_form = UserCreationForm(request.POST)
         profile_information_form = ProfileInformationForm(request.POST)
