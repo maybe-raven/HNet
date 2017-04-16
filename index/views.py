@@ -1,10 +1,11 @@
 from django.shortcuts import render, redirect
 from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required, user_passes_test
-from account.models import ProfileInformation
+from account.models import ProfileInformation, get_account_from_user
 from hnet.logger import CreateLogEntry
 from account.models import Patient, Doctor, Nurse, Administrator
 from .forms import StephenLoginForm
+
 
 
 def index(request):
@@ -47,8 +48,10 @@ def log(request):
 @login_required
 @user_passes_test(lambda u: test_user_account_type(u, Patient.ACCOUNT_TYPE))
 def patient(request):
+    patient = get_account_from_user(request.user)
+    context = {'patient':patient}
     CreateLogEntry(request.user.username, "Patient logged in.")
-    return render(request, 'index/patient.html')
+    return render(request, 'index/patient.html', context)
 
 
 @login_required()
