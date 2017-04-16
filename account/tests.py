@@ -6,7 +6,7 @@ from hospital.models import Hospital
 from account.models import ProfileInformation, Patient, Administrator, Doctor, Nurse, \
     create_default_account, create_super_user
 from account.forms import ProfileInformationForm, PatientCreationForm
-from account.views import register_doctor, create_administrators
+from account.views import register_doctor, create_administrator
 from .management.commands import setupgroups
 
 DEFAULT_PROFILE_INFORMATION_DATA = {'gender': ProfileInformation.MALE, 'address': 'Test address', 'phone': '1234567890'}
@@ -194,7 +194,7 @@ class AdministratorCreationTestCase(StaffAccountCreationTestCase):
         username = 'administrator0'
         request = self.factory.post(reverse('account:create_administrator'), construct_form_data(username, None))
         request.user = User.objects.get(username=self.ADMINISTRATOR_USERNAME)
-        response = create_administrators(request)
+        response = create_administrator(request)
         self.assertEqual(response.status_code, 200, 'Expected the account creation operation to be successful.')
         self.assertTrue(User.objects.filter(username=username).exists(),
                         'Expected a new user with the username "%s" to be added to the database.' % username)
@@ -210,7 +210,7 @@ class AdministratorCreationTestCase(StaffAccountCreationTestCase):
         username = 'administrator1'
         request = self.factory.post(reverse('account:create_administrator'), construct_form_data(username, {'hospital': self.hospital2.id}))
         request.user = User.objects.get(username=self.SUPERUSER_USERNAME)
-        response = create_administrators(request)
+        response = create_administrator(request)
         self.assertEqual(response.status_code, 200, 'Expected the account creation operation to be successful.')
         self.assertTrue(User.objects.filter(username=username).exists(),
                         'Expected a new user with the username "%s" to be added to the database.' % username)
@@ -229,14 +229,14 @@ class AdministratorCreationTestCase(StaffAccountCreationTestCase):
         administrator_count = Administrator.objects.count()
         request = self.factory.post(reverse('account:create_administrator'), {})
         request.user = User.objects.get(username=self.ADMINISTRATOR_USERNAME)
-        response = create_administrators(request)
+        response = create_administrator(request)
         self.assertEqual(response.status_code, 200, 'Expected the account creation operation to be successful.')
         self.assertEqual(Administrator.objects.count(), administrator_count, 'Expected failing to create a new administrator account.')
 
         administrator_count = Administrator.objects.count()
         request = self.factory.post(reverse('account:create_administrator'), construct_form_data(username, None))
         request.user = User.objects.get(username=self.SUPERUSER_USERNAME)
-        response = create_administrators(request)
+        response = create_administrator(request)
         self.assertEqual(response.status_code, 200, 'Expected the account creation operation to be successful.')
         self.assertEqual(Administrator.objects.count(), administrator_count, 'Expected failing to create a new administrator account.')
 
@@ -245,12 +245,12 @@ class AdministratorCreationTestCase(StaffAccountCreationTestCase):
 
         request = self.factory.post(reverse('account:create_administrator'), construct_form_data(username, None))
         request.user = AnonymousUser()
-        response = create_administrators(request)
+        response = create_administrator(request)
         self.assertEqual(response.status_code, 302,
                          'Expected a redirect response due to insufficient permission for creating a new administrator account.')
 
         request = self.factory.post(reverse('account:create_administrator'), construct_form_data(username, None))
         request.user = User.objects.get(username=self.PATIENT_USERNAME)
-        response = create_administrators(request)
+        response = create_administrator(request)
         self.assertEqual(response.status_code, 302,
                          'Expected a redirect response due to insufficient permission for creating a new administrator account.')
