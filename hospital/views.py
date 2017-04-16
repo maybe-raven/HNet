@@ -1,24 +1,42 @@
 from datetime import datetime
 from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404
+from account.models import Patient
 from hospital.models import TreatmentSession
 from hnet.logger import CreateLogEntry
 
 
 @login_required
+@permission_required('hospital.add_treatmentsession')
+@user_passes_test(lambda u: not u.is_superuser)
+def admit_patient(request, patient_id):
+    patient = get_object_or_404(Patient, pk=patient_id)
+    if request.method == 'POST':
+        if patient.get_current_treatment_session() is None:
+            doctor = request.user.doctor
+            TreatmentSession.objects.create(patient=patient, treating_hospital=doctor.hospital)
+
+    return redirect('medical:view_medical_information', patient_id=patient_id)
+
+
+@login_required
 @permission_required('hospital.discharge_patient')
 @user_passes_test(lambda u: not u.is_superuser)
-def discharge_patient(request, treatmentsession_id):
-    session = get_object_or_404(TreatmentSession, pk=treatmentsession_id)
+def discharge_patient(request, patient_id):
+    patient = get_object_or_404(Patient, pk=patient_id)
+    session = patient.get_current_treatment_session()
 
-    if session.discharge_timestamp is not None:
-        return render(request, 'discharge/already_discharged.html')
+    if session is None:
+        return redirect('medical:view_medical_information', patient_id=patient_id)
 
     if request.method == 'POST':
-        session.discharge_timestamp = datetime.now()
-        session.save()
+        if session.diagnosis_set.count() == 0:
+            session.delete()
+        else:
+            session.discharge_timestamp = datetime.now()
+            session.save()
         CreateLogEntry(request.user.username, "Patient discharged.")
-        return render(request, 'discharge/discharge_done.html')
+        return render(request, 'discharge/discharge_done.html', {'patient_id': patient_id})
     else:
         return render(request, 'discharge/discharge.html', {'session': session})
 

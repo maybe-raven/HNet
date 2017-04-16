@@ -92,6 +92,8 @@ class Command(BaseCommand):
                                                                     content_type=test_content_type)
             view_drug_permission = Permission.objects.get(codename='view_drug',
                                                           content_type=drug_content_type)
+            add_treatment_session = Permission.objects.get(codename='add_treatmentsession',
+                                                           content_type=treatment_session_content_type)
         except (Permission.DoesNotExist, OperationalError):
             raise CommandError('Operation cannot be completed. Did you forget to do database migration?')
 
@@ -123,8 +125,8 @@ class Command(BaseCommand):
                                     change_diagnosis_permission, request_test_permission,
                                     upload_test_results_permission, discharge_patient_permission,
                                     view_diagnosis_permission, view_treatment_session_permission,
-                                    view_patients_permission, view_prescription_permission]
-
+                                    view_patients_permission, view_prescription_permission,
+                                    add_treatment_session]
 
         doctor_group.save()
 

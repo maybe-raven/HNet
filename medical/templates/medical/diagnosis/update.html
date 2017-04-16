@@ -6,7 +6,7 @@
     <div class="maincontent">
         <div class="whitebox">
             <h3 style="text-align: center">
-                Diagnosis for {{ form.instance.patient.user.first_name }} {{ form.instance.patient.user.last_name }}
+                Diagnosis for {{ form.instance.get_patient.user.first_name }} {{ form.instance.get_patient.user.last_name }}
             </h3>
 
             {% if message %}
@@ -24,8 +24,8 @@
                         <input type="submit" value="Save" class="btn btn-default btn-lg inactive"/>
                     </div>
                     <div class="rightbutton">
-                        <a href="#" onclick="window.history.back(); return false;"
-                           class="btn btn-default btn-lg inactive" role="button">Cancel</a>
+                        <a href="{% url 'medical:view_medical_information' form.instance.get_patient.id %}"
+                           class="btn btn-default btn-lg inactive" role="button">Back to patient</a>
                     </div>
                 </div>
             </form>

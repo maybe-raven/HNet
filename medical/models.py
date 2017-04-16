@@ -29,7 +29,11 @@ class Diagnosis(models.Model):
 
     def __str__(self):
         if self.summary:
-            return self.summary.split('\n')[0][:80]
+            line = self.summary.split('\n')[0]
+            if len(line) < 97:
+                return line
+            else:
+                return line[:97] + '...'
         else:
             return "Diagnosis created at %s" % self.creation_timestamp.ctime()
 
