@@ -84,7 +84,7 @@ def update_diagnosis(request, diagnosis_id):
 @user_passes_test(lambda u: not u.is_superuser)
 def request_test(request, diagnosis_id):
     diagnosis = get_object_or_404(Diagnosis, pk=diagnosis_id)
-    doctor = get_object_or_404(User, pk=request.user.id).doctor
+    doctor = request.user.doctor
 
     if doctor is None:
         return render(request, 'medical/test/requested.html')
