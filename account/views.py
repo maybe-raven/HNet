@@ -66,7 +66,7 @@ def profile(request):
 @login_required()
 @permission_required('account.add_administrator')
 @permission_required('account.add_profileinformation')
-def create_administrators(request):
+def create_administrator(request):
     creator = get_account_from_user(request.user)
     administrator_form = None
 
