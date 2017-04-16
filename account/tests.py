@@ -6,7 +6,7 @@ from hospital.models import Hospital
 from account.models import ProfileInformation, Patient, Administrator, Doctor, Nurse, \
     create_default_account, create_super_user
 from account.forms import ProfileInformationForm, PatientCreationForm
-from account.views import register_doctor, create_administrator
+from account.views import register_doctor, create_administrator, create_nurse
 from .management.commands import setupgroups
 
 DEFAULT_PROFILE_INFORMATION_DATA = {'gender': ProfileInformation.MALE, 'address': 'Test address', 'phone': '1234567890'}
@@ -187,6 +187,71 @@ class DoctorCreationTestCase(StaffAccountCreationTestCase):
         response = register_doctor(request)
         self.assertEqual(response.status_code, 302,
                          'Expected a redirect response due to insufficient permission for creating a new doctor account.')
+
+
+class NurseCreationTestCase(StaffAccountCreationTestCase):
+    def test_successful(self):
+        username = 'nurse0'
+        request = self.factory.post(reverse('account:create_nurse'), construct_form_data(username, None))
+        request.user = User.objects.get(username=self.ADMINISTRATOR_USERNAME)
+        response = create_nurse(request)
+        self.assertEqual(response.status_code, 200, 'Expected the account creation operation to be successful.')
+        self.assertTrue(User.objects.filter(username=username).exists(),
+                        'Expected a new user with the username "%s" to be added to the database.' % username)
+        user = User.objects.get(username=username)
+        self.assertTrue(Nurse.objects.filter(user=user).exists(),
+                        'Expected a new `Nurse` object associated with the new user to be added to the database.')
+        self.assertTrue(user.groups.filter(name='Nurse').exists(),
+                        'Expected the new account to be in the "Nurse" user group.')
+        self.assertEqual(user.nurse.hospital, self.hospital1, 'Expected the new account to be associated with the hospital "%s"' % self.hospital1.name)
+
+        self.assertTrue(self.client.login(username=username, password=PASSWORD), 'Expected to be able to log in to the new account.')
+
+        username = 'nurse1'
+        request = self.factory.post(reverse('account:create_nurse'), construct_form_data(username, {'hospital': self.hospital2.id}))
+        request.user = User.objects.get(username=self.SUPERUSER_USERNAME)
+        response = create_nurse(request)
+        self.assertEqual(response.status_code, 200, 'Expected the account creation operation to be successful.')
+        self.assertTrue(User.objects.filter(username=username).exists(),
+                        'Expected a new user with the username "%s" to be added to the database.' % username)
+        user = User.objects.get(username=username)
+        self.assertTrue(Nurse.objects.filter(user=user).exists(),
+                        'Expected a new `Nurse` object associated with the new user to be added to the database.')
+        self.assertTrue(user.groups.filter(name='Nurse').exists(),
+                        'Expected the new account to be in the "Nurse" user group.')
+        self.assertEqual(user.nurse.hospital, self.hospital2, 'Expected the new account to be associated with the hospital "%s"' % self.hospital2.name)
+
+        self.assertTrue(self.client.login(username=username, password=PASSWORD), 'Expected to be able to log in to the new account.')
+
+    def test_failed_with_incomplete_values(self):
+        username = 'nurse'
+
+        request = self.factory.post(reverse('account:create_nurse'), {})
+        request.user = User.objects.get(username=self.ADMINISTRATOR_USERNAME)
+        response = create_nurse(request)
+        self.assertEqual(response.status_code, 200, 'Expected the account creation operation to be successful.')
+        self.assertFalse(Nurse.objects.exists(), 'Expected failing to create a new nurse account.')
+
+        request = self.factory.post(reverse('account:create_nurse'), construct_form_data(username, None))
+        request.user = User.objects.get(username=self.SUPERUSER_USERNAME)
+        response = create_nurse(request)
+        self.assertEqual(response.status_code, 200, 'Expected the account creation operation to be successful.')
+        self.assertFalse(Nurse.objects.exists(), 'Expected failing to create a new nurse account.')
+
+    def test_failed_with_insufficient_permission(self):
+        username = 'nurse'
+
+        request = self.factory.post(reverse('account:create_nurse'), construct_form_data(username, None))
+        request.user = AnonymousUser()
+        response = create_nurse(request)
+        self.assertEqual(response.status_code, 302,
+                         'Expected a redirect response due to insufficient permission for creating a new nurse account.')
+
+        request = self.factory.post(reverse('account:create_nurse'), construct_form_data(username, None))
+        request.user = User.objects.get(username=self.PATIENT_USERNAME)
+        response = create_nurse(request)
+        self.assertEqual(response.status_code, 302,
+                         'Expected a redirect response due to insufficient permission for creating a new nurse account.')
 
 
 class AdministratorCreationTestCase(StaffAccountCreationTestCase):
