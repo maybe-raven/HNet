@@ -83,6 +83,7 @@ class Patient(AbstractUser):
         return Patient.objects.create(
             user=user, medical_information='', proof_of_insurance='proof',
             preferred_hospital=hospital, emergency_contact_phone='1234567890'
+        )
 
     class Meta:
         permissions = (
