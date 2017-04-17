@@ -50,13 +50,13 @@
 
                 <form method="post" action="{% url 'hospital:discharge_patient' patient.id %}">
                     {% csrf_token %}
-                    <div class="parentbutton">
-                        <div class="leftbutton">
+                    <div class="row">
+                        <div class="col-md-3">
                             <a href="{% url 'medical:create_diagnosis' patient.id %}" class="btn btn-success">
                                 Add Diagnosis
                             </a>
                         </div>
-                        <div class="rightbutton">
+                        <div class="col-md-3 col-md-offset-3">
                             <input type="submit" class="btn btn-danger" value="Discharge Patient">
                         </div>
                     </div>
@@ -66,13 +66,13 @@
 
                 <form method="post" action="{% url 'hospital:admit_patient' patient.id %}">
                     {% csrf_token %}
-                    <div class="parentbutton">
-                        <div class="leftbutton">
+                    <div class="row">
+                        <div class="col-md-3">
                             <a href="{% url 'medical:create_diagnosis' patient.id %}" class="btn btn-success">
                                 Add Diagnosis
                             </a>
                         </div>
-                        <div class="rightbutton">
+                        <div class="col-md-3 col-md-offset-3">
                             <input type="submit" class="btn btn-success" value="Admit Patient">
                         </div>
                     </div>
@@ -80,6 +80,7 @@
 
             {% endif %}
 
+            <a href="{% url 'medical:view_prescriptions' patient.id %}" class="btn btn-primary">View Prescriptions</a>
             <a href="{% url 'medical:view_patients' %}" class="btn btn-primary">Back to list</a>
 
         </div>

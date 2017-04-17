@@ -11,4 +11,5 @@ urlpatterns = [
     url(r'^doctor/create/$', views.register_doctor, name='create_doctor'),
     url(r'^nurse/create/$', views.create_nurse, name='create_nurse'),
     url(r'^profile/$', views.profile, name='profile'),
+    url(r'^add/$', views.add_account, name='add_account'),
 ]
