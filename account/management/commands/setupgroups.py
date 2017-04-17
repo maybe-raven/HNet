@@ -91,8 +91,8 @@ class Command(BaseCommand):
                                                                     content_type=test_content_type)
             view_drug_permission = Permission.objects.get(codename='view_drug',
                                                           content_type=drug_content_type)
-            add_treatment_session = Permission.objects.get(codename='add_treatmentsession',
-                                                           content_type=treatment_session_content_type)
+            add_treatment_session_permission = Permission.objects.get(codename='add_treatmentsession',
+                                                                      content_type=treatment_session_content_type)
             release_test_results_permission = Permission.objects.get(codename='release_test_results',
                                                                      content_type=test_content_type)
             add_prescription_permission = Permission.objects.get(codename='add_prescription',
@@ -123,7 +123,8 @@ class Command(BaseCommand):
         nurse_group.save()
 
         nurse_group.permissions = [view_prescription_permission, view_patients_permission,
-                                   view_diagnosis_permission, view_treatment_session_permission]
+                                   view_diagnosis_permission, view_treatment_session_permission,
+                                   add_treatment_session_permission]
         nurse_group.save()
 
         # Set up Doctor group.
@@ -137,7 +138,7 @@ class Command(BaseCommand):
                                     upload_test_results_permission, discharge_patient_permission,
                                     view_diagnosis_permission, view_treatment_session_permission,
                                     view_patients_permission, view_prescription_permission,
-                                    add_treatment_session, release_test_results_permission,
+                                    add_treatment_session_permission, release_test_results_permission,
                                     add_prescription_permission, change_prescription_permission,
                                     delete_prescription_permission]
         doctor_group.save()

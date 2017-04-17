@@ -2,7 +2,8 @@ from django.test import TestCase, RequestFactory
 from django.contrib.auth.models import Group, User, AnonymousUser
 from django.contrib.auth import get_user
 from django.core.urlresolvers import reverse
-from hospital.models import Hospital
+from datetime import datetime
+from hospital.models import Hospital, TreatmentSession
 from account.models import ProfileInformation, Patient, Administrator, Doctor, Nurse, \
     create_default_account, create_super_user
 from account.forms import ProfileInformationForm, PatientCreationForm
@@ -35,10 +36,35 @@ def default_patient_data():
     }
 
 
+class PatientUnitTestCase(TestCase):
+    PATIENT_USERNAME = 'patient'
+
+    @classmethod
+    def setUpTestData(cls):
+        hospital = Hospital.create_default()
+        Group.objects.create(name='Patient')
+        create_default_account(cls.PATIENT_USERNAME, PASSWORD, Patient, hospital)
+
+    def test_get_current_treatment_session(self):
+        patient = User.objects.get(username=self.PATIENT_USERNAME).patient
+
+        treatment_session = patient.get_current_treatment_session()
+        self.assertEqual(treatment_session, None, 'Expected no active treatment session.')
+
+        TreatmentSession.objects.create(patient=patient, treating_hospital=Hospital.objects.first())
+        treatment_session = patient.get_current_treatment_session()
+        self.assertNotEqual(treatment_session, None, 'Expected an active treatment session.')
+
+        treatment_session.discharge_timestamp = datetime.now()
+        treatment_session.save()
+        treatment_session = patient.get_current_treatment_session()
+        self.assertEqual(treatment_session, None, 'Expected no active treatment session.')
+
+
 class PatientDataValidationTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
-        Hospital.objects.create(name='Test hospital', location='Test location')
+        Hospital.create_default()
 
     def test_patient_creation_valid(self):
         profile_info = ProfileInformationForm({'gender': ProfileInformation.FEMALE, 'address': '416 River St.', 'phone': '8784563456'})
@@ -71,7 +97,7 @@ class PatientCreationTestCase(TestCase):
     def setUpTestData(cls):
         Group.objects.create(name='Patient')
 
-        Hospital.objects.create(name='Test hospital', location='Test location')
+        Hospital.create_default()
 
     def test_success(self):
         username = 'patient'
