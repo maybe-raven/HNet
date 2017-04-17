@@ -13,6 +13,10 @@ class Hospital(models.Model):
     def __str__(self):
         return self.name
 
+    @staticmethod
+    def create_default():
+        return Hospital.objects.create(name='Test hospital', location='Test location')
+
 
 class TreatmentSession(models.Model):
     """
@@ -40,3 +44,9 @@ class TreatmentSession(models.Model):
     Any additional medical or non-medical notes about the patient that might help with any future treatment for this patient.
     """
     notes = models.TextField(blank=True)
+
+    class Meta:
+        permissions = (
+            ('view_treatmentsession', 'Can view treatment sessions'),
+            ('discharge_patient', 'Can discharge patient'),
+        )

@@ -1,8 +1,9 @@
 from django.shortcuts import render, redirect
 from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required, user_passes_test
-from account.models import ProfileInformation
+from account.models import ProfileInformation, get_account_from_user
 from hnet.logger import CreateLogEntry
+from account.models import Patient, Doctor, Nurse, Administrator
 from .forms import StephenLoginForm
 
 
@@ -11,16 +12,16 @@ def index(request):
     if profile_information is not None:
         account_type = profile_information.account_type
 
-        if account_type == ProfileInformation.PATIENT:
+        if account_type == Patient.ACCOUNT_TYPE:
             CreateLogEntry(request.user.username, "Patient logged in.")
             return redirect(reverse('index:patient'))
-        elif account_type == ProfileInformation.DOCTOR:
+        elif account_type == Doctor.ACCOUNT_TYPE:
             CreateLogEntry(request.user.username, "Doctor logged in.")
             return redirect(reverse('index:doctor'))
-        elif account_type == ProfileInformation.NURSE:
+        elif account_type == Nurse.ACCOUNT_TYPE:
             CreateLogEntry(request.user.username, "Nurse logged in.")
             return redirect(reverse('index:nurse'))
-        elif account_type == ProfileInformation.ADMINISTRATOR:
+        elif account_type == Administrator.ACCOUNT_TYPE:
             CreateLogEntry(request.user.username, "Administrator logged in.")
             return redirect(reverse('index:administrator'))
     else:
@@ -44,28 +45,30 @@ def log(request):
 
 # TODO: add group verification
 @login_required
-@user_passes_test(lambda u: test_user_account_type(u, ProfileInformation.PATIENT))
+@user_passes_test(lambda u: test_user_account_type(u, Patient.ACCOUNT_TYPE))
 def patient(request):
+    patient = get_account_from_user(request.user)
+    context = {'patient': patient}
     CreateLogEntry(request.user.username, "Patient logged in.")
-    return render(request, 'index/patient.html')
+    return render(request, 'index/patient.html', context)
 
 
 @login_required()
-@user_passes_test(lambda u: test_user_account_type(u, ProfileInformation.DOCTOR))
+@user_passes_test(lambda u: test_user_account_type(u, Doctor.ACCOUNT_TYPE))
 def doctor(request):
     CreateLogEntry(request.user.username, "Doctor logged in.")
-    return render(request, 'index/administrator.html')
+    return render(request, 'index/doctor.html')
 
 
 @login_required
-@user_passes_test(lambda u: test_user_account_type(u, ProfileInformation.NURSE))
+@user_passes_test(lambda u: test_user_account_type(u, Nurse.ACCOUNT_TYPE))
 def nurse(request):
     CreateLogEntry(request.user.username, "Nurse logged in.")
-    return render(request, 'index/administrator.html')
+    return render(request, 'index/nurse.html')
 
 
 @login_required
-@user_passes_test(lambda u: test_user_account_type(u, ProfileInformation.ADMINISTRATOR))
+@user_passes_test(lambda u: test_user_account_type(u, Administrator.ACCOUNT_TYPE))
 def administrator(request):
     CreateLogEntry(request.user.username, "Administrator logged in.")
     return render(request, 'index/administrator.html')
