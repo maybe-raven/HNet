@@ -3,7 +3,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth import forms as auth_forms
 from django.contrib.auth.models import Group, User
 
-from .models import Patient, Administrator, ProfileInformation, Doctor
+from .models import Patient, Administrator, ProfileInformation, Doctor, Nurse
 from .fields import PhoneField
 
 
@@ -37,7 +37,7 @@ class UserCreationForm(auth_forms.UserCreationForm):
         user.save()
 
         profile_information = profile_information_form.save(commit=False)
-        profile_information.account_type = ProfileInformation.PATIENT
+        profile_information.account_type = Patient.ACCOUNT_TYPE
         profile_information.user = user
         profile_information.save()
 
@@ -61,7 +61,7 @@ class UserCreationForm(auth_forms.UserCreationForm):
         user.save()
 
         profile_information = profile_information_form.save(commit=False)
-        profile_information.account_type = ProfileInformation.ADMINISTRATOR
+        profile_information.account_type = Administrator.ACCOUNT_TYPE
         profile_information.user = user
         profile_information.save()
 
@@ -86,7 +86,7 @@ class UserCreationForm(auth_forms.UserCreationForm):
         user.save()
 
         profile_information = profile_information_form.save(commit=False)
-        profile_information.account_type = ProfileInformation.ADMINISTRATOR
+        profile_information.account_type = Administrator.ACCOUNT_TYPE
         profile_information.user = user
         profile_information.save()
 
@@ -111,7 +111,7 @@ class UserCreationForm(auth_forms.UserCreationForm):
         user.save()
 
         profile_information = profile_information_form.save(commit=False)
-        profile_information.account_type = ProfileInformation.DOCTOR
+        profile_information.account_type = Doctor.ACCOUNT_TYPE
         profile_information.user = user
         profile_information.save()
 
@@ -135,7 +135,7 @@ class UserCreationForm(auth_forms.UserCreationForm):
         user.save()
 
         profile_information = profile_information_form.save(commit=False)
-        profile_information.account_type = ProfileInformation.DOCTOR
+        profile_information.account_type = Doctor.ACCOUNT_TYPE
         profile_information.user = user
         profile_information.save()
 
@@ -146,11 +146,37 @@ class UserCreationForm(auth_forms.UserCreationForm):
 
         return user
 
-    def save_as_nurse_with_profile_information(self, user_form, profile_information_form):
+    def save_as_nurse_by_creator_with_profile_information(self, creator, profile_information_form):
+        """
+        Saves the information in this form and the given form as a new nurse.
+        The `hospital` field of the new `Nurse` account will be the same as that of `creator`.
+        :param creator: An `Administrator` object, representing the person who created this account. 
+        :param profile_information_form: A `ProfileInformationForm` object.
+        :return: The newly created and saved `User` object (not `Nurse` object).
+        """
+
+        user = self.save()
+        nurse_group = Group.objects.get(name='Nurse')
+        user.groups.add(nurse_group)
+        user.save()
+
+        profile_information = profile_information_form.save(commit=False)
+        profile_information.account_type = Nurse.ACCOUNT_TYPE
+        profile_information.user = user
+        profile_information.save()
+
+        new_nurse = Nurse()
+        new_nurse.user = user
+        new_nurse.hospital = creator.hospital
+        new_nurse.save()
+
+        return new_nurse
+
+    def save_as_nurse_with_profile_information(self, nurse_form, profile_information_form):
         """
         Saves the information in this form and the given form as a new nurse
-        :param user_form:
-        :param profile_information_form:
+        :param nurse_form:  A `NurseForm` object. 
+        :param profile_information_form: A `ProfileInformationForm` object.
         :return: The newly created and saved user object (not nurse object)
         """
 
@@ -160,9 +186,13 @@ class UserCreationForm(auth_forms.UserCreationForm):
         user.save()
 
         profile_information = profile_information_form.save(commit=False)
-        profile_information.account_type = ProfileInformation.NURSE
+        profile_information.account_type = Nurse.ACCOUNT_TYPE
         profile_information.user = user
         profile_information.save()
+
+        new_nurse = nurse_form.save(commit=False)
+        new_nurse.user = user
+        new_nurse.save()
 
         return user
 
@@ -237,4 +267,12 @@ class AdministratorForm(forms.ModelForm):
 
     class Meta:
         model = Administrator
+        fields = ['hospital']
+
+
+class NurseForm(forms.ModelForm):
+    """A form used for obtaining nurse-specific information. """
+
+    class Meta:
+        model = Nurse
         fields = ['hospital']
