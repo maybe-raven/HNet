@@ -56,7 +56,7 @@ class Appointment(models.Model):
 
     @classmethod
     def get_for_user_in_year_in_month(cls, user, year, month):
-        return user.appointment_set.filter(date__year=year).filter(date__month=month).order_by('date', 'start_time')
+        return user.appointment_set.exclude(cancelled=True).filter(date__year=year).filter(date__month=month).order_by('date', 'start_time')
 
     @classmethod
     def get_for_user_in_week_starting_at_date(cls, user, starting_date):
@@ -71,7 +71,7 @@ class Appointment(models.Model):
 
         account = get_account_from_user(user)
         try:
-            return account.appointment_set.filter(date__gte=starting_date).filter(date__lt=starting_date + timedelta(days=7)).order_by('date', 'start_time')
+            return account.appointment_set.exclude(cancelled=True).filter(date__gte=starting_date).filter(date__lt=starting_date + timedelta(days=7)).order_by('date', 'start_time')
         except AttributeError:
             return None
 
