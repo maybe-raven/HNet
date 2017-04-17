@@ -15,6 +15,7 @@ def admit_patient(request, patient_id):
         if patient.get_current_treatment_session() is None:
             doctor = request.user.doctor
             TreatmentSession.objects.create(patient=patient, treating_hospital=doctor.hospital)
+            CreateLogEntry(request.user.username, "Patient admitted.")
 
     return redirect('medical:view_medical_information', patient_id=patient_id)
 
