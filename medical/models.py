@@ -16,7 +16,7 @@ class Diagnosis(models.Model):
 
     patient = models.ForeignKey(Patient, on_delete=models.PROTECT, null=True)
     """A high level summary of this patient's condition, including any useful, medical information for the treatment"""
-    summary = models.TextField(blank=True)
+    summary = models.TextField()
     category = models.ManyToManyField(DiagnosisCategory, blank=True)
     creation_timestamp = models.DateTimeField(auto_now_add=True)
     update_timestamp = models.DateTimeField(auto_now=True)
