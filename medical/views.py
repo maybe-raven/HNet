@@ -229,7 +229,8 @@ def request_test(request, diagnosis_id):
             return render(request, 'medical/test/requested.html', {'diagnosis_id': diagnosis_id})
     else:
         test_form = TestForm()
-        return render(request, 'medical/test/request.html', {'test_form': test_form, 'diagnosis': diagnosis})
+
+    return render(request, 'medical/test/request.html', {'test_form': test_form, 'diagnosis': diagnosis})
 
 
 @login_required()
