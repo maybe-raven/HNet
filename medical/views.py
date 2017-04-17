@@ -168,8 +168,11 @@ def view_medical_information(request, patient_id):
         key=lambda item: item.creation_timestamp if isinstance(item, Diagnosis) else item.admission_timestamp
     )
 
-    return render(request, 'medical/patient/medical_information.html',
-                  {'medical_information': medical_information, 'patient': patient})
+    return render(request, 'medical/patient/medical_information.html', {
+        'medical_information': medical_information, 'patient': patient,
+        'user_has_edit_permission': request.user.has_perm('medical.change_diagnosis'),
+        'user_has_add_permission': request.user.has_perm('medical.add_diagnosis')
+    })
 
 
 @login_required
@@ -229,7 +232,8 @@ def request_test(request, diagnosis_id):
             return render(request, 'medical/test/requested.html', {'diagnosis_id': diagnosis_id})
     else:
         test_form = TestForm()
-        return render(request, 'medical/test/request.html', {'test_form': test_form, 'diagnosis': diagnosis})
+
+    return render(request, 'medical/test/request.html', {'test_form': test_form, 'diagnosis': diagnosis})
 
 
 @login_required()

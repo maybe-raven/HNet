@@ -13,6 +13,10 @@ class Hospital(models.Model):
     def __str__(self):
         return self.name
 
+    @staticmethod
+    def create_default():
+        return Hospital.objects.create(name='Test hospital', location='Test location')
+
 
 class TreatmentSession(models.Model):
     """
