@@ -16,7 +16,7 @@ PASSWORD = '$teamname'
 class PatientAdmissionTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
-        setupgroups.Command().handle()
+        setupgroups.Command().handle(quiet=True)
 
         hospital = Hospital.objects.create()
         create_default_account(PATIENT_USERNAME, PASSWORD, Patient, hospital)
@@ -95,7 +95,7 @@ class PatientAdmissionTestCase(TestCase):
 class PatientDischargeTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
-        setupgroups.Command().handle()
+        setupgroups.Command().handle(quiet=True)
 
         hospital = Hospital.objects.create()
         create_default_account(PATIENT_USERNAME, PASSWORD, Patient, hospital)
