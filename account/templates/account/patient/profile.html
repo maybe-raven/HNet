@@ -14,16 +14,16 @@
                 <form method="post" action="{% url 'account:profile' %}">
                     {% csrf_token %}
                     <table>
-                        {{ user_form.as_table }}
-                        {{ profile_information_form.as_table }}
-                        {{ patient_form.as_table }}
+                        {% for form in form_list %}
+                            {{ form.as_table }}
+                        {% endfor %}
                     </table>
                     <div class="parentbutton">
                         <div class="leftbutton">
-                            <input type="submit" value="Submit" class="btn btn-default btn-lg inactive"/>
+                            <input type="submit" value="Save" class="btn btn-default btn-lg inactive"/>
                         </div>
                         <div class="rightbutton">
-                            <a href="{% url 'index:patient' %}" class="btn btn-default btn-lg inactive" role="button">Back
+                            <a href="{% url 'index:index' %}" class="btn btn-default btn-lg inactive" role="button">Back
                                 to Dashboard</a>
                         </div>
                     </div>

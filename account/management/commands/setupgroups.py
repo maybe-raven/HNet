@@ -149,9 +149,9 @@ class Command(BaseCommand):
         nurse_group = Group(name='Nurse')
         nurse_group.save()
 
-        nurse_group.permissions = [view_prescription_permission, view_patients_permission,
-                                   view_diagnosis_permission, view_treatment_session_permission,
-                                   add_treatment_session_permission]
+        nurse_group.permissions = [view_prescription_permission, change_profile_information_permission,
+                                   view_patients_permission, view_diagnosis_permission,
+                                   view_treatment_session_permission, add_treatment_session_permission]
         nurse_group.save()
 
         # Set up Doctor group.
@@ -177,7 +177,8 @@ class Command(BaseCommand):
         administrator_group.permissions = [add_administrator_permission, add_doctor_permission,
                                            add_profile_information_permission, add_drug_permission,
                                            remove_drug_permission, view_drug_permission,
-                                           change_drug_permission, add_nurse_permission]
+                                           change_drug_permission, add_nurse_permission,
+                                           change_profile_information_permission]
         administrator_group.save()
 
         if not quiet:
