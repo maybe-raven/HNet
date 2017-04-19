@@ -5,7 +5,7 @@ body {font-family: Verdana, sans-serif;}
 .month {
     margin-left: 0px;
     margin-right: 0px;
-    padding: 50px 50px;
+    padding: 30px 50px 50px;
     background: #1abc9c;
 }
 
@@ -149,4 +149,11 @@ td.hidden {
     border: 1px solid black;
     border-radius: 2px;
     height: 200px;
+}
+
+.weekblock{
+    padding: 10px 0px;
+    background-color: #ddd;
+    color: #666;
+
 }
