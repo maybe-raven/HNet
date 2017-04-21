@@ -31,7 +31,7 @@ class SendMessageTestCase(TestCase):
         response = views.send_message(request)
 
         self.assertEqual(response.status_code, 200, 'Expected the operation to be successful.')
-        self.assertEqual(Message.objects.exists(), 'Expected a new message record to be created.')
+        self.assertTrue(Message.objects.exists(), 'Expected a new message record to be created.')
         message = Message.objects.first()
         self.assertEqual(message.sender, self.sender, 'Expected the currently logged-in user to be the sender.')
         self.assertEqual(message.recipient, self.recipient,
