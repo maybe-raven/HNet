@@ -85,7 +85,8 @@ def create_administrator(request):
             else:
                 administrator_form = AdministratorForm(request.POST)
                 if administrator_form.is_valid():
-                    user_form.save_as_administrator_with_profile_information(administrator_form, profile_information_form)
+                    user_form.save_as_administrator_with_profile_information(administrator_form,
+                                                                             profile_information_form)
                     CreateLogEntry(request.user.username, "Administrator account registered.")
                     return render(request, 'account/administrator/create_done.html')
 
@@ -167,3 +168,10 @@ def create_nurse(request):
         'profile_information_form': profile_information_form,
         'nurse_form': nurse_form
     })
+
+
+@login_required()
+@permission_required('account.add_administrator')
+@permission_required('account.add_profileinformation')
+def add_account(request):
+    return render(request, 'account/common/new_account.html')

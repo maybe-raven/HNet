@@ -36,6 +36,7 @@ def discharge_patient(request, patient_id):
         else:
             session.discharge_timestamp = datetime.now()
             session.save()
+
         CreateLogEntry(request.user.username, "Patient discharged.")
         return render(request, 'discharge/discharge_done.html', {'patient_id': patient_id})
     else:

@@ -137,7 +137,7 @@ class StaffAccountCreationTestCase(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        setupgroups.Command().handle()
+        setupgroups.Command().handle(quiet=True)
 
         cls.hospital1 = Hospital.objects.create(name='Test hospital 1', location='Test location 1')
         cls.hospital2 = Hospital.objects.create(name='Test hospital 2', location='Test location 2')

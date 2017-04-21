@@ -32,7 +32,11 @@
                     {% for diagnosis in diagnosis_list %}
                         <tr>
                             <td>
-                                <a href="{% url 'medical:update_diagnosis' diagnosis.id %}">{{ diagnosis }}</a>
+                                {% if user_has_edit_permission %}
+                                    <a href="{% url 'medical:update_diagnosis' diagnosis.id %}">{{ diagnosis }}</a>
+                                {% else %}
+                                    <p>{{ diagnosis }}</p>
+                                {% endif %}
                             </td>
                         </tr>
                     {% endfor %}
@@ -50,13 +54,20 @@
 
                 <form method="post" action="{% url 'hospital:discharge_patient' patient.id %}">
                     {% csrf_token %}
-                    <div class="parentbutton">
-                        <div class="leftbutton">
-                            <a href="{% url 'medical:create_diagnosis' patient.id %}" class="btn btn-success">
-                                Add Diagnosis
-                            </a>
+
+                    <div class="row">
+                        <div class="col-md-3">
+                            {% if user_has_add_permission %}
+                                <a href="{% url 'medical:create_diagnosis' patient.id %}" class="btn btn-success">
+                                    Add Diagnosis
+                                </a>
+                            {% else %}
+                                <a href="{% url 'medical:view_prescriptions' patient.id %}" class="btn btn-success">
+                                    View Prescriptions
+                                </a>
+                            {% endif %}
                         </div>
-                        <div class="rightbutton">
+                        <div class="col-md-3 col-md-offset-3">
                             <input type="submit" class="btn btn-danger" value="Discharge Patient">
                         </div>
                     </div>
@@ -66,13 +77,19 @@
 
                 <form method="post" action="{% url 'hospital:admit_patient' patient.id %}">
                     {% csrf_token %}
-                    <div class="parentbutton">
-                        <div class="leftbutton">
-                            <a href="{% url 'medical:create_diagnosis' patient.id %}" class="btn btn-success">
-                                Add Diagnosis
-                            </a>
+                    <div class="row">
+                        <div class="col-md-3">
+                            {% if user_has_add_permission %}
+                                <a href="{% url 'medical:create_diagnosis' patient.id %}" class="btn btn-success">
+                                    Add Diagnosis
+                                </a>
+                            {% else %}
+                                <a href="{% url 'medical:view_prescriptions' patient.id %}" class="btn btn-success">
+                                    View Prescriptions
+                                </a>
+                            {% endif %}
                         </div>
-                        <div class="rightbutton">
+                        <div class="col-md-3 col-md-offset-3">
                             <input type="submit" class="btn btn-success" value="Admit Patient">
                         </div>
                     </div>

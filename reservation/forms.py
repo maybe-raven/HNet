@@ -52,6 +52,8 @@ class BaseAppointmentForm(forms.ModelForm):
 
         return cleaned_data
 
+    date = forms.DateField(widget=forms.SelectDateWidget)
+
     class Meta:
         model = Appointment
         fields = ['title', 'location', 'date', 'start_time', 'end_time']

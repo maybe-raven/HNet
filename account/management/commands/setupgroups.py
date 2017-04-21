@@ -9,26 +9,51 @@ from reservation.models import Appointment
 
 
 class Command(BaseCommand):
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '--quiet',
+            action='store_true',
+            dest='quiet',
+            default=False,
+            help='Run (and fail) silently; remove all output.'
+        )
+
+        parser.add_argument(
+            '--force',
+            action='store_true',
+            dest='force',
+            default=False,
+            help='Perform destructive operation without prompting the user. '
+                 'Output is still enabled in this mode.'
+        )
+
     def handle(self, *args, **options):
         try:
+            force = options.get('force')
+            quiet = options.get('quiet')
+
             # If there are existing groups, there could be conflicts with the groups this script is about to create.
             # It is possible to merge them, but it would be too complicated and time-consuming to implement.
             # So just remove all of them.
             # Since we trust this script to create the groups properly,
             # we can always say 'y' to the prompt and let it handle the update of groups and permissions in the database
             if Group.objects.count() > 0:
-                while True:
-                    self.stdout.write(self.style.NOTICE('You have existing groups in the database. '
-                                                        'Continuing will remove all of them, '
-                                                        'and create and set up only those required by the application.\n'
-                                                        'Are you sure you want to continue? (y or n)'))
-
-                    response = input()
-                    if response == 'n':
-                        print('No changes are made.')
+                if not force:
+                    if quiet:
                         return
-                    elif response == 'y':
-                        break
+
+                    while True:
+                        self.stdout.write(self.style.NOTICE('You have existing groups in the database. '
+                                                            'Continuing will remove all of them, '
+                                                            'and create and set up only those required by the application.\n'
+                                                            'Are you sure you want to continue? (y or n)'))
+
+                        response = input()
+                        if response == 'n':
+                            print('No changes are made.')
+                            return
+                        elif response == 'y':
+                            break
 
                 Group.objects.all().delete()
 
@@ -106,6 +131,8 @@ class Command(BaseCommand):
             add_nurse_permission = Permission.objects.get(codename='add_nurse',
                                                           content_type=nurse_content_type)
         except (Permission.DoesNotExist, OperationalError):
+            if quiet:
+                return
             raise CommandError('Operation cannot be completed. Did you forget to do database migration?')
 
         # Set up Patient group.
@@ -153,4 +180,5 @@ class Command(BaseCommand):
                                            change_drug_permission, add_nurse_permission]
         administrator_group.save()
 
-        self.stdout.write(self.style.SUCCESS('Successfully set up all required groups.'))
+        if not quiet:
+            self.stdout.write(self.style.SUCCESS('Successfully set up all required groups.'))
