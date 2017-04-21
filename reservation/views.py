@@ -308,7 +308,6 @@ def calculate_day(month, year):
             days_five.append(count)
             count += 1
         counter -= 7
-        print(int(counter))
         if int(counter) - 7 < 0 and int(counter) > 0:
             for i in range(0, int(counter)):
                 days_six.append(count)
