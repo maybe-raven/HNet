@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required, permission_required, 
 from django.shortcuts import render, redirect, get_object_or_404
 from account.models import Patient, get_account_from_user
 from hospital.models import TreatmentSession
-from hnet.logger import CreateLogEntry
+from hnet.logger import CreateLogEntry, readLog
 
 
 @login_required
@@ -44,4 +44,5 @@ def discharge_patient(request, patient_id):
 
 
 def logView(request):
-    return render(request, 'hospital/viewlog.html')
+    log = readLog()
+    return render(request, 'hospital/viewlog.html', {"log": log})
