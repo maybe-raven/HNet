@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required, permission_required, 
 from django.shortcuts import render, redirect, get_object_or_404
 from account.models import Patient, get_account_from_user
 from hospital.models import TreatmentSession
+from hospital.forms import TransferForm
 from hnet.logger import CreateLogEntry
 
 
@@ -41,6 +42,13 @@ def discharge_patient(request, patient_id):
         return render(request, 'discharge/discharge_done.html', {'patient_id': patient_id})
     else:
         return render(request, 'discharge/discharge.html', {'session': session})
+
+
+@login_required
+@permission_required('hospital.transfer_patient')
+@user_passes_test(lambda u: not u.is_superuser)
+def transfer_patient(request, patient_id):
+    pass
 
 
 def logView(request):

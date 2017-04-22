@@ -130,6 +130,8 @@ class Command(BaseCommand):
                                                             content_type=drug_content_type)
             add_nurse_permission = Permission.objects.get(codename='add_nurse',
                                                           content_type=nurse_content_type)
+            transfer_patient_permission = Permission.objects.get(codename='discharge_patient',
+                                                                 content_type=treatment_session_content_type)
         except (Permission.DoesNotExist, OperationalError):
             if quiet:
                 return
@@ -167,7 +169,7 @@ class Command(BaseCommand):
                                     view_patients_permission, view_prescription_permission,
                                     add_treatment_session_permission, release_test_results_permission,
                                     add_prescription_permission, change_prescription_permission,
-                                    delete_prescription_permission]
+                                    delete_prescription_permission, transfer_patient_permission]
         doctor_group.save()
 
         # Set up Administrator group
@@ -177,7 +179,7 @@ class Command(BaseCommand):
         administrator_group.permissions = [add_administrator_permission, add_doctor_permission,
                                            add_profile_information_permission, add_drug_permission,
                                            remove_drug_permission, view_drug_permission,
-                                           change_drug_permission, add_nurse_permission]
+                                           change_drug_permission, add_nurse_permission, transfer_patient_permission]
         administrator_group.save()
 
         if not quiet:

@@ -49,4 +49,5 @@ class TreatmentSession(models.Model):
         permissions = (
             ('view_treatmentsession', 'Can view treatment sessions'),
             ('discharge_patient', 'Can discharge patient'),
+            ('transfer_patient', 'Can transfer patient')
         )
