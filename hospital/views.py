@@ -58,6 +58,7 @@ def transfer_patient_as_admin(request, patient_id):
         form = TransferForm(request.POST)
         if form.is_valid():
             session.discharge_timestamp = datetime.now()
+            session.save()
             form.save_by_admin(patient, session)
             CreateLogEntry(request.user.username, "Patient transferred.")
             return render(request, 'transfer/transfer_done.html', {'patient_id': patient_id})
