@@ -81,3 +81,29 @@ class SendMessageTestCase(TestCase):
 
         self.assertEqual(response.status_code, 302)
         self.assertFalse(Message.objects.exists())
+
+def ViewMessageTestCase(TestCase):
+    MESSAGE = "Message"
+    NAME = "message:send"
+    SUCCESS_MESSAGE = "Valid message"
+
+    def test_success_case(self):
+            request = self.factory.post(reverse(self.NAME)),{
+                'recipient_username': RECIPIENT_USERNAME,
+                'content': SUCCESS_MESSAGE
+            }
+            request.user = self.sender
+            response = views.view_message(request)
+            self.assertEqual(response.status_code, 200, 'Expected the operation to be successful.')
+            message = Message.objects.first()
+            self.assertEqual(message.content, self.VALID_MESSAGE)
+
+    def test_fail_case(self):
+            request = self.factory.post(reverse(self.NAME)),{
+                'recipient_username': RECIPIENT_USERNAME,
+                'content' : ''
+            }
+            request.user = self.sender
+            response = views.view_message(request)
+            self.assertEqual(response.status_code, 200)
+            self.assertFalse(Message.object.exists())
