@@ -46,3 +46,7 @@ def discharge_patient(request, patient_id):
 def logView(request):
     log = readLog()
     return render(request, 'hospital/viewlog.html', {"log": log})
+
+@login_required()
+def statisticsView(request):
+    return render(request, 'hospital/viewstatistics.html')
