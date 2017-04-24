@@ -50,6 +50,3 @@ class TreatmentSession(models.Model):
             ('view_treatmentsession', 'Can view treatment sessions'),
             ('discharge_patient', 'Can discharge patient'),
         )
-
-class Statistics():
-    num_of_patients = 0
