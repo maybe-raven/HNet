@@ -222,5 +222,3 @@ class ViewStatisticsTestCase(TestCase):
         request.user = User.objects.get(username=ADMINISTRATOR_USERNAME)
         response = views.statisticsView
         self.assertEqual(response.status_code, 200, 'Expected to view statistics page.')
-
-
