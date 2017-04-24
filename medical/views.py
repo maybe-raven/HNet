@@ -270,4 +270,6 @@ def release_test_result(request, test_id):
 @login_required()
 @permission_required('medical.view_prescription')
 def medical_view_options(request):
-    return render(request, 'medical/patient/medical_view_options.html')
+    user = request.user
+    context = {'user': user}
+    return render(request, 'medical/patient/medical_view_options.html', context)
