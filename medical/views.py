@@ -265,3 +265,9 @@ def release_test_result(request, test_id):
         return render(request, 'medical/test/release_done.html', {'diagnosis_id': test.diagnosis.id})
 
     return render(request, 'medical/test/release.html', {'test': test})
+
+
+@login_required()
+@permission_required('medical.view_prescription')
+def medical_view_options(request):
+    return render(request, 'medical/patient/medical_view_options.html')
