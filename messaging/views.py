@@ -16,6 +16,7 @@ def send_message(request):
 
     return render(request, 'messaging/send.html', {'form': form})
 
+@login_required
 def view_message(request):
     if request.method == 'POST':
         form = MessageForm(request.POST)
