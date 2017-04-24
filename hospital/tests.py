@@ -231,7 +231,8 @@ class PatientTransferTestCase(TestCase):
         self.assertEqual(response.status_code, 200, 'Expected the operation to be successful.')
         self.assertTrue(TreatmentSession.objects.filter(previous_session=treatment_session).exists(),
                         'Expected a new treatment session referencing the old one to be added to the database.')
-        self.assertTrue(treatment_session.discharge_timestamp is not None,
+        new_session = TreatmentSession.objects.get(previous_session=treatment_session)
+        self.assertTrue(new_session.previous_session.discharge_timestamp is not None,
                         'Expected the patient to be discharged from the old treatment session ')
 
     def test_successful_doctor(self):
@@ -248,7 +249,8 @@ class PatientTransferTestCase(TestCase):
         self.assertEqual(response.status_code, 200, 'Expected the operation to be successful.')
         self.assertTrue(TreatmentSession.objects.filter(previous_session=treatment_session).exists(),
                         'Expected a new treatment session referencing the old one to be added to the database.')
-        self.assertTrue(treatment_session.discharge_timestamp is not None,
+        new_session = TreatmentSession.objects.get(previous_session=treatment_session)
+        self.assertTrue(new_session.previous_session.discharge_timestamp is not None,
                         'Expected the patient to be discharged from the old treatment session ')
         new_session = TreatmentSession.objects.get(previous_session=treatment_session)
         self.assertEqual(new_session.treating_hospital, doctor.doctor.hospital,
