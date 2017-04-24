@@ -15,3 +15,17 @@ def send_message(request):
         form = MessageForm()
 
     return render(request, 'messaging/send.html', {'form': form})
+
+def view_message(request):
+    if request.method == 'POST':
+        form = MessageForm(request.POST)
+        form.sender = request
+        form.recipient_username = request
+        if form.is_valid():
+            form.save()
+            return render(request, 'messaging/view_done.html')
+    else:
+        form = MessageForm
+        form.sender = request
+
+    return render(request,'messaging/view.html',{'form':form})
