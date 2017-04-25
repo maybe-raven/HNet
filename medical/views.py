@@ -44,7 +44,7 @@ def view_prescriptions(request, patient_id):
     prescriptions = Prescription.objects.all()
     list_prescription = []
     for prescription in prescriptions:
-        if prescription.diagnosis.treatment_session.patient == patient:
+        if prescription.diagnosis.patient == patient:
             list_prescription.append(prescription)
     context = {'prescription_list': list_prescription, 'patient': patient}
     return render(request, 'patient/patient_overview.html', context)
@@ -270,6 +270,6 @@ def release_test_result(request, test_id):
 @login_required()
 @permission_required('medical.view_prescription')
 def medical_view_options(request):
-    user = request.user
-    context = {'user': user}
+    patient = get_account_from_user(request.user)
+    context = {'user': patient}
     return render(request, 'medical/patient/medical_view_options.html', context)
