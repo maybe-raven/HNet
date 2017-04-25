@@ -10,13 +10,10 @@
 function myFunction() {
     if(confirm("Are you sure you want to export your information?") == true) {
         txt = "{% url 'medical:export_information' %}";
-        window = "_blank";
     } else {
         txt = "#";
-        window = "_self";
     }
     document.getElementById("download").setAttribute("href", txt);
-    document.getElementById("download").setAttribute("target", window);
 }
 
 </script>
@@ -27,7 +24,7 @@ function myFunction() {
             <h1>Patient Dashboard</h1>
             <p>From here you are able to select any of the following buttons to access
                 your profile information, medical information, or view your calendar and existing appointments.
-                you can also <a id="download" onclick="myFunction()" target="_self" href="#">click here</a> to export
+                you can also <a id="download" onclick="myFunction()" href="#">click here</a> to export
                 your medical information</p>
         </div>
 
