@@ -130,6 +130,8 @@ class Command(BaseCommand):
                                                             content_type=drug_content_type)
             add_nurse_permission = Permission.objects.get(codename='add_nurse',
                                                           content_type=nurse_content_type)
+            download_medical_information = Permission.objects.get(codename='export_information',
+                                                                  content_type=prescription_content_type)
         except (Permission.DoesNotExist, OperationalError):
             if quiet:
                 return
@@ -142,7 +144,8 @@ class Command(BaseCommand):
         patient_group.permissions = [change_patient_permission, change_profile_information_permission,
                                      add_appointment_permission,
                                      cancel_appointment_permission, change_appointment_permission,
-                                     view_appointment_permission, view_prescription_permission]
+                                     view_appointment_permission, view_prescription_permission,
+                                     download_medical_information]
         patient_group.save()
 
         # Set up Nurse group.
