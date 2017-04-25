@@ -10,6 +10,10 @@ from .models import Drug, Diagnosis, Test, Prescription
 from .forms import DrugForm, DiagnosisForm, TestForm, TestResultsForm, PrescriptionForm
 from medical.models import Prescription
 from hnet.logger import CreateLogEntry
+import tempfile
+import os
+from django.conf import settings
+from django.http import HttpResponse
 
 
 @login_required
@@ -265,3 +269,43 @@ def release_test_result(request, test_id):
         return render(request, 'medical/test/release_done.html', {'diagnosis_id': test.diagnosis.id})
 
     return render(request, 'medical/test/release.html', {'test': test})
+
+
+@login_required()
+@permission_required('medical.export_information')
+def export_information(request):
+    patient = get_account_from_user(request.user)
+    prescriptions = Prescription.objects.all()
+    tests = Test.objects.all()
+    with open('medical/static/media/export_information.txt', 'w') as info_file:
+        info_file.write("Medical Information for " + patient.user.first_name + " " + patient.user.last_name +
+                        "\n\nPrescriptions:\n\n")
+        if not prescriptions:
+            info_file.write("You have no prescriptions.")
+        else:
+            for prescription in prescriptions:
+                if prescription.diagnosis.patient == patient:
+                    info_file.write(
+                        "Drug: " + prescription.drug.name + "\n" + "Prescribing Doctor: Dr. " +
+                        prescription.doctor.user.first_name + " " + prescription.doctor.user.last_name +
+                        "\n" + "Amount: " + str(prescription.amount) + "\nDirections: " + prescription.instruction +
+                        "\n\n")
+        info_file.write("\n\nTest Results:\n\n")
+        if not tests:
+            info_file.write("You have no test results.")
+        else:
+            for test in tests:
+                if Test.diagnosis.patient == patient:
+                    info_file.write(
+                        "Test Released by Doctor: Dr. " + test.doctor.user.first_name + "\n" + "Description: " +
+                        test.description + "\n" + "Results: " + test.results + "\n\n")
+
+        info_file.close()
+    file_path = os.path.join(settings.MEDIA_ROOT, 'medical/static/media/export_information.txt')
+    if os.path.exists(file_path):
+        with open(file_path, 'rb') as fh:
+            response = HttpResponse(fh.read(), content_type="application/text;charset=UTF-8")
+            response['Content-Disposition'] = 'inline; filename=' + os.path.basename(file_path)
+            return response
+    else:
+        raise Http404
