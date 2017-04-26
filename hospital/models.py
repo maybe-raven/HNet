@@ -1,4 +1,5 @@
 from django.db import models
+from .statistics import Statistics
 
 
 class Hospital(models.Model):
@@ -9,6 +10,8 @@ class Hospital(models.Model):
 
     """A flag indicating whether or not this hospital is operational. Remove a hospital by setting this flag to False."""
     operational = models.BooleanField(default=True)
+
+    statistics = Statistics
 
     def __str__(self):
         return self.name
@@ -50,21 +53,3 @@ class TreatmentSession(models.Model):
             ('view_treatmentsession', 'Can view treatment sessions'),
             ('discharge_patient', 'Can discharge patient'),
         )
-
-class Statistics():
-    num_of_patients = 0
-    avarage_visit_per_patient = 0
-    avarage_leangth_of_stay = 0
-    prescriptions_given = 0
-
-    def __init__(self):
-        self.num_of_patients = 0
-        self.avarage_visit_per_patient = 0
-        self.avarage_leangth_of_stay = 0
-        self.prescriptions_given = 0
-
-    def add_patient(self):
-        self.num_of_patients += 1
-
-    def add_prescription(self):
-        self.prescriptions_given += 1
