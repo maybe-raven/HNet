@@ -295,7 +295,7 @@ def export_information(request):
             info_file.write("You have no test results.")
         else:
             for test in tests:
-                if Test.diagnosis.patient == patient:
+                if test.diagnosis.patient == patient:
                     info_file.write(
                         "Test Released by Doctor: Dr. " + test.doctor.user.first_name + "\n" + "Description: " +
                         test.description + "\n" + "Results: " + test.results + "\n\n")
