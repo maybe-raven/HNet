@@ -2,7 +2,7 @@ from django.test import TestCase, RequestFactory
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User, AnonymousUser
 from account.management.commands import setupgroups
-from account.models import Patient, Doctor, Nurse, create_default_account
+from account.models import Patient, Doctor, Nurse, Administrator, create_default_account
 from medical.models import Diagnosis
 from hospital.models import Hospital, TreatmentSession
 from hospital import views
@@ -10,6 +10,7 @@ from hospital import views
 PATIENT_USERNAME = 'patient'
 DOCTOR_USERNAME = 'doctor'
 NURSE_USERNAME = 'nurse'
+ADMINISTRATOR_USERNAME = 'admini'
 PASSWORD = '$teamname'
 
 
@@ -199,3 +200,25 @@ class PatientDischargeTestCase(TestCase):
         self.assertEqual(response.status_code, 302, 'Expected to be redirected due to insufficient permission.')
         self.assertTrue(TreatmentSession.objects.exists(),
                         'Expected no changes to any treatment session due to insufficient permission.')
+
+
+class ViewStatisticsTestCase(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        setupgroups.Command().handle(quiet=True)
+
+        hospital = Hospital.objects.create()
+        create_default_account(PATIENT_USERNAME, PASSWORD, Patient, hospital)
+        create_default_account(DOCTOR_USERNAME, PASSWORD, Doctor, hospital)
+        create_default_account(NURSE_USERNAME, PASSWORD, Nurse, hospital)
+        create_default_account(ADMINISTRATOR_USERNAME, PASSWORD, Administrator, hospital)
+
+    def setUp(self):
+        self.factory = RequestFactory()
+
+    def test_redirect(self):
+        administrator = User.objects.get(username=ADMINISTRATOR_USERNAME).administrator
+        request = self.factory.post(reverse('hospital:statistics', args=[administrator.id]), {})
+        request.user = User.objects.get(username=ADMINISTRATOR_USERNAME)
+        response = views.statisticsView
+        self.assertEqual(response.status_code, 200, 'Expected to view statistics page.')

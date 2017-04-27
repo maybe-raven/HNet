@@ -1,4 +1,5 @@
 from django.db import models
+from .statistics import Statistics
 
 
 class Hospital(models.Model):
@@ -9,6 +10,8 @@ class Hospital(models.Model):
 
     """A flag indicating whether or not this hospital is operational. Remove a hospital by setting this flag to False."""
     operational = models.BooleanField(default=True)
+
+    statistics = Statistics
 
     def __str__(self):
         return self.name

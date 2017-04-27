@@ -5,7 +5,7 @@ from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import render, get_object_or_404
 from django.core.urlresolvers import reverse
 from account.models import Patient, get_account_from_user
-from hospital.models import TreatmentSession
+from hospital.models import TreatmentSession, Statistics, Hospital
 from .models import Drug, Diagnosis, Test, Prescription
 from .forms import DrugForm, DiagnosisForm, TestForm, TestResultsForm, PrescriptionForm
 from medical.models import Prescription
@@ -54,6 +54,7 @@ def view_prescriptions(request, patient_id):
 @user_passes_test(lambda u: not u.is_superuser)
 def add_prescription(request, diagnosis_id):
     diagnosis = get_object_or_404(Diagnosis, pk=diagnosis_id)
+    Statistics.add_prescription(Hospital.statistics)
 
     if request.method == 'POST':
         form = PrescriptionForm(request.POST)
