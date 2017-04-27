@@ -286,19 +286,19 @@ def export_information(request):
             for prescription in prescriptions:
                 if prescription.diagnosis.patient == patient:
                     info_file.write(
-                        "Drug: " + prescription.drug.name + "\n" + "Prescribing Doctor: Dr. " +
-                        prescription.doctor.user.first_name + " " + prescription.doctor.user.last_name +
-                        "\n" + "Amount: " + str(prescription.amount) + "\nDirections: " + prescription.instruction +
-                        "\n\n")
+                        "Diagnosis: " + prescription.diagnosis.summary + "Drug: " + prescription.drug.name + "\n" +
+                        "Prescribing Doctor: Dr. " + prescription.doctor.user.first_name + " "
+                        + prescription.doctor.user.last_name + "\n" + "Amount: " + prescription.quantity_info() +
+                        "\nDirections: " + prescription.instruction + "\n\n")
         info_file.write("\n\nTest Results:\n\n")
         if not tests:
             info_file.write("You have no test results.")
         else:
             for test in tests:
-                if Test.diagnosis.patient == patient:
+                if Test.diagnosis.patient == patient and Test.released:
                     info_file.write(
-                        "Test Released by Doctor: Dr. " + test.doctor.user.first_name + "\n" + "Description: " +
-                        test.description + "\n" + "Results: " + test.results + "\n\n")
+                        "Test Released by Doctor: Dr. " + test.doctor.user.first_name + test.doctor.user.last_name +
+                        "\n" + "Description: " + test.description + "\n" + "Results: " + test.results + "\n\n")
 
         info_file.close()
     file_path = os.path.join(settings.MEDIA_ROOT, 'medical/static/media/export_information.txt')
