@@ -50,6 +50,7 @@ class Test(models.Model):
     description = models.TextField()
     results = models.TextField()
     notes = models.TextField()
+    file = models.FileField(default=None)
 
     uploaded = models.BooleanField(default=False)
     released = models.BooleanField(default=False)
