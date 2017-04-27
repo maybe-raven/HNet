@@ -286,7 +286,7 @@ def export_information(request):
             for prescription in prescriptions:
                 if prescription.diagnosis.patient == patient:
                     info_file.write(
-                        "Diagnosis: " + prescription.diagnosis.summary + "Drug: " + prescription.drug.name + "\n" +
+                        "Diagnosis: " + prescription.diagnosis.summary + "\nDrug: " + prescription.drug.name + "\n" +
                         "Prescribing Doctor: Dr. " + prescription.doctor.user.first_name + " "
                         + prescription.doctor.user.last_name + "\n" + "Amount: " + prescription.quantity_info() +
                         "\nDirections: " + prescription.instruction + "\n\n")
