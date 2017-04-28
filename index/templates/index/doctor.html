@@ -2,7 +2,7 @@
 {% block title %}Dashboard{% endblock %}
 {% block header %}Doctor Dashboard {% endblock %}
 {% block login %}
-<li><a href="{% url 'account:logout' %}"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
+    <li><a href="{% url 'account:logout' %}"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
 {% endblock %}
 {% block content %}
 
@@ -15,47 +15,48 @@
                 calendar.</p>
         </div>
 
-        <div class="row">
-            <div class="col-md-3">
-                <div class="col-md-12">
-                    <a target="_parent" href="{% url 'medical:view_patients' %}">
-                        <button class="iconbutton">
-                            <i class="fa fa-users" aria-hidden="true"></i>
-                            <p style="font-size:20px;">Patients</p>
-                        </button>
-                    </a>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="col-md-12">
+                        <a target="_parent" href="{% url 'account:profile' %}">
+                            <button class="iconbutton">
+                                <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
+                                <p style="font-size:20px;">Profile</p>
+                            </button>
+                        </a>
+                    </div>
                 </div>
-            </div>
-            <div class="col-md-3">
-                <div class="col-md-12">
-                    <a target="_parent" href="{% url 'reservation:calendar_now' %}">
-                        <button class="iconbutton">
-                            <i class="fa fa-calendar" aria-hidden="true"></i>
-                            <p style="font-size:20px;">Calendar</p></button>
-                    </a>
+                <div class="col-md-3">
+                    <div class="col-md-12">
+                        <a target="_parent" href="{% url 'medical:view_patients' %}">
+                            <button class="iconbutton">
+                                <i class="fa fa-users" aria-hidden="true"></i>
+                                <p style="font-size:20px;">Patients</p>
+                            </button>
+                        </a>
+                    </div>
                 </div>
-            </div>
-            <div class="col-md-3">
-                <div class="col-md-12">
-                    <a target="_parent" href="#">
+                <div class="col-md-3">
+                    <div class="col-md-12">
+                        <a target="_parent" href="{% url 'reservation:calendar_now' %}">
+                            <button class="iconbutton">
+                                <i class="fa fa-calendar" aria-hidden="true"></i>
+                                <p style="font-size:20px;">Calendar</p></button>
+                        </a>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="col-md-12">
+                        <a target="_parent" href="#">
 
-                        <button class="iconbutton">
-                            <i class="fa fa-envelope-o" aria-hidden="true"></i>
-                            <p style="font-size:20px;">Send Message</p></button>
-                    </a>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="col-md-12">
-                    <a target="_parent" href="{% url 'account:logout' %}">
-                        <button class="iconbutton">
-                            <span class="glyphicon glyphicon-log-out" aria-hidden="true"></span>
-                            <p style="font-size:20px;">Logout</p></button>
-                    </a>
+                            <button class="iconbutton">
+                                <i class="fa fa-envelope-o" aria-hidden="true"></i>
+                                <p style="font-size:20px;">Send Message</p></button>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
 {% endblock %}
