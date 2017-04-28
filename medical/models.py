@@ -49,7 +49,6 @@ class Test(models.Model):
 
     description = models.TextField()
     results = models.TextField()
-    notes = models.TextField()
 
     uploaded = models.BooleanField(default=False)
     released = models.BooleanField(default=False)
@@ -124,7 +123,8 @@ class Prescription(models.Model):
             return 'N/A'
 
         if self.cycle % 30 == 0:
-            return '%s (%s)' % (self.pluralize_with_abbreviation(self.cycle // 30, 'month'), self.pluralize_with_abbreviation(self.cycle, 'day'))
+            return '%s (%s)' % (self.pluralize_with_abbreviation(self.cycle // 30, 'month'),
+                                self.pluralize_with_abbreviation(self.cycle, 'day'))
         elif self.cycle % 7 == 0:
             return self.pluralize_with_abbreviation(self.cycle // 7, 'week')
         else:
