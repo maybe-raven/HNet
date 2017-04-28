@@ -2,7 +2,8 @@ from datetime import datetime
 from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
 from django.shortcuts import render, redirect, get_object_or_404
 from account.models import Patient, get_account_from_user
-from hospital.models import TreatmentSession, Statistics, Hospital
+from hospital.models import TreatmentSession, Hospital
+from hospital.statistics import Statistics
 from hnet.logger import CreateLogEntry, readLog
 
 
@@ -50,4 +51,5 @@ def logView(request):
 
 @login_required()
 def statisticsView(request):
-    return render(request, 'hospital/viewstatistics.html')
+    stats = Hospital.statistics.to_string(Hospital.statistics)
+    return render(request, 'hospital/viewstatistics.html', {"stats": stats})
