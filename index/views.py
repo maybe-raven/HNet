@@ -56,15 +56,17 @@ def patient(request):
 @login_required()
 @user_passes_test(lambda u: test_user_account_type(u, Doctor.ACCOUNT_TYPE))
 def doctor(request):
+    doctor_name = get_account_from_user(request.user)
     CreateLogEntry(request.user.username, "Doctor logged in.")
-    return render(request, 'index/doctor.html')
+    return render(request, 'index/doctor.html', {'doctor': doctor_name})
 
 
 @login_required
 @user_passes_test(lambda u: test_user_account_type(u, Nurse.ACCOUNT_TYPE))
 def nurse(request):
+    nurse_name = get_account_from_user(request.user)
     CreateLogEntry(request.user.username, "Nurse logged in.")
-    return render(request, 'index/nurse.html')
+    return render(request, 'index/nurse.html', {'nurse': nurse_name})
 
 
 @login_required

@@ -6,14 +6,14 @@
 {% endblock %}
 {% block content %}
 
-    <div class="container" role="main">
-        <div class="hyper">
-            <div id="jumbo" class="jumbotron">
-                <h1>Doctor Dashboard</h1>
-                <p>From here you are able to select any of the following buttons to access
-                    patient information, create prescriptions for patients, add test results for patients, and view your
-                    calendar.</p>
-            </div>
+<div class="container" role="main">
+    <div class="hyper">
+        <div id="jumbo" class="jumbotron">
+            <h1>Dr. {{ doctor.user.last_name }}'s Dashboard</h1>
+            <p>From here you are able to select any of the following buttons to access
+                patient information, create prescriptions for patients, add test results for patients, and view your
+                calendar.</p>
+        </div>
 
             <div class="row">
                 <div class="col-md-3">
