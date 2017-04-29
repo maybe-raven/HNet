@@ -120,6 +120,25 @@ def view_patients(request):
     return render(request, 'patient/view_patients.html', context)
 
 
+@login_required
+@permission_required('hospital.transfer_patient_any_hospital')
+@user_passes_test(lambda u: not u.is_superuser)
+def view_patients_admin(request):
+    admin = get_account_from_user(request.user)
+    hospital = admin.hospital
+    list_patients = []
+    patients = Patient.objects.all()
+    for patient in patients:
+        session = patient.get_current_treatment_session()
+        if session:
+            if session.treating_hospital == hospital:
+                list_patients.append(patient)
+
+    context = {'patient_list': list_patients, 'hospital': hospital}
+
+    return render(request, 'patient/view_patients_admin.html', context)
+
+
 @permission_required('medical.remove_drug')
 @user_passes_test(lambda u: not u.is_superuser)
 def remove_drug(request, drug_id):
@@ -168,10 +187,17 @@ def view_medical_information(request, patient_id):
         key=lambda item: item.creation_timestamp if isinstance(item, Diagnosis) else item.admission_timestamp
     )
 
+    if patient.get_current_treatment_session() is not None:
+        can_transfer = get_account_from_user(request.user).hospital != \
+                       patient.get_current_treatment_session().treating_hospital
+    else:
+        can_transfer = False
+
     return render(request, 'medical/patient/medical_information.html', {
         'medical_information': medical_information, 'patient': patient,
         'user_has_edit_permission': request.user.has_perm('medical.change_diagnosis'),
-        'user_has_add_permission': request.user.has_perm('medical.add_diagnosis')
+        'user_has_add_permission': request.user.has_perm('medical.add_diagnosis'),
+        'can_transfer': can_transfer
     })
 
 
