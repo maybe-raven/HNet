@@ -196,6 +196,11 @@ class UserCreationForm(auth_forms.UserCreationForm):
 
         return user
 
+    def clean_username(self):
+        username = self.cleaned_data["username"]
+        if username.startswith('.'):
+            raise forms.ValidationError('Username cannot start with a \'.\' character.')
+
     class Meta(auth_forms.UserCreationForm.Meta):
         fields = auth_forms.UserCreationForm.Meta.fields + ('first_name', 'last_name', 'email')
 

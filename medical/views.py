@@ -277,7 +277,9 @@ def export_information(request):
     patient = get_account_from_user(request.user)
     prescriptions = Prescription.objects.all()
     tests = Test.objects.all()
-    with open('medical/static/media/export_information.txt', 'w') as info_file:
+
+    file_path = os.path.join(settings.MEDIA_ROOT, 'medical/static/media/%s_medical_information.txt' % request.user.username)
+    with open(file_path, 'w') as info_file:
         info_file.write("Medical Information for " + patient.user.first_name + " " + patient.user.last_name +
                         "\n\nPrescriptions:\n\n")
         if not prescriptions:
@@ -301,18 +303,18 @@ def export_information(request):
                         "\n" + "Description: " + test.description + "\n" + "Results: " + test.results + "\n\n")
 
         info_file.close()
-    file_path = os.path.join(settings.MEDIA_ROOT, 'medical/static/media/export_information.txt')
+
     if os.path.exists(file_path):
         with open(file_path, 'rb') as fh:
             response = HttpResponse(fh.read(), content_type="application/text;charset=UTF-8")
-            response['Content-Disposition'] = 'inline; filename=' + os.path.basename(file_path)
+            response['Content-Disposition'] = 'inline; filename=medical_information.txt'
             return response
     else:
         raise Http404
+
 
 @permission_required('medical.view_prescription')
 def medical_view_options(request):
     patient = get_account_from_user(request.user)
     context = {'user': patient}
     return render(request, 'medical/patient/medical_view_options.html', context)
-
