@@ -12,6 +12,7 @@ install:
 before_script:
   - python manage.py makemigrations
   - python manage.py migrate
+  - echo "content" > file.txt
 
 script:
   - python manage.py test
