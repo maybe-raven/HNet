@@ -18,11 +18,13 @@ class DiagnosisForm(forms.ModelForm):
     def save_for_patient(self, patient):
         diagnosis = self.save(commit=False)
 
+        diagnosis.patient = patient
+
         treatment_session = patient.get_current_treatment_session()
         if treatment_session:
             diagnosis.treatment_session = treatment_session
         else:
-            diagnosis.patient = patient
+            pass
 
         diagnosis.save()
 

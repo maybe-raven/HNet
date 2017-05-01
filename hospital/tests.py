@@ -2,7 +2,7 @@ from django.test import TestCase, RequestFactory
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User, AnonymousUser
 from account.management.commands import setupgroups
-from account.models import Patient, Doctor, Nurse, create_default_account
+from account.models import Patient, Doctor, Nurse, create_default_account, Administrator
 from medical.models import Diagnosis
 from hospital.models import Hospital, TreatmentSession
 from hospital import views
@@ -10,6 +10,7 @@ from hospital import views
 PATIENT_USERNAME = 'patient'
 DOCTOR_USERNAME = 'doctor'
 NURSE_USERNAME = 'nurse'
+ADMINISTRATOR_USERNAME = 'admini'
 PASSWORD = '$teamname'
 
 
@@ -199,3 +200,125 @@ class PatientDischargeTestCase(TestCase):
         self.assertEqual(response.status_code, 302, 'Expected to be redirected due to insufficient permission.')
         self.assertTrue(TreatmentSession.objects.exists(),
                         'Expected no changes to any treatment session due to insufficient permission.')
+
+
+class PatientTransferTestCase(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        setupgroups.Command().handle(quiet=True)
+
+        cls.old_hospital = Hospital.objects.create()
+        cls.new_hospital = Hospital.objects.create()
+        create_default_account(PATIENT_USERNAME, PASSWORD, Patient, cls.new_hospital)
+        create_default_account(DOCTOR_USERNAME, PASSWORD, Doctor, cls.new_hospital)
+        create_default_account(ADMINISTRATOR_USERNAME, PASSWORD, Administrator, cls.new_hospital)
+        create_default_account(NURSE_USERNAME, PASSWORD, Nurse, cls.new_hospital)
+
+    def setUp(self):
+        self.factory = RequestFactory()
+
+    def test_successful_administrator(self):
+        patient = User.objects.get(username=PATIENT_USERNAME).patient
+        treatment_session = TreatmentSession.objects.create(patient=patient, treating_hospital=self.old_hospital)
+
+        request = self.factory.post(reverse('hospital:transfer_patient_as_admin', args=[patient.id]),
+                                    {'treating_hospital': self.new_hospital.id})
+        request.user = User.objects.get(username=ADMINISTRATOR_USERNAME)
+        response = views.transfer_patient_as_admin(request, patient.id)
+
+        self.assertEqual(response.status_code, 200, 'Expected the operation to be successful.')
+        self.assertTrue(TreatmentSession.objects.filter(previous_session=treatment_session).exists(),
+                        'Expected a new treatment session referencing the old one to be added to the database.')
+        new_session = TreatmentSession.objects.get(previous_session=treatment_session)
+        self.assertNotEqual(new_session.previous_session.discharge_timestamp, None,
+                            'Expected the patient to be discharged from the old treatment session ')
+        self.assertEqual(new_session.treating_hospital, self.new_hospital,
+                         "Expected the new treatment session to be associated with the new hospital.")
+
+    def test_successful_doctor(self):
+        patient = User.objects.get(username=PATIENT_USERNAME).patient
+        treatment_session = TreatmentSession.objects.create(patient=patient, treating_hospital=self.old_hospital)
+
+        doctor = User.objects.get(username=DOCTOR_USERNAME)
+        request = self.factory.post(reverse('hospital:transfer_patient_as_doctor', args=[patient.id]))
+        request.user = doctor
+        response = views.transfer_patient_as_doctor(request, patient.id)
+
+        self.assertEqual(response.status_code, 200, 'Expected the operation to be successful.')
+        self.assertTrue(TreatmentSession.objects.filter(previous_session=treatment_session).exists(),
+                        'Expected a new treatment session referencing the old one to be added to the database.')
+        new_session = TreatmentSession.objects.get(previous_session=treatment_session)
+        self.assertNotEqual(new_session.previous_session.discharge_timestamp, None,
+                            'Expected the patient to be discharged from the old treatment session ')
+        new_session = TreatmentSession.objects.get(previous_session=treatment_session)
+        self.assertEqual(new_session.treating_hospital, doctor.doctor.hospital,
+                         "Expected the new treatment session to be at the doctor's hospital")
+
+    def test_failed_not_logged_in(self):
+        patient = User.objects.get(username=PATIENT_USERNAME).patient
+        treatment_session = TreatmentSession.objects.create(patient=patient, treating_hospital=self.old_hospital)
+        request = self.factory.post(reverse('hospital:transfer_patient_as_admin', args=[patient.id]),
+                                    {'treating_hospital': self.new_hospital.id})
+        request.user = AnonymousUser()
+        response = views.transfer_patient_as_admin(request, patient.id)
+        self.assertEqual(response.status_code, 302,
+                         'Expected a redirect response due to insufficient permission for transferring a patient.')
+        self.assertFalse(TreatmentSession.objects.filter(previous_session=treatment_session).exists(),
+                         'Expected no new treatment session referencing the old one to be added to the database.')
+        self.assertEqual(treatment_session.discharge_timestamp, None,
+                         'Expected the patient to not be discharged from the old hospital.')
+        self.assertEqual(TreatmentSession.objects.count(), 1, 'Expected no changes to the database.')
+
+    def test_failed_no_permissions(self):
+        patient = User.objects.get(username=PATIENT_USERNAME).patient
+        treatment_session = TreatmentSession.objects.create(patient=patient, treating_hospital=self.old_hospital)
+        request = self.factory.post(reverse('hospital:transfer_patient_as_admin', args=[patient.id]),
+                                    {'treating_hospital': self.new_hospital.id})
+        request.user = User.objects.get(username=PATIENT_USERNAME)
+        response = views.transfer_patient_as_admin(request, patient.id)
+        self.assertEqual(response.status_code, 302,
+                         'Expected a redirect response due to insufficient permission for transferring a patient.')
+        self.assertFalse(TreatmentSession.objects.filter(previous_session=treatment_session).exists(),
+                         'Expected no new treatment session referencing the old one to be added to the database.')
+        self.assertEqual(treatment_session.discharge_timestamp, None,
+                         'Expected the patient to not be discharged from the old hospital.')
+        self.assertEqual(TreatmentSession.objects.count(), 1, 'Expected no changes to the database.')
+
+        request = self.factory.post(reverse('hospital:transfer_patient_as_admin', args=[patient.id]),
+                                    {'treating_hospital': self.new_hospital.id})
+        request.user = User.objects.get(username=NURSE_USERNAME)
+        response = views.transfer_patient_as_admin(request, patient.id)
+        self.assertEqual(response.status_code, 302,
+                         'Expected a redirect response due to insufficient permission for transferring a patient.')
+        self.assertFalse(TreatmentSession.objects.filter(previous_session=treatment_session).exists(),
+                         'Expected no new treatment session referencing the old one to be added to the database.')
+        self.assertEqual(treatment_session.discharge_timestamp, None,
+                         'Expected the patient to not be discharged from the old hospital.')
+        self.assertEqual(TreatmentSession.objects.count(), 1, 'Expected no changes to the database.')
+
+    def test_failed_no_treating_hospital(self):
+        patient = User.objects.get(username=PATIENT_USERNAME).patient
+
+        treatment_session = TreatmentSession.objects.create(patient=patient, treating_hospital=self.old_hospital)
+        request = self.factory.post(reverse('hospital:transfer_patient_as_admin', args=[patient.id]), {})
+        request.user = User.objects.get(username=ADMINISTRATOR_USERNAME)
+        response = views.transfer_patient_as_admin(request, patient.id)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(TreatmentSession.objects.count(), 1, 'Expected no changes to the database.')
+        self.assertFalse(TreatmentSession.objects.filter(previous_session=treatment_session).exists(),
+                         'Expected no new treatment session referencing the old one to be added to the database.')
+        self.assertEqual(treatment_session.discharge_timestamp, None,
+                         'Expected the patient to not be discharged from the old hospital.')
+
+    def test_failed_patient_not_admitted(self):
+        patient = User.objects.get(username=PATIENT_USERNAME).patient
+
+        request = self.factory.post(reverse('hospital:transfer_patient_as_admin', args=[patient.id]),
+                                    {'treating_hospital': self.new_hospital.id})
+        request.user = User.objects.get(username=ADMINISTRATOR_USERNAME)
+        response = views.transfer_patient_as_admin(request, patient.id)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(TreatmentSession.objects.exists(),
+                         'Expected no new treatment session to be added to the database.')
