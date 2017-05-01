@@ -8,3 +8,7 @@ activity.log
 
 */migrations/*
 !*/migrations/__init__.py
+*.png
+media/test_result/bananya_minimalist_wallpapers_by_jak852-dacqcqh.jpg
+*.log
+media/test_result/bookList2.txt
