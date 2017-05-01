@@ -22,5 +22,5 @@ class uploadfiletest(TestCase):
         diagnosis = Diagnosis.objects.create(patient=patient, summery=" ", catagory=" ")
         test = Test.objects.create(doctot=doctor, diagnosis=diagnosis, description="", results="", notes="")
         request = self.factory.post(reverse('medical:upload_test_result', args=[test.id]))
-        response = self.client.post(reverse('account:register_patient'))
-        self.assertEqual(response.status_code, 302, 'Expected to be redirected due to insufficient permission.')
+        response = self.client.post(reverse('medical:upload_test_result', args=[test.id]))
+        self.assertEqual(response.status_code, 200, 'Expected to upload test result.')
