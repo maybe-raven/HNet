@@ -1,6 +1,6 @@
 {% extends 'index/base.html' %}
 {% block title %}Dashboard{% endblock %}
-{% block header %}Patient Dashboard {% endblock %}
+{% block header %}{{ patient.user.first_name }}'s Dashboard {% endblock %}
 {% block login %}
     <li><a href="{% url 'account:logout' %}"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
 {% endblock %}
@@ -9,13 +9,13 @@
     <div class="container" role="main">
         <div class="hyper">
             <div id="jumbo" class="jumbotron">
-                <h1>Patient Dashboard</h1>
+                <h1>{{ patient.user.first_name }}'s Patient Dashboard</h1>
                 <p>From here you are able to select any of the following buttons to access
                     your profile information, medical information, or view your calendar and existing appointments.</p>
             </div>
 
             <div class="row">
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <div class="col-md-12">
                         <a target="_parent" href="{% url 'account:profile' %}">
                             <button class="iconbutton">
@@ -25,9 +25,9 @@
                         </a>
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <div class="col-md-12">
-                        <a target="_parent" href="#">
+                        <a target="_parent" href="{% url 'medical:medical_info' %}">
                             <button class="iconbutton">
                                 <i class="fa fa-heart" aria-hidden="true"></i>
                                 <p style="font-size:20px;">Medical Information</p>
@@ -35,7 +35,7 @@
                         </a>
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <div class="col-md-12">
                         <a target="_parent" href="{% url 'reservation:calendar_now' %}">
                             <button class="iconbutton">
@@ -44,34 +44,13 @@
                         </a>
                     </div>
                 </div>
-            </div>
-            <div class="row top-space">
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <div class="col-md-12">
                         <a target="_parent" href="#">
 
                             <button class="iconbutton">
-                                <i class="fa fa-bar-chart" aria-hidden="true"></i>
-                                <p style="font-size:20px;">Tests</p></button>
-                        </a>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="col-md-12">
-                        <a target="_parent" href="{% url 'medical:view_prescriptions' patient.id %}">
-
-                            <button class="iconbutton">
-                                <i class="fa fa-medkit" aria-hidden="true"></i>
-                                <p style="font-size:20px;">Prescriptions</p></button>
-                        </a>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="col-md-12">
-                        <a target="_parent" href="{% url 'account:logout' %}">
-                            <button class="iconbutton">
-                                <span class="glyphicon glyphicon-log-out" aria-hidden="true"></span>
-                                <p style="font-size:20px;">Logout</p></button>
+                                <i class="fa fa-envelope-o" aria-hidden="true"></i>
+                                <p style="font-size:20px;">Send Message</p></button>
                         </a>
                     </div>
                 </div>
