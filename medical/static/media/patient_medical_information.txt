@@ -1,9 +1,0 @@
-Medical Information for First Last
-
-Prescriptions:
-
-You have no prescriptions.
-
-Test Results:
-
-You have no test results.

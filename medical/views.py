@@ -278,7 +278,7 @@ def export_information(request):
     prescriptions = Prescription.objects.all()
     tests = Test.objects.all()
 
-    file_path = os.path.join(settings.MEDIA_ROOT, 'medical/static/media/%s_medical_information.txt' % request.user.username)
+    file_path = os.path.join(settings.MEDIA_ROOT, 'medical/media/%s_medical_information.txt' % request.user.username)
     with open(file_path, 'w') as info_file:
         info_file.write("Medical Information for " + patient.user.first_name + " " + patient.user.last_name +
                         "\n\nPrescriptions:\n\n")
