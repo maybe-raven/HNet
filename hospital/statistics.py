@@ -12,6 +12,26 @@ class Statistics():
         self.prescriptions_given = 0
         self.display = ""
 
+    def read_file(self):
+        stat_file = open('hospital/statistics.txt', 'r')
+        nums = []
+        for line in stat_file:
+            nums.append(int(line.strip()))
+
+        self.num_of_patients = nums[0]
+        self.avarage_visit_per_patient = nums[1]
+        self.avarage_leangth_of_stay = nums[2]
+        self.prescriptions_given = nums[3]
+
+    def write_file(self):
+        stat_file = open('hospital/statistics.txt', 'w')
+        stat_file.write(str(self.num_of_patients) + "\n")
+        stat_file.write(str(self.avarage_visit_per_patient) + "\n")
+        stat_file.write(str(self.avarage_leangth_of_stay) + "\n")
+        stat_file.write(str(self.prescriptions_given) + "\n")
+
+
+
     def add_patient(self):
         self.num_of_patients += 1
 
@@ -24,7 +44,7 @@ class Statistics():
         self.avarage_visit_per_patient = self.num_of_patients / total_patients
 
     def to_string(self):
-        stat_file
+        self.read_file(self)
         self.display += "Number of patients visiting the hospital : " + str(self.num_of_patients) + "\n"
         self.display += "Avarage visits per patient : " + str(self.avarage_visit_per_patient) + "\n"
         self.display += "Avarage length of stay : " + str(self.avarage_leangth_of_stay) + "\n"
