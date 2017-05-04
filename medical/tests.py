@@ -1,9 +1,7 @@
 from django.test import TestCase, RequestFactory
-from django.contrib.auth import get_user
-from django.contrib.auth.models import User, AnonymousUser, Group
+from django.contrib.auth.models import User, Group
 from medical.models import Test, Diagnosis
 from django.core.urlresolvers import reverse
-from medical.views import upload_test_result
 from django.core.files.uploadedfile import SimpleUploadedFile
 from account.models import create_default_account, Patient, Doctor
 from hospital.models import Hospital
