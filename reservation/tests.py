@@ -89,13 +89,12 @@ class AppointmentFormForDoctorTestCase(AppointmentFormTestCaseBase):
 class AppointmentFormForPatientTestCase(AppointmentFormTestCaseBase):
     def test_success_scenario(self):
         apt_form_patients = AppointmentFormForPatient({'title': 'Check up', 'date': self.tomorrow(), 'start_time':
-                                                      '2:00', 'end_time': '3:00', 'doctor': self.doctor().id})
+                                                      '2:00', 'doctor': self.doctor().id})
 
         self.assertTrue(apt_form_patients.is_valid(), 'Appointment form for patients should be validated')
 
     def test_empty_scenario(self):
-        apt_form_patients = AppointmentFormForPatient({'title': '', 'date': '', 'start_time': '', 'end_time': '',
-                                                       'doctor': ''})
+        apt_form_patients = AppointmentFormForPatient({'title': '', 'date': '', 'start_time': '', 'doctor': ''})
 
         self.assertFalse(apt_form_patients.is_valid(), 'Form should fail because of blank sections')
 

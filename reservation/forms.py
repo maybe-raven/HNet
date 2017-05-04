@@ -57,7 +57,7 @@ class BaseAppointmentForm(forms.ModelForm):
 
     class Meta:
         model = Appointment
-        fields = ['title', 'date', 'start_time']
+        fields = ['title', 'date', 'start_time', 'end_time']
 
 
 class AppointmentFormForPatient(BaseAppointmentForm):
@@ -90,6 +90,7 @@ class AppointmentFormForPatient(BaseAppointmentForm):
     class Meta:
         model = Appointment
         fields = BaseAppointmentForm.Meta.fields + ['doctor']
+        exclude = ('end_time',)
 
 
 class AppointmentFormForDoctor(BaseAppointmentForm):
@@ -118,4 +119,4 @@ class AppointmentFormForDoctor(BaseAppointmentForm):
 
     class Meta:
         model = Appointment
-        fields = BaseAppointmentForm.Meta.fields + ['patient', 'end_time']
+        fields = BaseAppointmentForm.Meta.fields + ['patient']
