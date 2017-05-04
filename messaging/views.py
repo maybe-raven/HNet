@@ -18,13 +18,10 @@ def send_message(request):
 
 @login_required
 def view_message(request):
-    if request.method == 'POST':
-        message = MessageForm(request.POST)
-        m = Message(message)
-        content = m.content
-        content.seen = True
-        message.save()
-    else:
-        form = MessageForm()
+    view = Message.view.get()
+    message = MessageForm(request)
+    m = Message(message)
+    content = m.content
+    message.save()
 
-    return render(request, 'messaging/view.html', {'form':form})
+    return render(request, 'messaging/view.html')
