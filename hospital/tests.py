@@ -211,7 +211,7 @@ class PatientTransferTestCase(TestCase):
         cls.new_hospital = Hospital.objects.create()
         create_default_account(PATIENT_USERNAME, PASSWORD, Patient, cls.new_hospital)
         create_default_account(DOCTOR_USERNAME, PASSWORD, Doctor, cls.new_hospital)
-        create_default_account(ADMINISTRATOR_USERNAME, PASSWORD, Administrator, cls.new_hospital)
+        create_default_account(ADMINISTRATOR_USERNAME, PASSWORD, Administrator, cls.old_hospital)
         create_default_account(NURSE_USERNAME, PASSWORD, Nurse, cls.new_hospital)
 
     def setUp(self):
