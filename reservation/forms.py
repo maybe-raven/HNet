@@ -56,7 +56,7 @@ class BaseAppointmentForm(forms.ModelForm):
 
     class Meta:
         model = Appointment
-        fields = ['title', 'location', 'date', 'start_time', 'end_time']
+        fields = ['title', 'date', 'start_time', 'end_time']
 
 
 class AppointmentFormForPatient(BaseAppointmentForm):
