@@ -81,6 +81,7 @@ def weekview(request, day=datetime.date.today().day, month=datetime.date.today()
         week_starting_date -= datetime.timedelta(days=weekday)
     week_ending_date = week_starting_date + datetime.timedelta(days=6)
 
+    doctor_list = None
     profile_information = ProfileInformation.from_user(request.user)
     account_type = profile_information.account_type
     if account_type == Nurse.ACCOUNT_TYPE:
@@ -102,7 +103,7 @@ def weekview(request, day=datetime.date.today().day, month=datetime.date.today()
     # 'start_date' and 'end_date' are `datetime.date` objects representing the dates at the start and end of the week.
     context = {'appointment_list': appointments, 'week': week, 'start_day': week_starting_date,
                'end_day': week_ending_date, 'next_week': next_week, 'last_week': last_week, 'person': person,
-               'doctors': doctors}
+               'doctors': doctors, 'selected_doctor_list': doctor_list}
 
     return render(request, 'reservation/weekview.html', context)
 
