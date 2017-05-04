@@ -10,6 +10,10 @@ from .models import Drug, Diagnosis, Test, Prescription
 from .forms import DrugForm, DiagnosisForm, TestForm, TestResultsForm, PrescriptionForm
 from medical.models import Prescription
 from hnet.logger import CreateLogEntry
+import tempfile
+import os
+from django.conf import settings
+from django.http import HttpResponse
 
 
 @login_required
@@ -268,6 +272,47 @@ def release_test_result(request, test_id):
 
 
 @login_required()
+@permission_required('medical.export_information')
+def export_information(request):
+    patient = get_account_from_user(request.user)
+    prescriptions = Prescription.objects.all()
+    tests = Test.objects.all()
+
+    file_path = os.path.join(settings.MEDIA_ROOT, 'medical/media/%s_medical_information.txt' % request.user.username)
+    with open(file_path, 'w') as info_file:
+        info_file.write("Medical Information for " + patient.user.first_name + " " + patient.user.last_name +
+                        "\n\nPrescriptions:\n\n")
+        if not prescriptions:
+            info_file.write("You have no prescriptions.")
+        else:
+            for prescription in prescriptions:
+                if prescription.diagnosis.patient == patient:
+                    info_file.write(
+                        "Diagnosis: " + prescription.diagnosis.summary + "\nDrug: " + prescription.drug.name + "\n" +
+                        "Prescribing Doctor: Dr. " + prescription.doctor.user.first_name + " "
+                        + prescription.doctor.user.last_name + "\n" + "Amount: " + prescription.quantity_info() +
+                        "\nDirections: " + prescription.instruction + "\n\n")
+        info_file.write("\n\nTest Results:\n\n")
+        if not tests:
+            info_file.write("You have no test results.")
+        else:
+            for test in tests:
+                if test.diagnosis.patient == patient and test.released:
+                    info_file.write(
+                        "Test Released by Doctor: Dr. " + test.doctor.user.first_name + test.doctor.user.last_name +
+                        "\n" + "Description: " + test.description + "\n" + "Results: " + test.results + "\n\n")
+
+        info_file.close()
+
+    if os.path.exists(file_path):
+        with open(file_path, 'rb') as fh:
+            response = HttpResponse(fh.read(), content_type="application/text;charset=UTF-8")
+            response['Content-Disposition'] = 'inline; filename=medical_information.txt'
+            return response
+    else:
+        raise Http404
+
+
 @permission_required('medical.view_prescription')
 def medical_view_options(request):
     patient = get_account_from_user(request.user)

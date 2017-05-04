@@ -18,5 +18,6 @@ urlpatterns = [
     url(r'^test/request/(?P<diagnosis_id>[0-9]+)/$', views.request_test, name='request_test'),
     url(r'^test/upload/(?P<test_id>[0-9]+)/$', views.upload_test_result, name='upload_test_result'),
     url(r'^test/release/(?P<test_id>[0-9]+)/$', views.release_test_result, name='release_test_result'),
+    url(r'^download_info/$', views.export_information, name='export_information'),
     url(r'^medical_info/$', views.medical_view_options, name='medical_info')
 ]

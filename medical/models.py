@@ -140,4 +140,5 @@ class Prescription(models.Model):
     class Meta:
         permissions = (
             ('view_prescription', 'Can view prescriptions'),
+            ('export_information', 'Can export information'),
         )
