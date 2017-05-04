@@ -82,12 +82,13 @@ class SendMessageTestCase(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertFalse(Message.objects.exists())
 
-def ViewMessageTestCase(TestCase):
+class ViewMessageTestCase(TestCase):
     MESSAGE = "Message"
     NAME = "message:send"
     SUCCESS_MESSAGE = "Valid message"
 
     def test_success_case(self):
+            SUCCESS_MESSAGE = "Valid message"
             request = self.factory.post(reverse(self.NAME)),{
                 'recipient_username': RECIPIENT_USERNAME,
                 'content': SUCCESS_MESSAGE
