@@ -1,5 +1,7 @@
 from django import forms
 from .models import TreatmentSession
+from account.models import Doctor
+
 
 
 class TransferForm(forms.ModelForm):

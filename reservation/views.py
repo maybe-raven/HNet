@@ -69,6 +69,7 @@ def calendar(request, month=datetime.date.today().month, year=datetime.date.toda
 @user_passes_test(lambda u: not u.is_superuser)
 def weekview(request, day=datetime.date.today().day, month=datetime.date.today().month,
              year=datetime.date.today().year):
+    doctors = []
     person = "user"
     day = int(day)
     month = int(month)
@@ -80,16 +81,23 @@ def weekview(request, day=datetime.date.today().day, month=datetime.date.today()
         week_starting_date -= datetime.timedelta(days=weekday)
     week_ending_date = week_starting_date + datetime.timedelta(days=6)
 
-    appointments = Appointment.get_for_user_in_week_starting_at_date(request.user, week_starting_date)
+    if request.method == "POST":
+        doctor_list = request.POST.getlist("doctor_list")
+        for doctor in doctor_list:
+            appointments = Appointment.objects.all().filter(doctor=doctor)
+    else:
+        appointments = Appointment.get_for_user_in_week_starting_at_date(request.user, week_starting_date)
+
     profile_information = ProfileInformation.from_user(request.user)
     if profile_information is not None:
         account_type = profile_information.account_type
         if account_type == Nurse.ACCOUNT_TYPE:
-            appointments = Appointment.objects.all()
-            person = "nurse"
             nurse = get_account_from_user(request.user)
             hospital = nurse.hospital
+            person = "nurse"
             doctors = Doctor.objects.all().filter(hospital=hospital)
+            for doctor_name in doctors:
+                appointments = Appointment.objects.all().filter(doctor=doctor_name)
 
     week = get_week(week_starting_date, week_ending_date)
     last_week = week_starting_date - datetime.timedelta(days=1)

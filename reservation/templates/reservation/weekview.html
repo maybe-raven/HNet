@@ -72,11 +72,17 @@
             </div>
             <div id="collapse1" class="panel-collapse collapse">
                 <ul class="list-group">
-                    <input>
-                    {% for doctor in doctors %}
-                        <li class="list-group-item">Dr. {{ doctor.user.first_name }} {{ doctor.user.last_name }}</li>
-                    {% endfor %}
+                    <form action="" method="post">
+                        {% csrf_token %}
+                        {% for doctor in doctors %}
+                        <li class="list-group-item"><input type="checkbox" name="doctor_list"
+                                                            value="{{ doctor }}"> Dr.
+                            {{ doctor.user.first_name }} {{ doctor.user.last_name }}</li>
+                            {% endfor %}
+                        <li class="list-group-item"><input type="submit" value="Save" class="button-sm"/></li>
                     </form>
+
+
                 </ul>
             </div>
         </div>
