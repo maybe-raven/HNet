@@ -48,8 +48,9 @@ def view_prescriptions(request, patient_id):
     prescriptions = Prescription.objects.all()
     list_prescription = []
     for prescription in prescriptions:
-        if prescription.diagnosis.patient == patient:
-            list_prescription.append(prescription)
+        if prescription.active():
+            if prescription.diagnosis.patient == patient:
+                list_prescription.append(prescription)
     context = {'prescription_list': list_prescription, 'patient': patient}
     return render(request, 'patient/patient_overview.html', context)
 
