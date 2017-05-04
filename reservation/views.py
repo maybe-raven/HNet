@@ -8,7 +8,7 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
 from reservation.models import Appointment
 from reservation.forms import AppointmentFormForPatient, AppointmentFormForDoctor
-from account.models import Patient, Doctor, ProfileInformation
+from account.models import Patient, Doctor, ProfileInformation, get_account_from_user
 from hnet.logger import CreateLogEntry
 
 
@@ -162,14 +162,26 @@ def edit_appointment(request, appointment_id):
     if not appointment.accessible_by_user(request.user):
         raise PermissionDenied()
 
-    if request.method == 'POST':
-        form = AppointmentFormForDoctor(request.POST, instance=appointment)
-        if form.is_valid():
-            CreateLogEntry(request.user.username, "Appointment edited.")
-            form.save()
-            return render(request, 'reservation/appointment/edit.html', {'form': form, 'message': 'All changes saved.'})
+    if ProfileInformation.from_user(request.user).account_type == Doctor.ACCOUNT_TYPE:
+        if request.method == 'POST':
+            form = AppointmentFormForDoctor(request.POST, instance=appointment)
+            if form.is_valid():
+                CreateLogEntry(request.user.username, "Appointment edited.")
+                form.save()
+                return render(request, 'reservation/appointment/edit.html',
+                              {'form': form, 'message': 'All changes saved.'})
+        else:
+            form = AppointmentFormForDoctor(instance=appointment)
     else:
-        form = AppointmentFormForDoctor(instance=appointment)
+        if request.method == 'POST':
+            form = AppointmentFormForPatient(request.POST, instance=appointment)
+            if form.is_valid():
+                CreateLogEntry(request.user.username, "Appointment edited.")
+                form.save()
+                return render(request, 'reservation/appointment/edit.html',
+                              {'form': form, 'message': 'All changes saved.'})
+        else:
+            form = AppointmentFormForPatient(instance=appointment)
 
     return render(request, 'reservation/appointment/edit.html', {'form': form})
 
