@@ -76,7 +76,7 @@
                         {% csrf_token %}
                         {% for doctor in doctors %}
                         <li class="list-group-item"><input type="checkbox" name="doctor_list"
-                                                            value="{{ doctor }}"> Dr.
+                                                            value="{{ doctor.user.id }}"> Dr.
                             {{ doctor.user.first_name }} {{ doctor.user.last_name }}</li>
                             {% endfor %}
                         <li class="list-group-item"><input type="submit" value="Save" class="button-sm"/></li>

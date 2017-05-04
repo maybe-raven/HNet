@@ -83,8 +83,10 @@ def weekview(request, day=datetime.date.today().day, month=datetime.date.today()
 
     if request.method == "POST":
         doctor_list = request.POST.getlist("doctor_list")
-        for doctor in doctor_list:
-            appointments = Appointment.objects.all().filter(doctor=doctor)
+        for doctor_id in doctor_list:
+            doctor_selected = Doctor.objects.all().filter(id=doctor_id)
+            for d in doctor_selected:
+                appointments = Appointment.objects.all().filter(doctor=d)
     else:
         appointments = Appointment.get_for_user_in_week_starting_at_date(request.user, week_starting_date)
 
