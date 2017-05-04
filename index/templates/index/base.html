@@ -59,7 +59,8 @@
                         <li><a href="{% url 'reservation:weekview_now' %}">Weekview Calendar</a></li>
                     </ul>
                 </li>
-                {% else %}
+                {% endif %}
+                {% if user.profile_information.account_type == "N" %}
                 <li><a href="{% url 'reservation:weekview_now' %}">Calendar</a></li>
                 {% endif %}
                 {% endif %}
