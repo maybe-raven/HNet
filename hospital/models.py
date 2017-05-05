@@ -70,7 +70,7 @@ class Statistics(models.Model):
         string += "Number of prescriptions given : " + str(self.prescriptions_given) + "\n"
         string += "Number of Doctors : " + str(self.num_of_doctors) + "\n"
         string += "Number of Nurses : " + str(self.num_of_nurses) + "\n"
-        string += "Appointments that day : " + str(self.appointments_that_day) + "\n"
+        string += "Appointments today : " + str(self.appointments_that_day) + "\n"
         return string
 
 
