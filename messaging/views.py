@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from .forms import MessageForm
-
+from .models import Message
 
 @login_required
 def send_message(request):
@@ -15,3 +15,13 @@ def send_message(request):
         form = MessageForm()
 
     return render(request, 'messaging/send.html', {'form': form})
+
+@login_required
+def view_message(request):
+    view = Message.view.get()
+    message = MessageForm(request)
+    m = Message(message)
+    content = m.content
+    message.save()
+
+    return render(request, 'messaging/view.html')
