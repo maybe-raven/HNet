@@ -32,6 +32,7 @@ class Diagnosis(models.Model):
     class Meta:
         permissions = (
             ('view_diagnosis', 'Can view diagnoses'),
+            ('view_own_diagnoses', 'Can view own diagnoses')
         )
 
 
