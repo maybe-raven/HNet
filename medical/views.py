@@ -14,6 +14,7 @@ import tempfile
 import os
 from django.conf import settings
 from django.http import HttpResponse
+from account.forms import ProfileInformationForm
 
 
 @login_required
@@ -230,6 +231,8 @@ def create_diagnosis(request, patient_id):
 def update_diagnosis(request, diagnosis_id):
     diagnosis = get_object_or_404(Diagnosis, pk=diagnosis_id)
 
+    message = request.GET.get('message')
+
     if request.method == 'POST':
         form = DiagnosisForm(request.POST, instance=diagnosis)
         if form.is_valid():
@@ -237,7 +240,6 @@ def update_diagnosis(request, diagnosis_id):
             return render(request, 'medical/diagnosis/update.html',
                           {'form': form, 'message': 'All changes saved.'})
     else:
-        message = request.GET.get('message')
         form = DiagnosisForm(instance=diagnosis)
 
     return render(request, 'medical/diagnosis/update.html',
@@ -339,6 +341,7 @@ def export_information(request):
         raise Http404
 
 
+@login_required()
 @permission_required('medical.view_prescription')
 def medical_view_options(request):
     patient = get_account_from_user(request.user)
@@ -354,6 +357,7 @@ def test_view(request):
     context = {'patient': patient, 'test_list': tests}
     return render(request, 'medical/test/test_view.html', context)
 
+
 @login_required()
 @permission_required('medical.view_test_results')
 def test_detail(request, test_id):
@@ -362,4 +366,16 @@ def test_detail(request, test_id):
     return render(request, 'medical/test/test_detail.html', context)
 
 
+@permission_required('medical.view_own_diagnoses')
+def medical_overview(request):
+    patient = request.user.patient
+    medical_information = list(Diagnosis.objects.filter(patient=patient).filter(treatment_session=None))
+    medical_information.extend(TreatmentSession.objects.filter(patient=patient))
 
+    medical_information.sort(
+        reverse=True,
+        key=lambda item: item.creation_timestamp if isinstance(item, Diagnosis) else item.admission_timestamp
+    )
+
+    context = {'patient': patient, 'medical_information': medical_information}
+    return render(request, 'medical/patient/medical_overview.html', context)

@@ -22,5 +22,6 @@ urlpatterns = [
     url(r'^test/release/(?P<test_id>[0-9]+)/$', views.release_test_result, name='release_test_result'),
     url(r'^test/test_detail/(?P<test_id>[0-9]+)/$', views.test_detail, name='test_detail'),
     url(r'^download_info/$', views.export_information, name='export_information'),
-    url(r'^medical_info/$', views.medical_view_options, name='medical_info')
+    url(r'^medical_info/$', views.medical_view_options, name='medical_info'),
+    url(r'^medical_overview/$', views.medical_overview, name='medical_overview')
 ]
