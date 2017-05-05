@@ -2,8 +2,7 @@ from datetime import datetime
 from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
 from django.shortcuts import render, redirect, get_object_or_404
 from account.models import Patient, get_account_from_user
-from hospital.models import TreatmentSession, Hospital
-from hospital.statistics import Statistics
+from hospital.models import TreatmentSession, Hospital, Statistics
 from hnet.logger import CreateLogEntry, readLog
 
 
@@ -12,7 +11,7 @@ from hnet.logger import CreateLogEntry, readLog
 @user_passes_test(lambda u: not u.is_superuser)
 def admit_patient(request, patient_id):
     patient = get_object_or_404(Patient, pk=patient_id)
-    Statistics.add_patient(Hospital.statistics)
+    Statistics.add_patient(Statistics.objetcs.get(name="Statistics"))
     if request.method == 'POST':
         if patient.get_current_treatment_session() is None:
             hospital = get_account_from_user(request.user).hospital
@@ -45,11 +44,13 @@ def discharge_patient(request, patient_id):
         return render(request, 'discharge/discharge.html', {'session': session})
 
 
+@login_required()
 def logView(request):
     log = readLog()
     return render(request, 'hospital/viewlog.html', {"log": log})
 
+
 @login_required()
 def statisticsView(request):
-    stats = Hospital.statistics.to_string(Hospital.statistics)
+    stats = Statistics.object.get()
     return render(request, 'hospital/viewstatistics.html', {"stats": stats})

@@ -1,5 +1,35 @@
 from django.db import models
-from .statistics import Statistics
+from django.core.exceptions import ObjectDoesNotExist
+
+
+class Statistics(models.Model):
+    name = models.CharField(max_length=30)
+    num_of_patients = models.DecimalField(max_digits=999, decimal_places=3)
+    avarage_visit_per_patient = models.DecimalField(max_digits=999, decimal_places=3)
+    avarage_leangth_of_stay = models.DecimalField(max_digits=999, decimal_places=3)
+    prescriptions_given = models.DecimalField(max_digits=999, decimal_places=3)
+
+    def add_patient(self):
+        self.num_of_patients += 1
+        self.save()
+
+    def add_prescription(self):
+        self.prescriptions_given += 1
+        self.save()
+
+    def calculate_avarage_visit_per_patient(self):
+        from account.models import Patient
+        total_patients = Patient.objects.last().id
+        self.avarage_visit_per_patient = self.num_of_patients / total_patients
+        self.save()
+
+    def __str__(self):
+        string = ""
+        string += "Number of patients visiting the hospital : " + str(self.num_of_patients) + "\n"
+        string += "Avarage visits per patient : " + str(self.avarage_visit_per_patient) + "\n"
+        string += "Avarage length of stay : " + str(self.avarage_leangth_of_stay) + "\n"
+        string += "Number of prescriptions given : " + str(self.prescriptions_given) + "\n"
+        return string
 
 
 class Hospital(models.Model):
@@ -11,7 +41,13 @@ class Hospital(models.Model):
     """A flag indicating whether or not this hospital is operational. Remove a hospital by setting this flag to False."""
     operational = models.BooleanField(default=True)
 
-    statistics = Statistics
+    statistics = models.ForeignKey(Statistics, on_delete=models.PROTECT)
+
+    try:
+        statistics = Statistics.objects.get(name="Statistics")
+    except ObjectDoesNotExist:
+        statistics = Statistics.objects.create(name="Statistics", num_of_patients=0, avarage_visit_per_patient=0
+                                               , avarage_leangth_of_stay=0, prescriptions_given=0)
 
     def __str__(self):
         return self.name
