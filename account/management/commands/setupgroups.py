@@ -161,7 +161,8 @@ class Command(BaseCommand):
 
         nurse_group.permissions = [view_prescription_permission, change_profile_information_permission,
                                    view_patients_permission, view_diagnosis_permission,
-                                   view_treatment_session_permission, add_treatment_session_permission]
+                                   view_treatment_session_permission, add_treatment_session_permission,
+                                   change_appointment_permission, view_appointment_permission]
         nurse_group.save()
 
         # Set up Doctor group.
