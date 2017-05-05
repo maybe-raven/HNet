@@ -97,3 +97,7 @@ def transfer_patient_as_doctor(request, patient_id):
 def logView(request):
     log = readLog()
     return render(request, 'hospital/viewlog.html', {"log": log})
+
+
+def system_information(request):
+    return render(request, 'hospital/system_information.html')
