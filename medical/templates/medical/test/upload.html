@@ -13,7 +13,7 @@
                 <p style="text-align: center;">{{ message }}</p>
             {% endif %}
 
-            <form method="post" action="{% url 'medical:upload_test_result' test.id %}" style="margin-bottom: 44pt;">
+            <form method="post" action="{% url 'medical:upload_test_result' test.id %}" style="margin-bottom: 44pt;" enctype="multipart/form-data">
                 {% csrf_token %}
                 <table>
                     {{ results_form.as_table }}

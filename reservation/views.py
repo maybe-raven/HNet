@@ -8,8 +8,9 @@ from django.core.urlresolvers import reverse
 from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
 from reservation.models import Appointment
 from reservation.forms import AppointmentFormForPatient, AppointmentFormForDoctor
-from account.models import Patient, Doctor, ProfileInformation
+from account.models import Patient, Doctor, ProfileInformation, Nurse
 from hnet.logger import CreateLogEntry
+from .models import get_account_from_user
 
 
 @login_required
@@ -68,6 +69,8 @@ def calendar(request, month=datetime.date.today().month, year=datetime.date.toda
 @user_passes_test(lambda u: not u.is_superuser)
 def weekview(request, day=datetime.date.today().day, month=datetime.date.today().month,
              year=datetime.date.today().year):
+    doctors = []
+    person = "user"
     day = int(day)
     month = int(month)
     year = int(year)
@@ -78,14 +81,29 @@ def weekview(request, day=datetime.date.today().day, month=datetime.date.today()
         week_starting_date -= datetime.timedelta(days=weekday)
     week_ending_date = week_starting_date + datetime.timedelta(days=6)
 
-    appointments = Appointment.get_for_user_in_week_starting_at_date(request.user, week_starting_date)
+    doctor_list = None
+    profile_information = ProfileInformation.from_user(request.user)
+    account_type = profile_information.account_type
+    if account_type == Nurse.ACCOUNT_TYPE:
+        nurse = get_account_from_user(request.user)
+        hospital = nurse.hospital
+        person = "nurse"
+        doctors = Doctor.objects.all().filter(hospital=hospital)
+        if request.method == "POST":
+            doctor_list = [parse_int(x) for x in request.POST.getlist("doctor_list")]
+            appointments = Appointment.objects.filter(doctor_id__in=doctor_list)
+        else:
+            appointments = Appointment.objects.filter(doctor__hospital=hospital)
+    else:
+        appointments = Appointment.get_for_user_in_week_starting_at_date(request.user, week_starting_date)
 
     week = get_week(week_starting_date, week_ending_date)
     last_week = week_starting_date - datetime.timedelta(days=1)
     next_week = week_ending_date + datetime.timedelta(days=1)
     # 'start_date' and 'end_date' are `datetime.date` objects representing the dates at the start and end of the week.
     context = {'appointment_list': appointments, 'week': week, 'start_day': week_starting_date,
-               'end_day': week_ending_date, 'next_week': next_week, 'last_week': last_week}
+               'end_day': week_ending_date, 'next_week': next_week, 'last_week': last_week, 'person': person,
+               'doctors': doctors, 'selected_doctor_list': doctor_list}
 
     return render(request, 'reservation/weekview.html', context)
 
@@ -234,7 +252,6 @@ def get_week(start_day, end_day):
             day_index -= 1
             temp_index += 1
 
-
     return weekday
 
 
@@ -318,3 +335,10 @@ def calculate_day(month, year):
     days = [days_one, days_two, days_three, days_four, days_five, days_six]
 
     return days
+
+
+def parse_int(input):
+    try:
+        return int(input)
+    except ValueError:
+        return None

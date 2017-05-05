@@ -273,7 +273,7 @@ def upload_test_result(request, test_id):
     test = get_object_or_404(Test, pk=test_id)
 
     if request.method == 'POST':
-        results_form = TestResultsForm(request.POST, instance=test)
+        results_form = TestResultsForm(request.POST, request.FILES, instance=test)
         if results_form.is_valid():
             results_form.save()
             CreateLogEntry(request.user.username, "Test results uploaded.")
