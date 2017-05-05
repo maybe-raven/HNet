@@ -1,7 +1,8 @@
 from django.db import models
 from datetime import date, timedelta
-from hospital.models import Hospital, TreatmentSession
+from hospital.models import TreatmentSession
 from account.models import Doctor, Patient
+from django.core.exceptions import ValidationError
 
 
 class Diagnosis(models.Model):
@@ -39,9 +40,14 @@ class Test(models.Model):
     doctor = models.ForeignKey(Doctor, on_delete=models.PROTECT)
     diagnosis = models.ForeignKey(Diagnosis, on_delete=models.PROTECT)
 
+    @classmethod
+    def validate_file_extension(value):
+        if not value.name.endswith('.jpeg','.png','.jpg'):
+            raise ValidationError(u'Invalid File Type')
+
     description = models.TextField()
     results = models.TextField()
-    file = models.FileField(default=None, upload_to="media/test_result")
+    file = models.FileField(default=None, upload_to="media/test_result", validators=validate_file_extension)
 
     uploaded = models.BooleanField(default=False)
     released = models.BooleanField(default=False)
