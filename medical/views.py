@@ -304,7 +304,7 @@ def export_information(request):
     prescriptions = Prescription.objects.all()
     tests = Test.objects.all()
 
-    file_path = os.path.join(settings.MEDIA_ROOT, 'medical/media/%s_medical_information.txt' % request.user.username)
+    file_path = os.path.join(settings.MEDIA_ROOT, 'media/medical_information/%s.txt' % request.user.username)
     with open(file_path, 'w') as info_file:
         info_file.write("Medical Information for " + patient.user.first_name + " " + patient.user.last_name +
                         "\n\nPrescriptions:\n\n")
@@ -344,3 +344,22 @@ def medical_view_options(request):
     patient = get_account_from_user(request.user)
     context = {'user': patient}
     return render(request, 'medical/patient/medical_view_options.html', context)
+
+
+@login_required()
+@permission_required('medical.view_test_results')
+def test_view(request):
+    patient = request.user.patient
+    tests = Test.objects.all().filter(diagnosis__patient=patient)
+    context = {'patient': patient, 'test_list': tests}
+    return render(request, 'medical/test/test_view.html', context)
+
+@login_required()
+@permission_required('medical.view_test_results')
+def test_detail(request, test_id):
+    test = get_object_or_404(Test, pk=test_id)
+    context = {'test': test}
+    return render(request, 'medical/test/test_detail.html', context)
+
+
+

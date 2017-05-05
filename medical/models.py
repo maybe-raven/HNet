@@ -68,6 +68,7 @@ class Test(models.Model):
             ('request_test', 'Can request tests'),
             ('upload_test_results', 'Can upload test results'),
             ('release_test_results', 'Can release test results'),
+            ('view_test_results', 'Can view tests'),
         )
 
 
