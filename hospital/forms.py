@@ -1,5 +1,7 @@
 from django import forms
 from .models import TreatmentSession
+from account.models import Doctor
+
 
 
 class TransferForm(forms.ModelForm):
@@ -16,3 +18,10 @@ class TransferForm(forms.ModelForm):
     class Meta:
         model = TreatmentSession
         fields = ['treating_hospital']
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super(TransferForm, self).__init__(*args, **kwargs)
+        if user:
+            self.fields['treating_hospital'].queryset = \
+                self.fields['treating_hospital'].queryset.exclude(administrator=user.administrator)

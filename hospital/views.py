@@ -1,7 +1,7 @@
 from datetime import datetime
 from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
 from django.shortcuts import render, redirect, get_object_or_404
-from account.models import Patient, get_account_from_user, Doctor
+from account.models import Patient, get_account_from_user
 from hospital.models import TreatmentSession
 from hnet.logger import CreateLogEntry, readLog
 from hospital.forms import TransferForm
@@ -55,13 +55,13 @@ def transfer_patient_as_admin(request, patient_id):
         return render(request, 'transfer/not_admitted.html', {'patient_id': patient_id})
 
     if request.method == 'POST':
-        form = TransferForm(request.POST)
+        form = TransferForm(request.POST, user=request.user)
         if form.is_valid():
             session.discharge_timestamp = datetime.now()
             session.save()
             form.save_by_admin(patient, session)
             CreateLogEntry(request.user.username, "Patient transferred.")
-            return render(request, 'transfer/transfer_done.html', {'patient_id': patient_id})
+            return render(request, 'transfer/transfer_done_admin.html', {'patient_id': patient_id})
     else:
         form = TransferForm()
 
@@ -77,6 +77,9 @@ def transfer_patient_as_doctor(request, patient_id):
 
     if session is None:
         return redirect('medical:view_medical_information', patient_id=patient_id)
+
+    if session.treating_hospital is get_account_from_user(request.user).hospital:
+        return render(request, 'transfer/cant_transfer.html')
 
     if request.method == 'POST':
         session.discharge_timestamp = datetime.now()

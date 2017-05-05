@@ -130,11 +130,15 @@ class Command(BaseCommand):
                                                             content_type=drug_content_type)
             add_nurse_permission = Permission.objects.get(codename='add_nurse',
                                                           content_type=nurse_content_type)
+
+            download_medical_information = Permission.objects.get(codename='export_information',
+                                                                  content_type=prescription_content_type)
             transfer_patient_any_permission = Permission.objects.get(codename='transfer_patient_any_hospital',
                                                                      content_type=treatment_session_content_type)
             transfer_patient_receiving_permission = Permission.objects.get(
                 codename='transfer_patient_receiving_hospital',
                 content_type=treatment_session_content_type)
+            
         except (Permission.DoesNotExist, OperationalError):
             if quiet:
                 return
@@ -147,7 +151,8 @@ class Command(BaseCommand):
         patient_group.permissions = [change_patient_permission, change_profile_information_permission,
                                      add_appointment_permission,
                                      cancel_appointment_permission, change_appointment_permission,
-                                     view_appointment_permission, view_prescription_permission]
+                                     view_appointment_permission, view_prescription_permission,
+                                     download_medical_information]
         patient_group.save()
 
         # Set up Nurse group.
@@ -156,7 +161,8 @@ class Command(BaseCommand):
 
         nurse_group.permissions = [view_prescription_permission, change_profile_information_permission,
                                    view_patients_permission, view_diagnosis_permission,
-                                   view_treatment_session_permission, add_treatment_session_permission]
+                                   view_treatment_session_permission, add_treatment_session_permission,
+                                   change_appointment_permission, view_appointment_permission]
         nurse_group.save()
 
         # Set up Doctor group.
