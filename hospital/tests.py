@@ -4,7 +4,7 @@ from django.contrib.auth.models import User, AnonymousUser
 from account.management.commands import setupgroups
 from account.models import Patient, Doctor, Nurse, Administrator, create_default_account
 from medical.models import Diagnosis
-from hospital.models import Hospital, TreatmentSession
+from hospital.models import Hospital, TreatmentSession, Statistics
 from hospital import views
 
 PATIENT_USERNAME = 'patient'
@@ -19,7 +19,15 @@ class PatientAdmissionTestCase(TestCase):
     def setUpTestData(cls):
         setupgroups.Command().handle(quiet=True)
 
-        hospital = Hospital.objects.create()
+        hospital = Hospital.objects.create(name='Test hospital',
+                                       statistics=Statistics.objects.create(name="Statistics", num_of_patients=0,
+                                                                            avarage_visit_per_patient=0,
+                                                                            avarage_length_of_stay=0,
+                                                                            prescriptions_given=0,
+                                                                            num_of_doctors=0,
+                                                                            num_of_nurses=0,
+                                                                            appointments_that_day=0)
+                                       , location='Test location')
         create_default_account(PATIENT_USERNAME, PASSWORD, Patient, hospital)
         create_default_account(DOCTOR_USERNAME, PASSWORD, Doctor, hospital)
         create_default_account(NURSE_USERNAME, PASSWORD, Nurse, hospital)
@@ -98,7 +106,15 @@ class PatientDischargeTestCase(TestCase):
     def setUpTestData(cls):
         setupgroups.Command().handle(quiet=True)
 
-        hospital = Hospital.objects.create()
+        hospital = Hospital.objects.create(name='Test hospital',
+                                       statistics=Statistics.objects.create(name="Statistics", num_of_patients=0,
+                                                                            avarage_visit_per_patient=0,
+                                                                            avarage_length_of_stay=0,
+                                                                            prescriptions_given=0,
+                                                                            num_of_doctors=0,
+                                                                            num_of_nurses=0,
+                                                                            appointments_that_day=0)
+                                       , location='Test location')
         create_default_account(PATIENT_USERNAME, PASSWORD, Patient, hospital)
         create_default_account(DOCTOR_USERNAME, PASSWORD, Doctor, hospital)
         create_default_account(NURSE_USERNAME, PASSWORD, Nurse, hospital)
@@ -177,7 +193,15 @@ class PatientDischargeTestCase(TestCase):
         patient = User.objects.get(username=PATIENT_USERNAME).patient
         # Create a different patient account to admit.
         admitted_patient_username = 'admitted_patient'
-        hospital = Hospital.objects.first()
+        hospital = Hospital.objects.create(name='Test hospital',
+                                       statistics=Statistics.objects.create(name="Statistics", num_of_patients=0,
+                                                                            avarage_visit_per_patient=0,
+                                                                            avarage_length_of_stay=0,
+                                                                            prescriptions_given=0,
+                                                                            num_of_doctors=0,
+                                                                            num_of_nurses=0,
+                                                                            appointments_that_day=0)
+                                       , location='Test location')
         admitted_patient = create_default_account(admitted_patient_username, PASSWORD, Patient, hospital).patient
         # Admit the second patient account.
         TreatmentSession.objects.create(patient=admitted_patient, treating_hospital=hospital)
@@ -207,7 +231,15 @@ class ViewStatisticsTestCase(TestCase):
     def setUpTestData(cls):
         setupgroups.Command().handle(quiet=True)
 
-        hospital = Hospital.objects.create()
+        hospital = Hospital.objects.create(name='Test hospital',
+                                       statistics=Statistics.objects.create(name="Statistics", num_of_patients=0,
+                                                                            avarage_visit_per_patient=0,
+                                                                            avarage_length_of_stay=0,
+                                                                            prescriptions_given=0,
+                                                                            num_of_doctors=0,
+                                                                            num_of_nurses=0,
+                                                                            appointments_that_day=0)
+                                       , location='Test location')
         create_default_account(PATIENT_USERNAME, PASSWORD, Patient, hospital)
         create_default_account(DOCTOR_USERNAME, PASSWORD, Doctor, hospital)
         create_default_account(NURSE_USERNAME, PASSWORD, Nurse, hospital)
@@ -218,7 +250,5 @@ class ViewStatisticsTestCase(TestCase):
 
     def test_redirect(self):
         administrator = User.objects.get(username=ADMINISTRATOR_USERNAME).administrator
-        request = self.factory.post(reverse('hospital:statistics', args=[administrator.id]), {})
-        request.user = User.objects.get(username=ADMINISTRATOR_USERNAME)
-        response = views.statisticsView
-        self.assertEqual(response.status_code, 200, 'Expected to view statistics page.')
+        response = self.client.get(reverse("hospital:statistics"))
+        self.assertEqual(response.status_code, 302, 'Expected to view statistics page.')
