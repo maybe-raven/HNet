@@ -41,6 +41,7 @@ class Test(models.Model):
 
     description = models.TextField()
     results = models.TextField()
+    file = models.FileField(default=None, upload_to="media/test_result")
 
     uploaded = models.BooleanField(default=False)
     released = models.BooleanField(default=False)
