@@ -2,7 +2,7 @@ from datetime import datetime
 from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
 from django.shortcuts import render, redirect, get_object_or_404
 from account.models import Patient, get_account_from_user
-from hospital.models import TreatmentSession, Hospital, Statistics
+from hospital.models import TreatmentSession, Statistics
 from hnet.logger import CreateLogEntry, readLog
 
 
@@ -11,7 +11,7 @@ from hnet.logger import CreateLogEntry, readLog
 @user_passes_test(lambda u: not u.is_superuser)
 def admit_patient(request, patient_id):
     patient = get_object_or_404(Patient, pk=patient_id)
-    Statistics.add_patient(Statistics.objetcs.get(name="Statistics"))
+    Statistics.add_patient(Statistics.objects.get(name="Statistics"))
     if request.method == 'POST':
         if patient.get_current_treatment_session() is None:
             hospital = get_account_from_user(request.user).hospital
@@ -52,5 +52,11 @@ def logView(request):
 
 @login_required()
 def statisticsView(request):
-    stats = Statistics.object.get()
+    Statistics.find_appointments(Statistics.objects.get(name="Statistics"))
+    Statistics.find_doctors(Statistics.objects.get(name="Statistics"))
+    Statistics.find_nurses(Statistics.objects.get(name="Statistics"))
+    Statistics.calculate_avarage_length_of_stay(Statistics.objects.get(name="Statistics"))
+    Statistics.calculate_avarage_visit_per_patient(Statistics.objects.get(name="Statistics"))
+    stats_string = Statistics.__str__(Statistics.objects.get(name="Statistics"))
+    stats = stats_string.split("\n")
     return render(request, 'hospital/viewstatistics.html', {"stats": stats})

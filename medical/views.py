@@ -54,7 +54,7 @@ def view_prescriptions(request, patient_id):
 @user_passes_test(lambda u: not u.is_superuser)
 def add_prescription(request, diagnosis_id):
     diagnosis = get_object_or_404(Diagnosis, pk=diagnosis_id)
-    Statistics.add_prescription(Statistics.objetcs.get(name="Statistics"))
+    Statistics.add_prescription(Statistics.objects.get(name="Statistics"))
 
     if request.method == 'POST':
         form = PrescriptionForm(request.POST)
