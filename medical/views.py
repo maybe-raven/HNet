@@ -4,12 +4,15 @@ from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import render, get_object_or_404
 from django.core.urlresolvers import reverse
-from account.models import Patient, get_account_from_user
-from hospital.models import TreatmentSession
+from hospital.models import TreatmentSession, Hospital, Statistics
+from account.models import Patient, Nurse, get_account_from_user
 from .models import Drug, Diagnosis, Test, Prescription
 from .forms import DrugForm, DiagnosisForm, TestForm, TestResultsForm, PrescriptionForm
-from medical.models import Prescription
 from hnet.logger import CreateLogEntry
+import os
+from django.conf import settings
+from django.http import HttpResponse
+from account.forms import ProfileInformationForm
 
 
 @login_required
@@ -44,8 +47,9 @@ def view_prescriptions(request, patient_id):
     prescriptions = Prescription.objects.all()
     list_prescription = []
     for prescription in prescriptions:
-        if prescription.diagnosis.treatment_session.patient == patient:
-            list_prescription.append(prescription)
+        if prescription.active():
+            if prescription.diagnosis.patient == patient:
+                list_prescription.append(prescription)
     context = {'prescription_list': list_prescription, 'patient': patient}
     return render(request, 'patient/patient_overview.html', context)
 
@@ -54,6 +58,7 @@ def view_prescriptions(request, patient_id):
 @user_passes_test(lambda u: not u.is_superuser)
 def add_prescription(request, diagnosis_id):
     diagnosis = get_object_or_404(Diagnosis, pk=diagnosis_id)
+    Statistics.add_prescription(Statistics.objects.get(name="Statistics"))
 
     if request.method == 'POST':
         form = PrescriptionForm(request.POST)
@@ -108,16 +113,34 @@ def remove_prescription(request, prescription_id):
 @user_passes_test(lambda u: not u.is_superuser)
 def view_patients(request):
     nurse = get_account_from_user(request.user)
-    hospital = nurse.hospital
+    patients = Patient.objects.all()
+    if request.user.profile_information.account_type == Nurse.ACCOUNT_TYPE:
+        hospital = nurse.hospital
+        patients = [p for p in patients if p.get_admitted_hospital() == hospital]
+        patients += Patient.objects.filter(preferred_hospital=hospital)
+
+    context = {'patient_list': patients, 'hospital': hospital}
+
+    return render(request, 'patient/view_patients.html', context)
+
+
+@login_required
+@permission_required('hospital.transfer_patient_any_hospital')
+@user_passes_test(lambda u: not u.is_superuser)
+def view_patients_admin(request):
+    admin = get_account_from_user(request.user)
+    hospital = admin.hospital
     list_patients = []
     patients = Patient.objects.all()
     for patient in patients:
-        if patient.preferred_hospital == hospital:
-            list_patients.append(patient)
+        session = patient.get_current_treatment_session()
+        if session:
+            if session.treating_hospital == hospital:
+                list_patients.append(patient)
 
     context = {'patient_list': list_patients, 'hospital': hospital}
 
-    return render(request, 'patient/view_patients.html', context)
+    return render(request, 'patient/view_patients_admin.html', context)
 
 
 @permission_required('medical.remove_drug')
@@ -168,8 +191,18 @@ def view_medical_information(request, patient_id):
         key=lambda item: item.creation_timestamp if isinstance(item, Diagnosis) else item.admission_timestamp
     )
 
-    return render(request, 'medical/patient/medical_information.html',
-                  {'medical_information': medical_information, 'patient': patient})
+    if patient.get_current_treatment_session() is not None:
+        can_transfer = get_account_from_user(request.user).hospital != \
+                       patient.get_current_treatment_session().treating_hospital
+    else:
+        can_transfer = False
+
+    return render(request, 'medical/patient/medical_information.html', {
+        'medical_information': medical_information, 'patient': patient,
+        'user_has_edit_permission': request.user.has_perm('medical.change_diagnosis'),
+        'user_has_add_permission': request.user.has_perm('medical.add_diagnosis'),
+        'can_transfer': can_transfer
+    })
 
 
 @login_required
@@ -197,6 +230,8 @@ def create_diagnosis(request, patient_id):
 def update_diagnosis(request, diagnosis_id):
     diagnosis = get_object_or_404(Diagnosis, pk=diagnosis_id)
 
+    message = request.GET.get('message')
+
     if request.method == 'POST':
         form = DiagnosisForm(request.POST, instance=diagnosis)
         if form.is_valid():
@@ -204,7 +239,6 @@ def update_diagnosis(request, diagnosis_id):
             return render(request, 'medical/diagnosis/update.html',
                           {'form': form, 'message': 'All changes saved.'})
     else:
-        message = request.GET.get('message')
         form = DiagnosisForm(instance=diagnosis)
 
     return render(request, 'medical/diagnosis/update.html',
@@ -229,7 +263,8 @@ def request_test(request, diagnosis_id):
             return render(request, 'medical/test/requested.html', {'diagnosis_id': diagnosis_id})
     else:
         test_form = TestForm()
-        return render(request, 'medical/test/request.html', {'test_form': test_form, 'diagnosis': diagnosis})
+
+    return render(request, 'medical/test/request.html', {'test_form': test_form, 'diagnosis': diagnosis})
 
 
 @login_required()
@@ -239,7 +274,7 @@ def upload_test_result(request, test_id):
     test = get_object_or_404(Test, pk=test_id)
 
     if request.method == 'POST':
-        results_form = TestResultsForm(request.POST, instance=test)
+        results_form = TestResultsForm(request.POST, request.FILES, instance=test)
         if results_form.is_valid():
             results_form.save()
             CreateLogEntry(request.user.username, "Test results uploaded.")
@@ -261,3 +296,85 @@ def release_test_result(request, test_id):
         return render(request, 'medical/test/release_done.html', {'diagnosis_id': test.diagnosis.id})
 
     return render(request, 'medical/test/release.html', {'test': test})
+
+
+@login_required()
+@permission_required('medical.export_information')
+def export_information(request):
+    patient = get_account_from_user(request.user)
+    prescriptions = Prescription.objects.all()
+    tests = Test.objects.all()
+
+    file_path = os.path.join(settings.MEDIA_ROOT, 'media/medical_information/%s.txt' % request.user.username)
+    with open(file_path, 'w') as info_file:
+        info_file.write("Medical Information for " + patient.user.first_name + " " + patient.user.last_name +
+                        "\n\nPrescriptions:\n\n")
+        if not prescriptions:
+            info_file.write("You have no prescriptions.")
+        else:
+            for prescription in prescriptions:
+                if prescription.diagnosis.patient == patient:
+                    info_file.write(
+                        "Diagnosis: " + prescription.diagnosis.summary + "\nDrug: " + prescription.drug.name + "\n" +
+                        "Prescribing Doctor: Dr. " + prescription.doctor.user.first_name + " "
+                        + prescription.doctor.user.last_name + "\n" + "Amount: " + prescription.quantity_info() +
+                        "\nDirections: " + prescription.instruction + "\n\n")
+        info_file.write("\n\nTest Results:\n\n")
+        if not tests:
+            info_file.write("You have no test results.")
+        else:
+            for test in tests:
+                if test.diagnosis.patient == patient and test.released:
+                    info_file.write(
+                        "Test Released by Doctor: Dr. " + test.doctor.user.first_name + test.doctor.user.last_name +
+                        "\n" + "Description: " + test.description + "\n" + "Results: " + test.results + "\n\n")
+
+        info_file.close()
+
+    if os.path.exists(file_path):
+        with open(file_path, 'rb') as fh:
+            response = HttpResponse(fh.read(), content_type="application/text;charset=UTF-8")
+            response['Content-Disposition'] = 'inline; filename=medical_information.txt'
+            return response
+    else:
+        raise Http404
+
+
+@login_required()
+@permission_required('medical.view_prescription')
+def medical_view_options(request):
+    patient = get_account_from_user(request.user)
+    context = {'patient': patient}
+    return render(request, 'medical/patient/medical_view_options.html', context)
+
+
+@login_required()
+@permission_required('medical.view_test_results')
+def test_view(request):
+    patient = request.user.patient
+    tests = Test.objects.all().filter(diagnosis__patient=patient)
+    context = {'patient': patient, 'test_list': tests}
+    return render(request, 'medical/test/test_view.html', context)
+
+
+@login_required()
+@permission_required('medical.view_test_results')
+def test_detail(request, test_id):
+    test = get_object_or_404(Test, pk=test_id)
+    context = {'test': test}
+    return render(request, 'medical/test/test_detail.html', context)
+
+
+@permission_required('medical.view_own_diagnoses')
+def medical_overview(request):
+    patient = request.user.patient
+    medical_information = list(Diagnosis.objects.filter(patient=patient).filter(treatment_session=None))
+    medical_information.extend(TreatmentSession.objects.filter(patient=patient))
+
+    medical_information.sort(
+        reverse=True,
+        key=lambda item: item.creation_timestamp if isinstance(item, Diagnosis) else item.admission_timestamp
+    )
+
+    context = {'patient': patient, 'medical_information': medical_information}
+    return render(request, 'medical/patient/medical_overview.html', context)

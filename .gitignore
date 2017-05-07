@@ -8,3 +8,5 @@ activity.log
 
 */migrations/*
 !*/migrations/__init__.py
+
+media/*

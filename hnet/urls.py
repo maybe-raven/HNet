@@ -23,4 +23,5 @@ urlpatterns = [
     url(r'^reservation/', include('reservation.urls')),
     url(r'^hospital/', include('hospital.urls')),
     url(r'^medical/', include('medical.urls')),
+    url(r'^messaging/', include('messaging.urls')),
 ]

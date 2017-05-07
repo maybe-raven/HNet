@@ -4,7 +4,7 @@ from django.contrib import auth
 from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
 from .forms import UserCreationForm, UserChangeForm, ProfileInformationForm, PatientCreationForm, PatientChangeForm, \
     AdministratorForm, DoctorCreationForm, NurseForm
-from .models import ProfileInformation, Administrator, get_account_from_user
+from .models import ProfileInformation, Patient, Administrator, get_account_from_user
 from hnet.logger import CreateLogEntry
 
 
@@ -39,31 +39,30 @@ def register_patient(request):
 def profile(request):
     user = request.user
     profile_information = user.profile_information
-    patient = user.patient
+    account = get_account_from_user(request.user)
 
     if request.method == 'POST':
         user_form = UserChangeForm(request.POST, instance=user)
         profile_information_form = ProfileInformationForm(request.POST, instance=profile_information)
-        patient_form = PatientChangeForm(request.POST, instance=patient)
-        if user_form.is_valid() and profile_information_form.is_valid() and patient_form.is_valid():
+        patient_form = PatientChangeForm(request.POST, instance=account) if isinstance(account, Patient) else None
+        if user_form.is_valid() and profile_information_form.is_valid() and (patient_form is None or patient_form.is_valid()):
             user_form.save()
             profile_information_form.save()
-            patient_form.save()
+            if patient_form:
+                patient_form.save()
             CreateLogEntry(request.user.username, "Changed profile information.")
-            return render(request, 'account/patient/profile.html',
-                          {'profile_information_form': profile_information_form,
-                           'user_form': user_form,
-                           'patient_form': patient_form,
-                           'message': 'All changes saved.'})
+            return render(request, 'account/patient/profile.html', {
+                'form_list': [user_form, profile_information_form, patient_form],
+                'message': 'All changes saved.'
+            })
     else:
         user_form = UserChangeForm(instance=user)
         profile_information_form = ProfileInformationForm(instance=profile_information)
-        patient_form = PatientChangeForm(instance=patient)
+        patient_form = PatientChangeForm(instance=account) if isinstance(account, Patient) else None
 
-    return render(request, 'account/patient/profile.html',
-                  {'profile_information_form': profile_information_form,
-                   'patient_form': patient_form,
-                   'user_form': user_form})
+    return render(request, 'account/patient/profile.html', {
+        'form_list': [user_form, profile_information_form, patient_form],
+    })
 
 
 @login_required()

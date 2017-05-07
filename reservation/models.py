@@ -3,31 +3,6 @@ from django.db import models
 from account.models import Patient, Doctor, get_account_from_user
 
 
-class Location(models.Model):
-    """
-    Represent a location within a hospital that can be used for an appointment
-    E.g.: a doctor's office.
-    """
-    doctor = models.ForeignKey('account.Doctor', on_delete=models.PROTECT)
-
-    """The location of this 'location' within a hospital"""
-    location = models.CharField(max_length=20)
-
-    """Is this location currently available for an appointment."""
-    available = models.BooleanField(default=True)
-
-    """
-    Is this record still active?
-    If an office is no longer used or assigned to a different doctor,
-    set this flag to false rather than deleting or modifying this record to maintain data integrity,
-    and create new record for the same physical location if necessary.
-    """
-    active = models.BooleanField(default=True)
-
-    def __str__(self):
-        return self.location
-
-
 class Appointment(models.Model):
     """
     A model object that stores an appointment's information.
@@ -36,7 +11,6 @@ class Appointment(models.Model):
     title = models.CharField(max_length=50)
     patient = models.ForeignKey(Patient, on_delete=models.PROTECT)
     doctor = models.ForeignKey(Doctor, on_delete=models.PROTECT)
-    location = models.ForeignKey(Location, on_delete=models.PROTECT)
     date = models.DateField()
     start_time = models.TimeField()
     end_time = models.TimeField()
@@ -56,7 +30,8 @@ class Appointment(models.Model):
 
     @classmethod
     def get_for_user_in_year_in_month(cls, user, year, month):
-        return user.appointment_set.filter(date__year=year).filter(date__month=month).order_by('date', 'start_time')
+        return user.appointment_set.exclude(cancelled=True).filter(date__year=year).filter(date__month=month).order_by(
+            'date', 'start_time')
 
     @classmethod
     def get_for_user_in_week_starting_at_date(cls, user, starting_date):
@@ -71,13 +46,14 @@ class Appointment(models.Model):
 
         account = get_account_from_user(user)
         try:
-            return account.appointment_set.filter(date__gte=starting_date).filter(date__lt=starting_date + timedelta(days=7)).order_by('date', 'start_time')
+            return account.appointment_set.exclude(cancelled=True).filter(date__gte=starting_date).filter(
+                date__lt=starting_date + timedelta(days=7)).order_by('date', 'start_time')
         except AttributeError:
             return None
 
     @classmethod
     def get_for_user_in_date(cls, user, date):
-        return user.appointment_set.filter(date=date).order_by('start_time')
+        return user.appointment_set.exclude(cancelled=True).filter(date=date).order_by('start_time')
 
     class Meta:
         permissions = (

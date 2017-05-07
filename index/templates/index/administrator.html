@@ -1,5 +1,5 @@
 {% extends 'index/base.html' %}
-{% block title %}Admin Dashboard{% endblock %}
+{% block title %}Dashboard{% endblock %}
 {% block header %}Admin Dashboard {% endblock %}
 {% block login %}
 <li><a href="{% url 'account:logout' %}"><span class="glyphicon glyphicon-log-out"></span> Logout</a></li>
@@ -17,10 +17,10 @@
         <div class="row">
             <div class="col-md-3">
                 <div class="col-md-12">
-                    <a target="_parent" href="{% url 'hospital:log' %}">
+                    <a target="_parent" href="{% url 'hospital:system_information' %}">
                         <button class="iconbutton">
                             <i class="fa fa-tasks" aria-hidden="true"></i>
-                            <p style="font-size:20px;">View System Log</p>
+                            <p style="font-size:20px;">System Information</p>
                         </button>
                     </a>
                 </div>
@@ -46,10 +46,22 @@
             </div>
             <div class="col-md-3">
                 <div class="col-md-12">
-                    <a target="_parent" href="#">
+                    <a target="_parent" href="{% url 'messaging:index' %}">
                         <button class="iconbutton">
                             <span class="fa fa-envelope-o" aria-hidden="true"></span>
-                            <p style="font-size:20px;">Send Message</p></button>
+                            <p style="font-size:20px;">Messaging</p></button>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <h1></h1>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="col-md-12">
+                    <a target="_parent" href="{% url 'medical:view_patients_admin' %}">
+                        <button class="iconbutton">
+                            <span class="fa fa-arrow-circle-o-right" aria-hidden="true"></span>
+                            <p style="font-size:20px;">Transfer Patient</p></button>
                     </a>
                 </div>
             </div>

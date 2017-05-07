@@ -3,6 +3,7 @@ import datetime
 from django import forms
 from django.db.models import Q
 from reservation.models import Appointment
+from datetime import date, timedelta
 
 
 class BaseAppointmentForm(forms.ModelForm):
@@ -52,9 +53,11 @@ class BaseAppointmentForm(forms.ModelForm):
 
         return cleaned_data
 
+    date = forms.DateField(widget=forms.SelectDateWidget)
+
     class Meta:
         model = Appointment
-        fields = ['title', 'location', 'date', 'start_time', 'end_time']
+        fields = ['title', 'date', 'start_time', 'end_time']
 
 
 class AppointmentFormForPatient(BaseAppointmentForm):
@@ -70,20 +73,24 @@ class AppointmentFormForPatient(BaseAppointmentForm):
         :param creator: The patient participant.
         """
 
+        appointment = super(AppointmentFormForPatient, self).save(commit=False)
+
         if creator is not None:
-            appointment = super(AppointmentFormForPatient, self).save(commit=False)
             appointment.patient = creator.patient
+            appointment.end_time = (datetime.datetime.combine(date.today(), appointment.start_time) +
+                                    timedelta(minutes=30)).time()
 
             if commit:
                 appointment.save()
         else:
-            appointment = super(AppointmentFormForPatient, self).save(commit)
+            appointment.save()
 
         return appointment
 
     class Meta:
         model = Appointment
         fields = BaseAppointmentForm.Meta.fields + ['doctor']
+        exclude = ('end_time',)
 
 
 class AppointmentFormForDoctor(BaseAppointmentForm):

@@ -7,7 +7,6 @@ from account.models import Patient, Doctor, Nurse, Administrator
 from .forms import StephenLoginForm
 
 
-
 def index(request):
     profile_information = ProfileInformation.from_user(request.user)
     if profile_information is not None:
@@ -49,7 +48,7 @@ def log(request):
 @user_passes_test(lambda u: test_user_account_type(u, Patient.ACCOUNT_TYPE))
 def patient(request):
     patient = get_account_from_user(request.user)
-    context = {'patient':patient}
+    context = {'patient': patient}
     CreateLogEntry(request.user.username, "Patient logged in.")
     return render(request, 'index/patient.html', context)
 
@@ -57,15 +56,17 @@ def patient(request):
 @login_required()
 @user_passes_test(lambda u: test_user_account_type(u, Doctor.ACCOUNT_TYPE))
 def doctor(request):
+    doctor_name = get_account_from_user(request.user)
     CreateLogEntry(request.user.username, "Doctor logged in.")
-    return render(request, 'index/doctor.html')
+    return render(request, 'index/doctor.html', {'doctor': doctor_name})
 
 
 @login_required
 @user_passes_test(lambda u: test_user_account_type(u, Nurse.ACCOUNT_TYPE))
 def nurse(request):
+    nurse_name = get_account_from_user(request.user)
     CreateLogEntry(request.user.username, "Nurse logged in.")
-    return render(request, 'index/nurse.html')
+    return render(request, 'index/nurse.html', {'nurse': nurse_name})
 
 
 @login_required

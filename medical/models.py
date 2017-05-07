@@ -4,20 +4,12 @@ from hospital.models import Hospital, TreatmentSession
 from account.models import Doctor, Patient
 
 
-class DiagnosisCategory(models.Model):
-    name = models.CharField(max_length=20)
-
-    def __str__(self):
-        return self.name
-
-
 class Diagnosis(models.Model):
     treatment_session = models.ForeignKey(TreatmentSession, on_delete=models.CASCADE, null=True)
 
     patient = models.ForeignKey(Patient, on_delete=models.PROTECT, null=True)
     """A high level summary of this patient's condition, including any useful, medical information for the treatment"""
-    summary = models.TextField(blank=True)
-    category = models.ManyToManyField(DiagnosisCategory, blank=True)
+    summary = models.TextField()
     creation_timestamp = models.DateTimeField(auto_now_add=True)
     update_timestamp = models.DateTimeField(auto_now=True)
 
@@ -40,6 +32,7 @@ class Diagnosis(models.Model):
     class Meta:
         permissions = (
             ('view_diagnosis', 'Can view diagnoses'),
+            ('view_own_diagnoses', 'Can view own diagnoses')
         )
 
 
@@ -49,7 +42,7 @@ class Test(models.Model):
 
     description = models.TextField()
     results = models.TextField()
-    notes = models.TextField()
+    file = models.FileField(default=None, upload_to="media/test_result")
 
     uploaded = models.BooleanField(default=False)
     released = models.BooleanField(default=False)
@@ -76,6 +69,7 @@ class Test(models.Model):
             ('request_test', 'Can request tests'),
             ('upload_test_results', 'Can upload test results'),
             ('release_test_results', 'Can release test results'),
+            ('view_test_results', 'Can view tests'),
         )
 
 
@@ -124,7 +118,8 @@ class Prescription(models.Model):
             return 'N/A'
 
         if self.cycle % 30 == 0:
-            return '%s (%s)' % (self.pluralize_with_abbreviation(self.cycle // 30, 'month'), self.pluralize_with_abbreviation(self.cycle, 'day'))
+            return '%s (%s)' % (self.pluralize_with_abbreviation(self.cycle // 30, 'month'),
+                                self.pluralize_with_abbreviation(self.cycle, 'day'))
         elif self.cycle % 7 == 0:
             return self.pluralize_with_abbreviation(self.cycle // 7, 'week')
         else:
@@ -148,4 +143,5 @@ class Prescription(models.Model):
     class Meta:
         permissions = (
             ('view_prescription', 'Can view prescriptions'),
+            ('export_information', 'Can export information'),
         )
