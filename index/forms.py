@@ -1,4 +1,5 @@
 from django import forms
+from hnet.logger import CreateLogEntry
 
 
 class StephenLoginForm(forms.Form):
@@ -8,7 +9,7 @@ class StephenLoginForm(forms.Form):
     """
     username = forms.CharField(max_length=254)
     password = forms.CharField(label="Password", strip=False, widget=forms.PasswordInput)
-
+    CreateLogEntry("SREPHEN", " HAS LOGGED IN.")
     error_messages = {
         'invalid_login': "Please enter a correct %(username)s and password. "
                          "Note that both fields may be case-sensitive."
