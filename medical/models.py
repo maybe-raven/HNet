@@ -2,6 +2,7 @@ from django.db import models
 from datetime import date, timedelta
 from hospital.models import Hospital, TreatmentSession
 from account.models import Doctor, Patient
+from .validator import validate_file_extension
 
 
 class Diagnosis(models.Model):
@@ -42,7 +43,8 @@ class Test(models.Model):
 
     description = models.TextField()
     results = models.TextField()
-    file = models.FileField(default=None, upload_to="medical/static/test_results")
+
+    file = models.FileField(default=None, upload_to="medical/static/test_results", validators=[validate_file_extension])
 
     uploaded = models.BooleanField(default=False)
     released = models.BooleanField(default=False)

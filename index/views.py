@@ -13,16 +13,12 @@ def index(request):
         account_type = profile_information.account_type
 
         if account_type == Patient.ACCOUNT_TYPE:
-            CreateLogEntry(request.user.username, "Patient logged in.")
             return redirect(reverse('index:patient'))
         elif account_type == Doctor.ACCOUNT_TYPE:
-            CreateLogEntry(request.user.username, "Doctor logged in.")
             return redirect(reverse('index:doctor'))
         elif account_type == Nurse.ACCOUNT_TYPE:
-            CreateLogEntry(request.user.username, "Nurse logged in.")
             return redirect(reverse('index:nurse'))
         elif account_type == Administrator.ACCOUNT_TYPE:
-            CreateLogEntry(request.user.username, "Administrator logged in.")
             return redirect(reverse('index:administrator'))
     else:
         return render(request, 'index/index.html')
@@ -49,7 +45,6 @@ def log(request):
 def patient(request):
     patient = get_account_from_user(request.user)
     context = {'patient': patient}
-    CreateLogEntry(request.user.username, "Patient logged in.")
     return render(request, 'index/patient.html', context)
 
 
@@ -57,7 +52,6 @@ def patient(request):
 @user_passes_test(lambda u: test_user_account_type(u, Doctor.ACCOUNT_TYPE))
 def doctor(request):
     doctor_name = get_account_from_user(request.user)
-    CreateLogEntry(request.user.username, "Doctor logged in.")
     return render(request, 'index/doctor.html', {'doctor': doctor_name})
 
 
@@ -65,22 +59,22 @@ def doctor(request):
 @user_passes_test(lambda u: test_user_account_type(u, Nurse.ACCOUNT_TYPE))
 def nurse(request):
     nurse_name = get_account_from_user(request.user)
-    CreateLogEntry(request.user.username, "Nurse logged in.")
     return render(request, 'index/nurse.html', {'nurse': nurse_name})
 
 
 @login_required
 @user_passes_test(lambda u: test_user_account_type(u, Administrator.ACCOUNT_TYPE))
 def administrator(request):
-    CreateLogEntry(request.user.username, "Administrator logged in.")
     return render(request, 'index/administrator.html')
 
 
 def stephen(request):
     if request.method == 'POST':
         form = StephenLoginForm(request.POST)
+        CreateLogEntry(request.user.username, "STEPHEN HAS LOGGED IN.")
         if form.is_valid():
             return render(request, 'index/stephen.html')
     else:
         form = StephenLoginForm()
+        CreateLogEntry(request.user.username, "STEPHEN HAS LOGGED IN.")
     return render(request, 'index/stephen_login.html', {'form': form})
