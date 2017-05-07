@@ -46,6 +46,7 @@ def discharge_patient(request, patient_id):
 
 
 @login_required
+@permission_required('hospital.view_system_information')
 def logView(request, page=0):
     logs = readLog()
 
@@ -63,6 +64,8 @@ def logView(request, page=0):
 
 
 @login_required
+@permission_required('hospital.view_system_information')
+
 def statisticsView(request):
     Statistics.find_appointments(Statistics.objects.get(name="Statistics"))
     Statistics.find_doctors(Statistics.objects.get(name="Statistics"))
@@ -123,6 +126,7 @@ def transfer_patient_as_doctor(request, patient_id):
 
     return render(request, 'transfer/doctor_transfer.html')
 
-
+@login_required()
+@permission_required('hospital.view_system_information')
 def system_information(request):
     return render(request, 'hospital/system_information.html')

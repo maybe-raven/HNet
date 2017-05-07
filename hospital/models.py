@@ -73,6 +73,13 @@ class Statistics(models.Model):
         string += "Appointments today : " + str(self.appointments_that_day) + "\n"
         return string
 
+    class Meta:
+        permissions = (
+            ('view_system_information', 'Can view system information'),
+
+        )
+
+
 
 class Hospital(models.Model):
     """A model that describes the basic information of a hospital."""
