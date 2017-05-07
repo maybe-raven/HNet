@@ -1,17 +1,25 @@
 import datetime
-
 from django.test import TestCase
 from reservation.forms import BaseAppointmentForm, AppointmentFormForPatient, AppointmentFormForDoctor
 from django.contrib.auth.models import User
-from account.models import Patient, Doctor
+from account.models import Patient, Doctor, ProfileInformation
+from hospital.models import Hospital, Statistics
+from account.forms import ProfileInformationForm, PatientCreationForm
 from reservation.models import Appointment
-from hospital.models import Hospital
 
 
 # Create your tests here.
 class AppointmentFormTestCaseBase(TestCase):
     def setUp(self):
-        hospital = Hospital.objects.create(name='Test hospital', location='Test location')
+        hospital = Hospital.objects.create(name='Test hospital',
+                                       statistics=Statistics.objects.create(name="Statistics", num_of_patients=0,
+                                                                            avarage_visit_per_patient=0,
+                                                                            avarage_length_of_stay=0,
+                                                                            prescriptions_given=0,
+                                                                            num_of_doctors=0,
+                                                                            num_of_nurses=0,
+                                                                            appointments_that_day=0)
+                                       , location='Test location')
         user_doctor = User.objects.create_user(username='d', password='password')
         user_patient = User.objects.create_user(username='p', password='password')
         doctor = Doctor.objects.create(user=user_doctor, hospital=hospital)
