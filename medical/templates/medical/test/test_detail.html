@@ -3,6 +3,7 @@
 {% block header %}Tests Detail Page{% endblock %}
 
 {% block content %}
+{% load static %}
 <div class="container">
     <div class="col-md-8 col-md-offset-2">
         <div id="jumbo" class="jumbotron">
@@ -11,8 +12,9 @@
             <p>Releasing Doctor: Dr. {{ test.doctor.user.last_name }}</p>
             <p>Results: {{ test.results }}</p>
             <p>Diagnosis: {{ test.diagnosis.summary }}</p>
-            <p>Files: <a href="#">{{ test.file }}</a></p>
-            <div class="row">
+            <p>Files: <a href="#">Test Result Uploaded File</a></p>
+            <img src="{% static 'test_results/DSCN1622.JPG' %}" alt="Test Result File" style="width:512px;height:512px;">
+            <div class="row" style="margin-top:15px;">
                 <div class="col-md-4">
                     <a href="#" onclick="window.history.back(); return false;" class="btn btn-primary">
                         Back

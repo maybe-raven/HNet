@@ -42,7 +42,7 @@ class Test(models.Model):
 
     description = models.TextField()
     results = models.TextField()
-    file = models.FileField(default=None, upload_to="media/test_result")
+    file = models.FileField(default=None, upload_to="medical/static/test_results")
 
     uploaded = models.BooleanField(default=False)
     released = models.BooleanField(default=False)
