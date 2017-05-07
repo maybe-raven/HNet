@@ -41,8 +41,8 @@
                         {% if user.profile_information.account_type == "P" %}
                         <li role="separator" class="divider"></li>
                         <li class="dropdown-header">Other</li>
-                        <li><a href="{% url 'medical:view_prescriptions' user.id %}">Prescriptions</a></li>
-                        <li><a href="#">Tests</a></li>
+                        <li><a href="{% url 'medical:view_prescriptions' user.patient.id %}">Prescriptions</a></li>
+                        <li><a href="{% url 'medical:test_view' %}">Tests</a></li>
                         {% endif %}
                     </ul>
                 </li>
