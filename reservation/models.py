@@ -77,7 +77,7 @@ class Appointment(models.Model):
 
     @classmethod
     def get_for_user_in_date(cls, user, date):
-        return user.appointment_set.filter(date=date).order_by('start_time')
+        return user.appointment_set.exclude(cancelled=True).filter(date=date).order_by('start_time')
 
     class Meta:
         permissions = (

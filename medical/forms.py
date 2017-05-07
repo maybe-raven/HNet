@@ -18,11 +18,13 @@ class DiagnosisForm(forms.ModelForm):
     def save_for_patient(self, patient):
         diagnosis = self.save(commit=False)
 
+        diagnosis.patient = patient
+
         treatment_session = patient.get_current_treatment_session()
         if treatment_session:
             diagnosis.treatment_session = treatment_session
         else:
-            diagnosis.patient = patient
+            pass
 
         diagnosis.save()
 
@@ -56,6 +58,12 @@ class TestResultsForm(forms.ModelForm):
     A form for obtaining test results in text form.
     """
 
+    def uploadfile(self, file, commit=True):
+        test = super(TestResultsForm, self).save(commit=commit)
+        test.file = file
+        test.uploaded = True
+        test.save()
+
     def save(self, commit=True):
         test = super(TestResultsForm, self).save(commit=commit)
         test.uploaded = True
@@ -65,7 +73,7 @@ class TestResultsForm(forms.ModelForm):
 
     class Meta:
         model = Test
-        fields = ['results']
+        fields = ['results', 'file']
 
 
 class PrescriptionForm(forms.ModelForm):
