@@ -111,10 +111,11 @@ def remove_prescription(request, prescription_id):
 @permission_required('account.view_patients')
 @user_passes_test(lambda u: not u.is_superuser)
 def view_patients(request):
-    nurse = get_account_from_user(request.user)
+    account = get_account_from_user(request.user)
+    hospital = account.hospital
+
     patients = Patient.objects.all()
     if request.user.profile_information.account_type == Nurse.ACCOUNT_TYPE:
-        hospital = nurse.hospital
         patients = [p for p in patients if p.get_admitted_hospital() == hospital]
         patients += Patient.objects.filter(preferred_hospital=hospital)
 
