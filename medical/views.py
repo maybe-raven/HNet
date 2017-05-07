@@ -361,7 +361,7 @@ def medical_view_options(request):
 @permission_required('medical.view_test_results')
 def test_view(request):
     patient = request.user.patient
-    tests = Test.objects.all().filter(diagnosis__patient=patient)
+    tests = Test.objects.all().filter(diagnosis__patient=patient).filter(released=True)
     context = {'patient': patient, 'test_list': tests}
     return render(request, 'medical/test/test_view.html', context)
 
@@ -370,6 +370,8 @@ def test_view(request):
 @permission_required('medical.view_test_results')
 def test_detail(request, test_id):
     test = get_object_or_404(Test, pk=test_id)
+    if not test.released:
+        raise Http404()
     file_path = "test_results/" + str(test.doctor.id) + "_" + str(test.id) + test.extension()
     context = {'test': test, 'path': file_path}
     return render(request, 'medical/test/test_detail.html', context)
