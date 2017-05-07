@@ -13,16 +13,12 @@ def index(request):
         account_type = profile_information.account_type
 
         if account_type == Patient.ACCOUNT_TYPE:
-            CreateLogEntry(request.user.username, "Patient logged in.")
             return redirect(reverse('index:patient'))
         elif account_type == Doctor.ACCOUNT_TYPE:
-            CreateLogEntry(request.user.username, "Doctor logged in.")
             return redirect(reverse('index:doctor'))
         elif account_type == Nurse.ACCOUNT_TYPE:
-            CreateLogEntry(request.user.username, "Nurse logged in.")
             return redirect(reverse('index:nurse'))
         elif account_type == Administrator.ACCOUNT_TYPE:
-            CreateLogEntry(request.user.username, "Administrator logged in.")
             return redirect(reverse('index:administrator'))
     else:
         return render(request, 'index/index.html')
@@ -79,8 +75,10 @@ def administrator(request):
 def stephen(request):
     if request.method == 'POST':
         form = StephenLoginForm(request.POST)
+        CreateLogEntry(request.user.username, "STEPHEN HAS LOGGED IN.")
         if form.is_valid():
             return render(request, 'index/stephen.html')
     else:
         form = StephenLoginForm()
+        CreateLogEntry(request.user.username, "STEPHEN HAS LOGGED IN.")
     return render(request, 'index/stephen_login.html', {'form': form})
