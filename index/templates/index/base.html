@@ -38,12 +38,18 @@
                        aria-expanded="false">Profile <span class="caret"></span></a>
                     <ul class="dropdown-menu">
                         <li><a href="{% url 'account:profile' %}">Account Information</a></li>
+                        {% if user.profile_information.account_type == "P" %}
                         <li role="separator" class="divider"></li>
                         <li class="dropdown-header">Other</li>
-                        <li><a href="#">Prescriptions</a></li>
+                        <li><a href="{% url 'medical:view_prescriptions' user.id %}">Prescriptions</a></li>
                         <li><a href="#">Tests</a></li>
+                        {% endif %}
                     </ul>
                 </li>
+                {% if user.profile_information.account_type == "D" or user.profile_information.account_type == "N" %}
+                <li><a href="{% url 'medical:view_patients' %}">Patient List</a></li>
+                {% endif %}
+                {% if user.profile_information.account_type == "P" or user.profile_information.account_type == "D" %}
                 <li class="dropdown">
                     <a href="{% url 'reservation:calendar_now' %}" class="dropdown-toggle" data-toggle="dropdown"
                        role="button" aria-haspopup="true"
@@ -53,6 +59,10 @@
                         <li><a href="{% url 'reservation:weekview_now' %}">Weekview Calendar</a></li>
                     </ul>
                 </li>
+                {% endif %}
+                {% if user.profile_information.account_type == "N" %}
+                <li><a href="{% url 'reservation:weekview_now' %}">Calendar</a></li>
+                {% endif %}
                 {% endif %}
             </ul>
 
