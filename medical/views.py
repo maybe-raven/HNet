@@ -5,7 +5,7 @@ from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import render, get_object_or_404
 from django.core.urlresolvers import reverse
 from hospital.models import TreatmentSession, Statistics
-from account.models import Patient, Nurse, get_account_from_user
+from account.models import ProfileInformation, Patient, Nurse, get_account_from_user
 from .models import Drug, Diagnosis, Test, Prescription
 from .forms import DrugForm, DiagnosisForm, TestForm, TestResultsForm, PrescriptionForm
 from hnet.logger import CreateLogEntry
@@ -120,8 +120,7 @@ def view_patients(request):
 
     patients = Patient.objects.all()
     if request.user.profile_information.account_type == Nurse.ACCOUNT_TYPE:
-        patients = [p for p in patients if p.get_admitted_hospital() == hospital]
-        patients += Patient.objects.filter(preferred_hospital=hospital)
+        patients = [p for p in patients if p.get_admitted_hospital() == hospital or p.preferred_hospital == hospital]
 
     context = {'patient_list': patients, 'hospital': hospital}
 
@@ -196,17 +195,18 @@ def view_medical_information(request, patient_id):
         key=lambda item: item.creation_timestamp if isinstance(item, Diagnosis) else item.admission_timestamp
     )
 
+    can_transfer = False
     if patient.get_current_treatment_session() is not None:
-        can_transfer = get_account_from_user(request.user).hospital != \
-                       patient.get_current_treatment_session().treating_hospital
-    else:
-        can_transfer = False
+        if request.user.has_perm("hospital.transfer_patient_receiving_hospital"):
+            can_transfer = get_account_from_user(request.user).hospital != \
+                           patient.get_current_treatment_session().treating_hospital
 
     return render(request, 'medical/patient/medical_information.html', {
         'medical_information': medical_information, 'patient': patient,
         'user_has_edit_permission': request.user.has_perm('medical.change_diagnosis'),
         'user_has_add_permission': request.user.has_perm('medical.add_diagnosis'),
-        'can_transfer': can_transfer
+        'can_discharge': request.user.has_perm('hospital.discharge_patient'),
+        'can_transfer': can_transfer,
     })
 
 
