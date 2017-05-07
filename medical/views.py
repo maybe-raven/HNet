@@ -5,7 +5,7 @@ from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import render, get_object_or_404
 from django.core.urlresolvers import reverse
 from account.models import Patient, Nurse, get_account_from_user
-from hospital.models import TreatmentSession
+from hospital.models import TreatmentSession, Hospital
 from .models import Drug, Diagnosis, Test, Prescription
 from .forms import DrugForm, DiagnosisForm, TestForm, TestResultsForm, PrescriptionForm
 from hnet.logger import CreateLogEntry
