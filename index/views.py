@@ -68,6 +68,12 @@ def administrator(request):
     return render(request, 'index/administrator.html')
 
 
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def system_administrator(request):
+    return render(request, 'index/sys_admin.html')
+
+
 def stephen(request):
     if request.method == 'POST':
         form = StephenLoginForm(request.POST)
