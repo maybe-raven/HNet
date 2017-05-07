@@ -4,13 +4,11 @@ from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import render, get_object_or_404
 from django.core.urlresolvers import reverse
-from account.models import Patient, get_account_from_user
+from account.models import Patient, Nurse, get_account_from_user
 from hospital.models import TreatmentSession
 from .models import Drug, Diagnosis, Test, Prescription
 from .forms import DrugForm, DiagnosisForm, TestForm, TestResultsForm, PrescriptionForm
-from medical.models import Prescription
 from hnet.logger import CreateLogEntry
-import tempfile
 import os
 from django.conf import settings
 from django.http import HttpResponse
@@ -48,8 +46,9 @@ def view_prescriptions(request, patient_id):
     prescriptions = Prescription.objects.all()
     list_prescription = []
     for prescription in prescriptions:
-        if prescription.diagnosis.patient == patient:
-            list_prescription.append(prescription)
+        if prescription.active():
+            if prescription.diagnosis.patient == patient:
+                list_prescription.append(prescription)
     context = {'prescription_list': list_prescription, 'patient': patient}
     return render(request, 'patient/patient_overview.html', context)
 
@@ -112,14 +111,13 @@ def remove_prescription(request, prescription_id):
 @user_passes_test(lambda u: not u.is_superuser)
 def view_patients(request):
     nurse = get_account_from_user(request.user)
-    hospital = nurse.hospital
-    list_patients = []
     patients = Patient.objects.all()
-    for patient in patients:
-        if patient.preferred_hospital == hospital:
-            list_patients.append(patient)
+    if request.user.profile_information.account_type == Nurse.ACCOUNT_TYPE:
+        hospital = nurse.hospital
+        patients = [p for p in patients if p.get_admitted_hospital() == hospital]
+        patients += Patient.objects.filter(preferred_hospital=hospital)
 
-    context = {'patient_list': list_patients, 'hospital': hospital}
+    context = {'patient_list': patients, 'hospital': hospital}
 
     return render(request, 'patient/view_patients.html', context)
 

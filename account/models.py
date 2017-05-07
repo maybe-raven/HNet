@@ -97,6 +97,11 @@ class Patient(AbstractUser):
     def get_current_treatment_session(self):
         return TreatmentSession.objects.filter(patient=self).filter(discharge_timestamp=None).first()
 
+    def get_admitted_hospital(self):
+        treatment_session = self.get_current_treatment_session()
+        if treatment_session:
+            return treatment_session.treating_hospital
+
     class Meta:
         permissions = (
             ('view_patients', 'Can view patients'),
