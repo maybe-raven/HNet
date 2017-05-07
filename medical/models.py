@@ -32,6 +32,7 @@ class Diagnosis(models.Model):
     class Meta:
         permissions = (
             ('view_diagnosis', 'Can view diagnoses'),
+            ('view_own_diagnoses', 'Can view own diagnoses')
         )
 
 
@@ -68,6 +69,7 @@ class Test(models.Model):
             ('request_test', 'Can request tests'),
             ('upload_test_results', 'Can upload test results'),
             ('release_test_results', 'Can release test results'),
+            ('view_test_results', 'Can view tests'),
         )
 
 

@@ -4,16 +4,15 @@ from django.core.exceptions import PermissionDenied
 from django.http import HttpResponseRedirect, Http404
 from django.shortcuts import render, get_object_or_404
 from django.core.urlresolvers import reverse
-from account.models import Patient, get_account_from_user
 from hospital.models import TreatmentSession, Hospital, Statistics
+from account.models import Patient, Nurse, get_account_from_user
 from .models import Drug, Diagnosis, Test, Prescription
 from .forms import DrugForm, DiagnosisForm, TestForm, TestResultsForm, PrescriptionForm
-from medical.models import Prescription
 from hnet.logger import CreateLogEntry
-import tempfile
 import os
 from django.conf import settings
 from django.http import HttpResponse
+from account.forms import ProfileInformationForm
 
 
 @login_required
@@ -48,8 +47,9 @@ def view_prescriptions(request, patient_id):
     prescriptions = Prescription.objects.all()
     list_prescription = []
     for prescription in prescriptions:
-        if prescription.diagnosis.patient == patient:
-            list_prescription.append(prescription)
+        if prescription.active():
+            if prescription.diagnosis.patient == patient:
+                list_prescription.append(prescription)
     context = {'prescription_list': list_prescription, 'patient': patient}
     return render(request, 'patient/patient_overview.html', context)
 
@@ -113,14 +113,13 @@ def remove_prescription(request, prescription_id):
 @user_passes_test(lambda u: not u.is_superuser)
 def view_patients(request):
     nurse = get_account_from_user(request.user)
-    hospital = nurse.hospital
-    list_patients = []
     patients = Patient.objects.all()
-    for patient in patients:
-        if patient.preferred_hospital == hospital:
-            list_patients.append(patient)
+    if request.user.profile_information.account_type == Nurse.ACCOUNT_TYPE:
+        hospital = nurse.hospital
+        patients = [p for p in patients if p.get_admitted_hospital() == hospital]
+        patients += Patient.objects.filter(preferred_hospital=hospital)
 
-    context = {'patient_list': list_patients, 'hospital': hospital}
+    context = {'patient_list': patients, 'hospital': hospital}
 
     return render(request, 'patient/view_patients.html', context)
 
@@ -231,6 +230,8 @@ def create_diagnosis(request, patient_id):
 def update_diagnosis(request, diagnosis_id):
     diagnosis = get_object_or_404(Diagnosis, pk=diagnosis_id)
 
+    message = request.GET.get('message')
+
     if request.method == 'POST':
         form = DiagnosisForm(request.POST, instance=diagnosis)
         if form.is_valid():
@@ -238,7 +239,6 @@ def update_diagnosis(request, diagnosis_id):
             return render(request, 'medical/diagnosis/update.html',
                           {'form': form, 'message': 'All changes saved.'})
     else:
-        message = request.GET.get('message')
         form = DiagnosisForm(instance=diagnosis)
 
     return render(request, 'medical/diagnosis/update.html',
@@ -305,7 +305,7 @@ def export_information(request):
     prescriptions = Prescription.objects.all()
     tests = Test.objects.all()
 
-    file_path = os.path.join(settings.MEDIA_ROOT, 'medical/media/%s_medical_information.txt' % request.user.username)
+    file_path = os.path.join(settings.MEDIA_ROOT, 'media/medical_information/%s.txt' % request.user.username)
     with open(file_path, 'w') as info_file:
         info_file.write("Medical Information for " + patient.user.first_name + " " + patient.user.last_name +
                         "\n\nPrescriptions:\n\n")
@@ -340,8 +340,41 @@ def export_information(request):
         raise Http404
 
 
+@login_required()
 @permission_required('medical.view_prescription')
 def medical_view_options(request):
     patient = get_account_from_user(request.user)
-    context = {'user': patient}
+    context = {'patient': patient}
     return render(request, 'medical/patient/medical_view_options.html', context)
+
+
+@login_required()
+@permission_required('medical.view_test_results')
+def test_view(request):
+    patient = request.user.patient
+    tests = Test.objects.all().filter(diagnosis__patient=patient)
+    context = {'patient': patient, 'test_list': tests}
+    return render(request, 'medical/test/test_view.html', context)
+
+
+@login_required()
+@permission_required('medical.view_test_results')
+def test_detail(request, test_id):
+    test = get_object_or_404(Test, pk=test_id)
+    context = {'test': test}
+    return render(request, 'medical/test/test_detail.html', context)
+
+
+@permission_required('medical.view_own_diagnoses')
+def medical_overview(request):
+    patient = request.user.patient
+    medical_information = list(Diagnosis.objects.filter(patient=patient).filter(treatment_session=None))
+    medical_information.extend(TreatmentSession.objects.filter(patient=patient))
+
+    medical_information.sort(
+        reverse=True,
+        key=lambda item: item.creation_timestamp if isinstance(item, Diagnosis) else item.admission_timestamp
+    )
+
+    context = {'patient': patient, 'medical_information': medical_information}
+    return render(request, 'medical/patient/medical_overview.html', context)

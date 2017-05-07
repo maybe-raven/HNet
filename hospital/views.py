@@ -111,3 +111,7 @@ def transfer_patient_as_doctor(request, patient_id):
         return render(request, 'transfer/transfer_done.html', {'patient_id': patient_id})
 
     return render(request, 'transfer/doctor_transfer.html')
+
+
+def system_information(request):
+    return render(request, 'hospital/system_information.html')
