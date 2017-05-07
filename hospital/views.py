@@ -46,9 +46,20 @@ def discharge_patient(request, patient_id):
 
 
 @login_required
-def logView(request):
-    log = readLog()
-    return render(request, 'hospital/viewlog.html', {"log": log})
+def logView(request, page=0):
+    logs = readLog()
+
+    page = int(page)
+    start = page * 20
+    end = (page + 1) * 20
+
+    total = len(logs)
+    has_prev = page > 0
+    prev = page - 1 if has_prev else None
+    next = page + 1 if end < total else None
+
+    logs = logs[start:end]
+    return render(request, 'hospital/viewlog.html', {"log_list": logs, 'has_prev': has_prev, 'prev': prev, 'next': next})
 
 
 @login_required

@@ -10,6 +10,8 @@
                 {% for i in stats %}
                 <p>{{ i }}</p>
                 {% endfor %}
+
+                <a href="{% url 'hospital:system_information' %}" class="button">Back</a>
             </div>
         </div>
     </div>
