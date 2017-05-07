@@ -343,5 +343,5 @@ def export_information(request):
 @permission_required('medical.view_prescription')
 def medical_view_options(request):
     patient = get_account_from_user(request.user)
-    context = {'user': patient}
+    context = {'patient': patient}
     return render(request, 'medical/patient/medical_view_options.html', context)
