@@ -71,10 +71,8 @@ def administrator(request):
 def stephen(request):
     if request.method == 'POST':
         form = StephenLoginForm(request.POST)
-        CreateLogEntry(request.user.username, "STEPHEN HAS LOGGED IN.")
         if form.is_valid():
             return render(request, 'index/stephen.html')
     else:
         form = StephenLoginForm()
-        CreateLogEntry(request.user.username, "STEPHEN HAS LOGGED IN.")
     return render(request, 'index/stephen_login.html', {'form': form})

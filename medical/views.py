@@ -32,6 +32,7 @@ def add_drug(request):
         form = DrugForm(request.POST)
         if form.is_valid():
             form.save()
+            CreateLogEntry(request.user.username, "Added new drug.")
             return render(request, 'medical/drug/add_done.html')
     else:
         form = DrugForm()
@@ -63,6 +64,7 @@ def add_prescription(request, diagnosis_id):
         form = PrescriptionForm(request.POST)
         if form.is_valid():
             form.save_to_diagnosis_by_doctor(diagnosis, request.user.doctor)
+            CreateLogEntry(request.user.username, "Added prescription.")
             return render(request, 'medical/prescriptions/add_done.html', {'diagnosis_id': diagnosis_id})
     else:
         form = PrescriptionForm()
@@ -83,6 +85,7 @@ def edit_prescription(request, prescription_id):
         form = PrescriptionForm(request.POST, instance=prescription)
         if form.is_valid():
             form.save()
+            CreateLogEntry(request.user.username, "Edited prescription.")
             return render(request, 'medical/prescriptions/edit.html', {'form': form, 'message': 'All changes saved.'})
     else:
         form = PrescriptionForm(instance=prescription)
@@ -102,6 +105,7 @@ def remove_prescription(request, prescription_id):
     if request.method == 'POST':
         diagnosis_id = prescription.diagnosis.id
         prescription.delete()
+        CreateLogEntry(request.user.username, "Prescription deleted.")
         return render(request, 'medical/prescriptions/remove_done.html', {'diagnosis_id': diagnosis_id})
 
     return render(request, 'medical/prescriptions/remove.html', {'prescription': prescription})
@@ -171,6 +175,7 @@ def update_drug(request, drug_id):
         form = DrugForm(request.POST, instance=drug)
         if form.is_valid():
             form.save()
+            CreateLogEntry(request.user.username, "Removed drug.")
             return render(request, 'medical/drug/update.html', {'form': form, 'message': 'All changes saved.'})
     else:
         form = DrugForm(instance=drug)
@@ -214,6 +219,7 @@ def create_diagnosis(request, patient_id):
         form = DiagnosisForm(request.POST)
         if form.is_valid():
             diagnosis = form.save_for_patient(patient)
+            CreateLogEntry(request.user.username, "Diagnosis created.")
             return HttpResponseRedirect('%s?%s' % (
                 reverse('medical:update_diagnosis', args=[diagnosis.id]),
                 urlencode({'message': 'Diagnosis successfully created.'})
@@ -236,6 +242,7 @@ def update_diagnosis(request, diagnosis_id):
         form = DiagnosisForm(request.POST, instance=diagnosis)
         if form.is_valid():
             form.save()
+            CreateLogEntry(request.user.username, "Diagnosis updated.")
             return render(request, 'medical/diagnosis/update.html',
                           {'form': form, 'message': 'All changes saved.'})
     else:
@@ -293,6 +300,7 @@ def release_test_result(request, test_id):
     if request.method == 'POST':
         test.released = True
         test.save()
+        CreateLogEntry(request.user.username, "Test result released.")
         return render(request, 'medical/test/release_done.html', {'diagnosis_id': test.diagnosis.id})
 
     return render(request, 'medical/test/release.html', {'test': test})
@@ -335,6 +343,7 @@ def export_information(request):
         with open(file_path, 'rb') as fh:
             response = HttpResponse(fh.read(), content_type="application/text;charset=UTF-8")
             response['Content-Disposition'] = 'inline; filename=medical_information.txt'
+            CreateLogEntry(request.user.username, "Patient exported medical information.")
             return response
     else:
         raise Http404
