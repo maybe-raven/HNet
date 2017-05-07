@@ -24,6 +24,7 @@ def calendar(request, month=datetime.date.today().month, year=datetime.date.toda
 
     week_list = calculate_day(str(month), str(year))
 
+    # forward and back arrow calculations
     if month == 1:
         prev_month = 12
         prev_year = year - 1
@@ -44,6 +45,7 @@ def calendar(request, month=datetime.date.today().month, year=datetime.date.toda
                'prev_month': prev_month, 'prev_year': prev_year, 'next_month': next_month,
                'next_year': next_year, 'week_list': week_list}
 
+    # grab all appointments for the select user
     profile_information = ProfileInformation.from_user(request.user)
     if profile_information is not None:
         account_type = profile_information.account_type
@@ -80,6 +82,7 @@ def weekview(request, day=datetime.date.today().day, month=datetime.date.today()
         week_starting_date -= datetime.timedelta(days=weekday)
     week_ending_date = week_starting_date + datetime.timedelta(days=6)
 
+    # if nurse, get selected doctors to show, otherwise show your own appointments
     doctor_list = None
     profile_information = ProfileInformation.from_user(request.user)
     account_type = profile_information.account_type

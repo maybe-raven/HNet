@@ -309,6 +309,13 @@ def release_test_result(request, test_id):
 @login_required()
 @permission_required('medical.export_information')
 def export_information(request):
+    """
+    Patients are able to export their personal medical information
+    such as the prescriptions they have and any relevant
+    diagnoses. Also they can export test results
+    :param request: the requesting user (Patient)
+    :return: none
+    """
     patient = get_account_from_user(request.user)
     prescriptions = Prescription.objects.all()
     tests = Test.objects.all()
