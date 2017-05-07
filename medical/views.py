@@ -58,12 +58,12 @@ def view_prescriptions(request, patient_id):
 @user_passes_test(lambda u: not u.is_superuser)
 def add_prescription(request, diagnosis_id):
     diagnosis = get_object_or_404(Diagnosis, pk=diagnosis_id)
-    Statistics.add_prescription(Statistics.objects.get(name="Statistics"))
 
     if request.method == 'POST':
         form = PrescriptionForm(request.POST)
         if form.is_valid():
             form.save_to_diagnosis_by_doctor(diagnosis, request.user.doctor)
+            Statistics.add_prescription(Statistics.objects.get(name=request.user.doctor.hospital.name+" Statistics"))
             return render(request, 'medical/prescriptions/add_done.html', {'diagnosis_id': diagnosis_id})
     else:
         form = PrescriptionForm()

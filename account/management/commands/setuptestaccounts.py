@@ -56,7 +56,7 @@ class Command(BaseCommand):
                         break
 
             hospital = Hospital.objects.create(name='Test hospital',
-                                       statistics=Statistics.objects.create(name="Statistics", num_of_patients=0,
+                                       statistics=Statistics.objects.create(name="Test hospital Statistics", num_of_patients=0,
                                                                             avarage_visit_per_patient=0,
                                                                             avarage_length_of_stay=0,
                                                                             prescriptions_given=0,

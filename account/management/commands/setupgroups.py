@@ -4,7 +4,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.db.utils import OperationalError
 from account.models import Patient, ProfileInformation, Administrator, Doctor, Nurse
 from medical.models import Drug, Diagnosis, Test, Prescription
-from hospital.models import TreatmentSession
+from hospital.models import TreatmentSession, Statistics
 from reservation.models import Appointment
 
 
@@ -70,6 +70,7 @@ class Command(BaseCommand):
             treatment_session_content_type = ContentType.objects.get_for_model(TreatmentSession)
             test_content_type = ContentType.objects.get_for_model(Test)
             nurse_content_type = ContentType.objects.get_for_model(Nurse)
+            statistics_log_content_type = ContentType.objects.get_for_model(Statistics)
 
             # Try to get all the permissions
             # This requires that the database has been migrated.
@@ -143,6 +144,8 @@ class Command(BaseCommand):
 
             view_own_diagnoses_permission = Permission.objects.get(codename='view_own_diagnoses',
                                                                    content_type=diagnosis_content_type)
+            view_system_information_permission = Permission.objects.get(codename='view_system_information',
+                                                                        content_type =statistics_log_content_type)
 
         except (Permission.DoesNotExist, OperationalError):
             if quiet:
@@ -197,7 +200,7 @@ class Command(BaseCommand):
                                            remove_drug_permission, view_drug_permission,
                                            change_drug_permission, add_nurse_permission,
                                            change_profile_information_permission,
-                                           transfer_patient_any_permission]
+                                           transfer_patient_any_permission, view_system_information_permission]
         administrator_group.save()
 
         if not quiet:

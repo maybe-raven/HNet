@@ -42,7 +42,7 @@ class PatientUnitTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         hospital = Hospital.objects.create(name='Test hospital',
-                                       statistics=Statistics.objects.create(name="Statistics", num_of_patients=0,
+                                       statistics=Statistics.objects.create(name="Test hospital Statistics", num_of_patients=0,
                                                                             avarage_visit_per_patient=0,
                                                                             avarage_length_of_stay=0,
                                                                             prescriptions_given=0,
@@ -148,7 +148,7 @@ class StaffAccountCreationTestCase(TestCase):
         setupgroups.Command().handle(quiet=True)
 
         cls.hospital1 = Hospital.objects.create(name='Test hospital 1',
-                                       statistics=Statistics.objects.create(name="Statistics", num_of_patients=0,
+                                       statistics=Statistics.objects.create(name="Test hospital 1 Statistics", num_of_patients=0,
                                                                             avarage_visit_per_patient=0,
                                                                             avarage_length_of_stay=0,
                                                                             prescriptions_given=0,
@@ -157,7 +157,13 @@ class StaffAccountCreationTestCase(TestCase):
                                                                             appointments_that_day=0)
                                        , location='Test location 1')
         cls.hospital2 = Hospital.objects.create(name='Test hospital 2',
-                                       statistics=Statistics.objects.get(name="Statistics"), location='Test location 2')
+                                       statistics=Statistics.objects.create(name="Test hospital 2 Statistics", num_of_patients=0,
+                                                                            avarage_visit_per_patient=0,
+                                                                            avarage_length_of_stay=0,
+                                                                            prescriptions_given=0,
+                                                                            num_of_doctors=0,
+                                                                            num_of_nurses=0,
+                                                                            appointments_that_day=0), location='Test location 2')
 
         create_super_user(cls.SUPERUSER_USERNAME, PASSWORD)
         create_default_account(cls.ADMINISTRATOR_USERNAME, PASSWORD, Administrator, cls.hospital1)
