@@ -8,20 +8,23 @@ from .forms import StephenLoginForm
 
 
 def index(request):
-    profile_information = ProfileInformation.from_user(request.user)
-    if profile_information is not None:
-        account_type = profile_information.account_type
-
-        if account_type == Patient.ACCOUNT_TYPE:
-            return redirect(reverse('index:patient'))
-        elif account_type == Doctor.ACCOUNT_TYPE:
-            return redirect(reverse('index:doctor'))
-        elif account_type == Nurse.ACCOUNT_TYPE:
-            return redirect(reverse('index:nurse'))
-        elif account_type == Administrator.ACCOUNT_TYPE:
-            return redirect(reverse('index:administrator'))
+    if request.user.is_superuser:
+        return redirect(reverse('index:system_administrator'))
     else:
-        return render(request, 'index/index.html')
+        profile_information = ProfileInformation.from_user(request.user)
+        if profile_information is not None:
+            account_type = profile_information.account_type
+
+            if account_type == Patient.ACCOUNT_TYPE:
+                return redirect(reverse('index:patient'))
+            elif account_type == Doctor.ACCOUNT_TYPE:
+                return redirect(reverse('index:doctor'))
+            elif account_type == Nurse.ACCOUNT_TYPE:
+                return redirect(reverse('index:nurse'))
+            elif account_type == Administrator.ACCOUNT_TYPE:
+                return redirect(reverse('index:administrator'))
+        else:
+            return render(request, 'index/index.html')
 
 
 def test_user_account_type(user, account_type):
