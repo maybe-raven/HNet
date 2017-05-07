@@ -370,7 +370,8 @@ def test_view(request):
 @permission_required('medical.view_test_results')
 def test_detail(request, test_id):
     test = get_object_or_404(Test, pk=test_id)
-    context = {'test': test}
+    file_path = "test_results/" + str(test.doctor.id) + "_" + str(test.id) + test.extension()
+    context = {'test': test, 'path': file_path}
     return render(request, 'medical/test/test_detail.html', context)
 
 

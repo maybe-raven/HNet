@@ -3,6 +3,7 @@ from datetime import date, timedelta
 from hospital.models import Hospital, TreatmentSession
 from account.models import Doctor, Patient
 from .validator import validate_file_extension
+import os
 
 
 class Diagnosis(models.Model):
@@ -44,7 +45,16 @@ class Test(models.Model):
     description = models.TextField()
     results = models.TextField()
 
-    file = models.FileField(default=None, upload_to="medical/static/test_results", validators=[validate_file_extension])
+    def content_file_name(self, filename):
+        ext = filename.split('.')[-1]
+        filename = "%s_%s.%s" % (self.doctor.id, self.id, ext)
+        return os.path.join('medical/static/test_results', filename)
+
+    file = models.FileField(default=None, upload_to=content_file_name, validators=[validate_file_extension])
+
+    def extension(self):
+        name, extension = os.path.splitext(self.file.name)
+        return extension
 
     uploaded = models.BooleanField(default=False)
     released = models.BooleanField(default=False)
