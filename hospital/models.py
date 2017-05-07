@@ -3,7 +3,7 @@ from datetime import date, timedelta
 
 
 class Statistics(models.Model):
-    name = models.CharField(max_length=30)
+    name = models.CharField(max_length=60)
     num_of_patients = models.DecimalField(max_digits=999, decimal_places=2)
     avarage_visit_per_patient = models.DecimalField(max_digits=999, decimal_places=2)
     avarage_length_of_stay = models.DecimalField(max_digits=999, decimal_places=4)
@@ -98,7 +98,7 @@ class Hospital(models.Model):
     @staticmethod
     def create_default():
         return Hospital.objects.create(name='Test hospital',
-                                       statistics=Statistics.objects.create(name="Statistics", num_of_patients=0,
+                                       statistics=Statistics.objects.create(name="Test hospital Statistics", num_of_patients=0,
                                                                             avarage_visit_per_patient=0,
                                                                             avarage_length_of_stay=0,
                                                                             prescriptions_given=0,

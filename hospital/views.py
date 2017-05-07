@@ -12,11 +12,11 @@ from hospital.forms import TransferForm
 @user_passes_test(lambda u: not u.is_superuser)
 def admit_patient(request, patient_id):
     patient = get_object_or_404(Patient, pk=patient_id)
-    Statistics.add_patient(Statistics.objects.get(name="Statistics"))
     if request.method == 'POST':
         if patient.get_current_treatment_session() is None:
             hospital = get_account_from_user(request.user).hospital
             TreatmentSession.objects.create(patient=patient, treating_hospital=hospital)
+            Statistics.add_patient(Statistics.objects.get(name=hospital.name + " Statistics"))
             CreateLogEntry(request.user.username, "Patient admitted.")
 
     return redirect('medical:view_medical_information', patient_id=patient_id)
@@ -60,19 +60,23 @@ def logView(request, page=0):
     next = page + 1 if end < total else None
 
     logs = logs[start:end]
-    return render(request, 'hospital/viewlog.html', {"log_list": logs, 'has_prev': has_prev, 'prev': prev, 'next': next})
+    return render(request, 'hospital/viewlog.html',
+                  {"log_list": logs, 'has_prev': has_prev, 'prev': prev, 'next': next})
 
 
 @login_required
 @permission_required('hospital.view_system_information')
-
 def statisticsView(request):
-    Statistics.find_appointments(Statistics.objects.get(name="Statistics"))
-    Statistics.find_doctors(Statistics.objects.get(name="Statistics"))
-    Statistics.find_nurses(Statistics.objects.get(name="Statistics"))
-    Statistics.calculate_avarage_length_of_stay(Statistics.objects.get(name="Statistics"))
-    Statistics.calculate_avarage_visit_per_patient(Statistics.objects.get(name="Statistics"))
-    stats_string = Statistics.__str__(Statistics.objects.get(name="Statistics"))
+    from account.models import Administrator
+    user = request.user
+    hospital_name = Administrator.objects.get(user=user).hospital.name
+    print("\n" + hospital_name + " Statistics\n")
+    Statistics.find_appointments(Statistics.objects.get(name=hospital_name + " Statistics"))
+    Statistics.find_doctors(Statistics.objects.get(name=hospital_name + " Statistics"))
+    Statistics.find_nurses(Statistics.objects.get(name=hospital_name + " Statistics"))
+    Statistics.calculate_avarage_length_of_stay(Statistics.objects.get(name=hospital_name + " Statistics"))
+    Statistics.calculate_avarage_visit_per_patient(Statistics.objects.get(name=hospital_name + " Statistics"))
+    stats_string = Statistics.__str__(Statistics.objects.get(name=hospital_name + " Statistics"))
     stats = stats_string.split("\n")
     return render(request, 'hospital/viewstatistics.html', {"stats": stats})
 
@@ -125,6 +129,7 @@ def transfer_patient_as_doctor(request, patient_id):
         return render(request, 'transfer/transfer_done.html', {'patient_id': patient_id})
 
     return render(request, 'transfer/doctor_transfer.html')
+
 
 @login_required()
 @permission_required('hospital.view_system_information')

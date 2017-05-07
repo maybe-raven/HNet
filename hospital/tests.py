@@ -20,7 +20,7 @@ class PatientAdmissionTestCase(TestCase):
         setupgroups.Command().handle(quiet=True)
 
         hospital = Hospital.objects.create(name='Test hospital',
-                                           statistics=Statistics.objects.create(name="Statistics", num_of_patients=0,
+                                           statistics=Statistics.objects.create(name="Test hospital Statistics", num_of_patients=0,
                                                                                 avarage_visit_per_patient=0,
                                                                                 avarage_length_of_stay=0,
                                                                                 prescriptions_given=0,
@@ -107,7 +107,7 @@ class PatientDischargeTestCase(TestCase):
         setupgroups.Command().handle(quiet=True)
 
         hospital = Hospital.objects.create(name='Test hospital',
-                                           statistics=Statistics.objects.create(name="Statistics", num_of_patients=0,
+                                           statistics=Statistics.objects.create(name="Test hospital Statistics", num_of_patients=0,
                                                                                 avarage_visit_per_patient=0,
                                                                                 avarage_length_of_stay=0,
                                                                                 prescriptions_given=0,
@@ -194,7 +194,7 @@ class PatientDischargeTestCase(TestCase):
         # Create a different patient account to admit.
         admitted_patient_username = 'admitted_patient'
         hospital = Hospital.objects.create(name='Test hospital',
-                                           statistics=Statistics.objects.create(name="Statistics", num_of_patients=0,
+                                           statistics=Statistics.objects.create(name="Test hospital Statistics", num_of_patients=0,
                                                                                 avarage_visit_per_patient=0,
                                                                                 avarage_length_of_stay=0,
                                                                                 prescriptions_given=0,
@@ -233,7 +233,7 @@ class PatientTransferTestCase(TestCase):
 
         cls.old_hospital = Hospital.objects.create(name='Old Hospital',
                                                    statistics=Statistics.objects.create(
-                                                       name="Statistics", num_of_patients=0,
+                                                       name="Old Hospital Statistics", num_of_patients=0,
                                                        avarage_visit_per_patient=0,
                                                        avarage_length_of_stay=0,
                                                        prescriptions_given=0,
@@ -242,7 +242,7 @@ class PatientTransferTestCase(TestCase):
                                                        appointments_that_day=0))
         cls.new_hospital = Hospital.objects.create(name='New Hospital',
                                                    statistics=Statistics.objects.create(
-                                                       name="Statistics", num_of_patients=0,
+                                                       name="New Hospital Statistics", num_of_patients=0,
                                                        avarage_visit_per_patient=0,
                                                        avarage_length_of_stay=0,
                                                        prescriptions_given=0,
@@ -370,7 +370,7 @@ class ViewStatisticsTestCase(TestCase):
         setupgroups.Command().handle(quiet=True)
 
         hospital = Hospital.objects.create(name='Test hospital',
-                                           statistics=Statistics.objects.create(name="Statistics", num_of_patients=0,
+                                           statistics=Statistics.objects.create(name="Test hospital Statistics", num_of_patients=0,
                                                                                 avarage_visit_per_patient=0,
                                                                                 avarage_length_of_stay=0,
                                                                                 prescriptions_given=0,
