@@ -12,7 +12,7 @@ from hospital.forms import TransferForm
 @user_passes_test(lambda u: not u.is_superuser)
 def admit_patient(request, patient_id):
     patient = get_object_or_404(Patient, pk=patient_id)
-    Statistics.add_patient(Statistics.objects.get(name="Statistics"))
+    get_account_from_user(request.user).hospital.statistics.add_patient()
     if request.method == 'POST':
         if patient.get_current_treatment_session() is None:
             hospital = get_account_from_user(request.user).hospital
@@ -63,13 +63,15 @@ def logView(request, page=0):
 
 
 @login_required
+@user_passes_test(lambda u: not u.is_superuser)
 def statisticsView(request):
-    Statistics.find_appointments(Statistics.objects.get(name="Statistics"))
-    Statistics.find_doctors(Statistics.objects.get(name="Statistics"))
-    Statistics.find_nurses(Statistics.objects.get(name="Statistics"))
-    Statistics.calculate_avarage_length_of_stay(Statistics.objects.get(name="Statistics"))
-    Statistics.calculate_avarage_visit_per_patient(Statistics.objects.get(name="Statistics"))
-    stats_string = Statistics.__str__(Statistics.objects.get(name="Statistics"))
+    statistics = get_account_from_user(request.user).hospital.statistics
+    statistics.find_appointments()
+    statistics.find_doctors()
+    statistics.find_nurses()
+    statistics.calculate_avarage_length_of_stay()
+    statistics.calculate_avarage_visit_per_patient()
+    stats_string = statistics.__str__()
     stats = stats_string.split("\n")
     return render(request, 'hospital/viewstatistics.html', {"stats": stats})
 
