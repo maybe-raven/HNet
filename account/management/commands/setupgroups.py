@@ -138,7 +138,12 @@ class Command(BaseCommand):
             transfer_patient_receiving_permission = Permission.objects.get(
                 codename='transfer_patient_receiving_hospital',
                 content_type=treatment_session_content_type)
-            
+            view_test_results_permission = Permission.objects.get(codename='view_test_results',
+                                                                  content_type=test_content_type)
+
+            view_own_diagnoses_permission = Permission.objects.get(codename='view_own_diagnoses',
+                                                                   content_type=diagnosis_content_type)
+
         except (Permission.DoesNotExist, OperationalError):
             if quiet:
                 return
@@ -152,7 +157,9 @@ class Command(BaseCommand):
                                      add_appointment_permission,
                                      cancel_appointment_permission, change_appointment_permission,
                                      view_appointment_permission, view_prescription_permission,
-                                     download_medical_information]
+                                     download_medical_information, view_test_results_permission,
+                                     download_medical_information, view_own_diagnoses_permission]
+
         patient_group.save()
 
         # Set up Nurse group.
