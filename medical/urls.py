@@ -12,6 +12,7 @@ urlpatterns = [
     url(r'^patient/(?P<patient_id>[0-9]+)/$', views.view_medical_information, name='view_medical_information'),
     url(r'^diagnosis/create/(?P<patient_id>[0-9]+)/$', views.create_diagnosis, name='create_diagnosis'),
     url(r'^diagnosis/update/(?P<diagnosis_id>[0-9]+)/$', views.update_diagnosis, name='update_diagnosis'),
+    url(r'^diagnosis/archive/(?P<diagnosis_id>[0-9]+)/$', views.archive_diagnosis, name='archive_diagnosis'),
     url(r'^prescriptions/(?P<patient_id>[0-9]+)/$', views.view_prescriptions, name='view_prescriptions'),
     url(r'^prescriptions/add/(?P<diagnosis_id>[0-9]+)/$', views.add_prescription, name='add_prescriptions'),
     url(r'^prescriptions/edit/(?P<prescription_id>[0-9]+)/$', views.edit_prescription, name='edit_prescriptions'),

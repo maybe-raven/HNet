@@ -12,7 +12,6 @@ from hnet.logger import CreateLogEntry
 import os
 from django.conf import settings
 from django.http import HttpResponse
-from account.forms import ProfileInformationForm
 
 
 @login_required
@@ -377,3 +376,4 @@ def medical_overview(request):
 
     context = {'patient': patient, 'medical_information': medical_information}
     return render(request, 'medical/patient/medical_overview.html', context)
+

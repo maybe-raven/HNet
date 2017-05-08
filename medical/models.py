@@ -13,6 +13,8 @@ class Diagnosis(models.Model):
     creation_timestamp = models.DateTimeField(auto_now_add=True)
     update_timestamp = models.DateTimeField(auto_now=True)
 
+    archived = models.BooleanField(default=False)
+
     def get_patient(self):
         if self.patient:
             return self.patient
