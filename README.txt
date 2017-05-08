@@ -11,7 +11,6 @@ Installation:
    6) execute command "python manage.py createsuperuser"
 
 Disclaimers:
-   - only super user (system admins) can create location
    - super user is required to get the server up and running. After the first administrator is created, it can run independently.
 
 Known Bugs:
