@@ -4,7 +4,7 @@ from django.contrib.auth.models import User, AnonymousUser
 from account.management.commands import setupgroups
 from account.models import Patient, Doctor, Nurse, create_default_account, Administrator
 from medical.models import Diagnosis
-from hospital.models import Hospital, TreatmentSession, Statistics
+from hospital.models import Hospital, TreatmentSession
 from hospital import views
 
 PATIENT_USERNAME = 'patient'
@@ -19,16 +19,7 @@ class PatientAdmissionTestCase(TestCase):
     def setUpTestData(cls):
         setupgroups.Command().handle(quiet=True)
 
-        hospital = Hospital.objects.create(name='Test hospital',
-                                           statistics=Statistics.objects.create(
-                                               num_of_patients=0,
-                                               avarage_visit_per_patient=0,
-                                               avarage_length_of_stay=0,
-                                               prescriptions_given=0,
-                                               num_of_doctors=0,
-                                               num_of_nurses=0,
-                                               appointments_that_day=0)
-                                           , location='Test location')
+        hospital = Hospital.objects.create(name='Test hospital', location='Test location')
         create_default_account(PATIENT_USERNAME, PASSWORD, Patient, hospital)
         create_default_account(DOCTOR_USERNAME, PASSWORD, Doctor, hospital)
         create_default_account(NURSE_USERNAME, PASSWORD, Nurse, hospital)
@@ -107,16 +98,7 @@ class PatientDischargeTestCase(TestCase):
     def setUpTestData(cls):
         setupgroups.Command().handle(quiet=True)
 
-        hospital = Hospital.objects.create(name='Test hospital',
-                                           statistics=Statistics.objects.create(
-                                               num_of_patients=0,
-                                               avarage_visit_per_patient=0,
-                                               avarage_length_of_stay=0,
-                                               prescriptions_given=0,
-                                               num_of_doctors=0,
-                                               num_of_nurses=0,
-                                               appointments_that_day=0)
-                                           , location='Test location')
+        hospital = Hospital.objects.create(name='Test hospital', location='Test location')
         create_default_account(PATIENT_USERNAME, PASSWORD, Patient, hospital)
         create_default_account(DOCTOR_USERNAME, PASSWORD, Doctor, hospital)
         create_default_account(NURSE_USERNAME, PASSWORD, Nurse, hospital)
@@ -195,16 +177,7 @@ class PatientDischargeTestCase(TestCase):
         patient = User.objects.get(username=PATIENT_USERNAME).patient
         # Create a different patient account to admit.
         admitted_patient_username = 'admitted_patient'
-        hospital = Hospital.objects.create(name='Test hospital',
-                                           statistics=Statistics.objects.create(
-                                               num_of_patients=0,
-                                               avarage_visit_per_patient=0,
-                                               avarage_length_of_stay=0,
-                                               prescriptions_given=0,
-                                               num_of_doctors=0,
-                                               num_of_nurses=0,
-                                               appointments_that_day=0)
-                                           , location='Test location')
+        hospital = Hospital.objects.create(name='Test hospital', location='Test location')
         admitted_patient = create_default_account(admitted_patient_username, PASSWORD, Patient, hospital).patient
         # Admit the second patient account.
         TreatmentSession.objects.create(patient=admitted_patient, treating_hospital=hospital)
@@ -234,24 +207,8 @@ class PatientTransferTestCase(TestCase):
     def setUpTestData(cls):
         setupgroups.Command().handle(quiet=True)
 
-        cls.old_hospital = Hospital.objects.create(name='Old Hospital',
-                                                   statistics=Statistics.objects.create(
-                                                       num_of_patients=0,
-                                                       avarage_visit_per_patient=0,
-                                                       avarage_length_of_stay=0,
-                                                       prescriptions_given=0,
-                                                       num_of_doctors=0,
-                                                       num_of_nurses=0,
-                                                       appointments_that_day=0))
-        cls.new_hospital = Hospital.objects.create(name='New Hospital',
-                                                   statistics=Statistics.objects.create(
-                                                       num_of_patients=0,
-                                                       avarage_visit_per_patient=0,
-                                                       avarage_length_of_stay=0,
-                                                       prescriptions_given=0,
-                                                       num_of_doctors=0,
-                                                       num_of_nurses=0,
-                                                       appointments_that_day=0))
+        cls.old_hospital = Hospital.objects.create(name='Old Hospital')
+        cls.new_hospital = Hospital.objects.create(name='New Hospital')
         create_default_account(PATIENT_USERNAME, PASSWORD, Patient, cls.new_hospital)
         create_default_account(DOCTOR_USERNAME, PASSWORD, Doctor, cls.new_hospital)
         create_default_account(ADMINISTRATOR_USERNAME, PASSWORD, Administrator, cls.old_hospital)
@@ -372,16 +329,7 @@ class ViewStatisticsTestCase(TestCase):
     def setUpTestData(cls):
         setupgroups.Command().handle(quiet=True)
 
-        hospital = Hospital.objects.create(name='Test hospital',
-                                           statistics=Statistics.objects.create(
-                                               num_of_patients=0,
-                                               avarage_visit_per_patient=0,
-                                               avarage_length_of_stay=0,
-                                               prescriptions_given=0,
-                                               num_of_doctors=0,
-                                               num_of_nurses=0,
-                                               appointments_that_day=0)
-                                           , location='Test location')
+        hospital = Hospital.objects.create(name='Test hospital', location='Test location')
         create_default_account(PATIENT_USERNAME, PASSWORD, Patient, hospital)
         create_default_account(DOCTOR_USERNAME, PASSWORD, Doctor, hospital)
         create_default_account(NURSE_USERNAME, PASSWORD, Nurse, hospital)

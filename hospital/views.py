@@ -2,7 +2,8 @@ from datetime import datetime
 from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
 from django.shortcuts import render, redirect, get_object_or_404
 from account.models import Patient, get_account_from_user
-from hospital.models import TreatmentSession, Statistics, Hospital
+from hospital.models import TreatmentSession, Hospital
+from hospital.statistics import Statistics
 from hnet.logger import CreateLogEntry, readLog
 from hospital.forms import TransferForm
 
@@ -67,9 +68,9 @@ def logView(request, page=0):
 def statisticsView(request):
     account = get_account_from_user(request.user)
     if account is None:
-        stats_list = [h.statistics for h in Hospital.objects.all()]
+        stats_list = [Statistics(h) for h in Hospital.objects.all()]
     else:
-        stats_list = [account.hospital.statistics]
+        stats_list = [Statistics(account.hospital)]
 
     return render(request, 'hospital/viewstatistics.html', {"stats_list": stats_list})
 

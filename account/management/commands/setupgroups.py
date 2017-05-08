@@ -4,7 +4,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.db.utils import OperationalError
 from account.models import Patient, ProfileInformation, Administrator, Doctor, Nurse
 from medical.models import Drug, Diagnosis, Test, Prescription
-from hospital.models import Statistics, TreatmentSession
+from hospital.models import Hospital, TreatmentSession
 from reservation.models import Appointment
 
 
@@ -71,7 +71,7 @@ class Command(BaseCommand):
             treatment_session_content_type = ContentType.objects.get_for_model(TreatmentSession)
             test_content_type = ContentType.objects.get_for_model(Test)
             nurse_content_type = ContentType.objects.get_for_model(Nurse)
-            statistics_content_type = ContentType.objects.get_for_model(Statistics)
+            hospital_content_type = ContentType.objects.get_for_model(Hospital)
 
             # Try to get all the permissions
             # This requires that the database has been migrated.
@@ -146,7 +146,7 @@ class Command(BaseCommand):
             view_own_diagnoses_permission = Permission.objects.get(codename='view_own_diagnoses',
                                                                    content_type=diagnosis_content_type)
             view_system_information_permission = Permission.objects.get(codename='can_view_system_information',
-                                                                        content_type=statistics_content_type)
+                                                                        content_type=hospital_content_type)
 
         except (Permission.DoesNotExist, OperationalError):
             if quiet:
