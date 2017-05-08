@@ -369,6 +369,7 @@ def calculate_day(month, year):
     days_five = []
     days_six = []
 
+    # populate each of the weeks to be displayed
     if (int(final) == 0):
         final = 7
 
