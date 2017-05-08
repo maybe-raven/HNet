@@ -18,6 +18,9 @@
                 <table>
                     {{ results_form.as_table }}
                 </table>
+                {% load static %}
+                <img src="{% static '' %}{{ path }}" alt="Test Result File"
+                 style="width:100%;height:100%;">
 
                 <div class="parentbutton">
                     <div class="leftbutton">
