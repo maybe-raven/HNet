@@ -20,13 +20,14 @@ class PatientAdmissionTestCase(TestCase):
         setupgroups.Command().handle(quiet=True)
 
         hospital = Hospital.objects.create(name='Test hospital',
-                                           statistics=Statistics.objects.create(name="Statistics", num_of_patients=0,
-                                                                                avarage_visit_per_patient=0,
-                                                                                avarage_length_of_stay=0,
-                                                                                prescriptions_given=0,
-                                                                                num_of_doctors=0,
-                                                                                num_of_nurses=0,
-                                                                                appointments_that_day=0)
+                                           statistics=Statistics.objects.create(
+                                               num_of_patients=0,
+                                               avarage_visit_per_patient=0,
+                                               avarage_length_of_stay=0,
+                                               prescriptions_given=0,
+                                               num_of_doctors=0,
+                                               num_of_nurses=0,
+                                               appointments_that_day=0)
                                            , location='Test location')
         create_default_account(PATIENT_USERNAME, PASSWORD, Patient, hospital)
         create_default_account(DOCTOR_USERNAME, PASSWORD, Doctor, hospital)
@@ -107,13 +108,14 @@ class PatientDischargeTestCase(TestCase):
         setupgroups.Command().handle(quiet=True)
 
         hospital = Hospital.objects.create(name='Test hospital',
-                                           statistics=Statistics.objects.create(name="Statistics", num_of_patients=0,
-                                                                                avarage_visit_per_patient=0,
-                                                                                avarage_length_of_stay=0,
-                                                                                prescriptions_given=0,
-                                                                                num_of_doctors=0,
-                                                                                num_of_nurses=0,
-                                                                                appointments_that_day=0)
+                                           statistics=Statistics.objects.create(
+                                               num_of_patients=0,
+                                               avarage_visit_per_patient=0,
+                                               avarage_length_of_stay=0,
+                                               prescriptions_given=0,
+                                               num_of_doctors=0,
+                                               num_of_nurses=0,
+                                               appointments_that_day=0)
                                            , location='Test location')
         create_default_account(PATIENT_USERNAME, PASSWORD, Patient, hospital)
         create_default_account(DOCTOR_USERNAME, PASSWORD, Doctor, hospital)
@@ -194,13 +196,14 @@ class PatientDischargeTestCase(TestCase):
         # Create a different patient account to admit.
         admitted_patient_username = 'admitted_patient'
         hospital = Hospital.objects.create(name='Test hospital',
-                                           statistics=Statistics.objects.create(name="Statistics", num_of_patients=0,
-                                                                                avarage_visit_per_patient=0,
-                                                                                avarage_length_of_stay=0,
-                                                                                prescriptions_given=0,
-                                                                                num_of_doctors=0,
-                                                                                num_of_nurses=0,
-                                                                                appointments_that_day=0)
+                                           statistics=Statistics.objects.create(
+                                               num_of_patients=0,
+                                               avarage_visit_per_patient=0,
+                                               avarage_length_of_stay=0,
+                                               prescriptions_given=0,
+                                               num_of_doctors=0,
+                                               num_of_nurses=0,
+                                               appointments_that_day=0)
                                            , location='Test location')
         admitted_patient = create_default_account(admitted_patient_username, PASSWORD, Patient, hospital).patient
         # Admit the second patient account.
@@ -233,7 +236,7 @@ class PatientTransferTestCase(TestCase):
 
         cls.old_hospital = Hospital.objects.create(name='Old Hospital',
                                                    statistics=Statistics.objects.create(
-                                                       name="Statistics", num_of_patients=0,
+                                                       num_of_patients=0,
                                                        avarage_visit_per_patient=0,
                                                        avarage_length_of_stay=0,
                                                        prescriptions_given=0,
@@ -242,7 +245,7 @@ class PatientTransferTestCase(TestCase):
                                                        appointments_that_day=0))
         cls.new_hospital = Hospital.objects.create(name='New Hospital',
                                                    statistics=Statistics.objects.create(
-                                                       name="Statistics", num_of_patients=0,
+                                                       num_of_patients=0,
                                                        avarage_visit_per_patient=0,
                                                        avarage_length_of_stay=0,
                                                        prescriptions_given=0,
@@ -370,13 +373,14 @@ class ViewStatisticsTestCase(TestCase):
         setupgroups.Command().handle(quiet=True)
 
         hospital = Hospital.objects.create(name='Test hospital',
-                                           statistics=Statistics.objects.create(name="Statistics", num_of_patients=0,
-                                                                                avarage_visit_per_patient=0,
-                                                                                avarage_length_of_stay=0,
-                                                                                prescriptions_given=0,
-                                                                                num_of_doctors=0,
-                                                                                num_of_nurses=0,
-                                                                                appointments_that_day=0)
+                                           statistics=Statistics.objects.create(
+                                               num_of_patients=0,
+                                               avarage_visit_per_patient=0,
+                                               avarage_length_of_stay=0,
+                                               prescriptions_given=0,
+                                               num_of_doctors=0,
+                                               num_of_nurses=0,
+                                               appointments_that_day=0)
                                            , location='Test location')
         create_default_account(PATIENT_USERNAME, PASSWORD, Patient, hospital)
         create_default_account(DOCTOR_USERNAME, PASSWORD, Doctor, hospital)

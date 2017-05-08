@@ -56,14 +56,15 @@ class Command(BaseCommand):
                         break
 
             hospital = Hospital.objects.create(name='Test hospital',
-                                       statistics=Statistics.objects.create(name="Statistics", num_of_patients=0,
-                                                                            avarage_visit_per_patient=0,
-                                                                            avarage_length_of_stay=0,
-                                                                            prescriptions_given=0,
-                                                                            num_of_doctors=0,
-                                                                            num_of_nurses=0,
-                                                                            appointments_that_day=0)
-                                       , location='Test location')
+                                               statistics=Statistics.objects.create(
+                                                   num_of_patients=0,
+                                                   avarage_visit_per_patient=0,
+                                                   avarage_length_of_stay=0,
+                                                   prescriptions_given=0,
+                                                   num_of_doctors=0,
+                                                   num_of_nurses=0,
+                                                   appointments_that_day=0)
+                                               , location='Test location')
             self.stdout.write(self.style.SUCCESS('Successfully created test hospital record.'))
 
             create_default_account('patient', default_password, Patient, hospital)

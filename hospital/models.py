@@ -3,7 +3,6 @@ from datetime import date, timedelta
 
 
 class Statistics(models.Model):
-    name = models.CharField(max_length=30)
     num_of_patients = models.DecimalField(max_digits=999, decimal_places=2)
     avarage_visit_per_patient = models.DecimalField(max_digits=999, decimal_places=2)
     avarage_length_of_stay = models.DecimalField(max_digits=999, decimal_places=4)
@@ -83,7 +82,7 @@ class Hospital(models.Model):
     """A flag indicating whether or not this hospital is operational. Remove a hospital by setting this flag to False."""
     operational = models.BooleanField(default=True)
 
-    statistics = models.ForeignKey(Statistics, on_delete=models.PROTECT)
+    statistics = models.OneToOneField(Statistics, on_delete=models.PROTECT)
 
     def __str__(self):
         return self.name
@@ -91,13 +90,14 @@ class Hospital(models.Model):
     @staticmethod
     def create_default():
         return Hospital.objects.create(name='Test hospital',
-                                       statistics=Statistics.objects.create(name="Statistics", num_of_patients=0,
-                                                                            avarage_visit_per_patient=0,
-                                                                            avarage_length_of_stay=0,
-                                                                            prescriptions_given=0,
-                                                                            num_of_doctors=0,
-                                                                            num_of_nurses=0,
-                                                                            appointments_that_day=0)
+                                       statistics=Statistics.objects.create(
+                                           num_of_patients=0,
+                                           avarage_visit_per_patient=0,
+                                           avarage_length_of_stay=0,
+                                           prescriptions_given=0,
+                                           num_of_doctors=0,
+                                           num_of_nurses=0,
+                                           appointments_that_day=0)
                                        , location='Test location')
 
 

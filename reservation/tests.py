@@ -12,14 +12,15 @@ from reservation.models import Appointment
 class AppointmentFormTestCaseBase(TestCase):
     def setUp(self):
         hospital = Hospital.objects.create(name='Test hospital',
-                                       statistics=Statistics.objects.create(name="Statistics", num_of_patients=0,
-                                                                            avarage_visit_per_patient=0,
-                                                                            avarage_length_of_stay=0,
-                                                                            prescriptions_given=0,
-                                                                            num_of_doctors=0,
-                                                                            num_of_nurses=0,
-                                                                            appointments_that_day=0)
-                                       , location='Test location')
+                                           statistics=Statistics.objects.create(
+                                               num_of_patients=0,
+                                               avarage_visit_per_patient=0,
+                                               avarage_length_of_stay=0,
+                                               prescriptions_given=0,
+                                               num_of_doctors=0,
+                                               num_of_nurses=0,
+                                               appointments_that_day=0)
+                                           , location='Test location')
         user_doctor = User.objects.create_user(username='d', password='password')
         user_patient = User.objects.create_user(username='p', password='password')
         doctor = Doctor.objects.create(user=user_doctor, hospital=hospital)
@@ -97,7 +98,7 @@ class AppointmentFormForDoctorTestCase(AppointmentFormTestCaseBase):
 class AppointmentFormForPatientTestCase(AppointmentFormTestCaseBase):
     def test_success_scenario(self):
         apt_form_patients = AppointmentFormForPatient({'title': 'Check up', 'date': self.tomorrow(), 'start_time':
-                                                      '2:00', 'doctor': self.doctor().id})
+            '2:00', 'doctor': self.doctor().id})
 
         self.assertTrue(apt_form_patients.is_valid(), 'Appointment form for patients should be validated')
 
