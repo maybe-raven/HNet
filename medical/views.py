@@ -18,6 +18,7 @@ from django.http import HttpResponse
 @permission_required('medical.view_drug')
 @user_passes_test(lambda u: not u.is_superuser)
 def list_drug(request):
+    """ Get the list of the drugs"""
     drug_list = Drug.objects.filter(active=True).order_by('name')
 
     return render(request, 'medical/drug/list.html', {'drug_list': drug_list})
@@ -27,6 +28,10 @@ def list_drug(request):
 @permission_required('medical.add_drug')
 @user_passes_test(lambda u: not u.is_superuser)
 def add_drug(request):
+    """
+    Only administrators are able to add in new
+    drugs for a hospital
+    """
     if request.method == 'POST':
         form = DrugForm(request.POST)
         if form.is_valid():
@@ -43,6 +48,12 @@ def add_drug(request):
 @permission_required('medical.view_prescription')
 @user_passes_test(lambda u: not u.is_superuser)
 def view_prescriptions(request, patient_id):
+    """
+    patients and doctors and nurses are able to view prescriptions
+    for a given patient
+    :param patient_id: id of the patient that is being accesed
+    :return: list of prescriptions for a patient
+    """
     patient = get_object_or_404(Patient, pk=patient_id)
     prescriptions = Prescription.objects.all()
     list_prescription = []
@@ -57,6 +68,7 @@ def view_prescriptions(request, patient_id):
 @permission_required('medical.add_prescription')
 @user_passes_test(lambda u: not u.is_superuser)
 def add_prescription(request, diagnosis_id):
+    """Doctors are able to prescribe for a patient after diagnosing"""
     diagnosis = get_object_or_404(Diagnosis, pk=diagnosis_id)
 
     if request.method == 'POST':
@@ -74,10 +86,12 @@ def add_prescription(request, diagnosis_id):
 @permission_required('medical.change_prescription')
 @user_passes_test(lambda u: not u.is_superuser)
 def edit_prescription(request, prescription_id):
+    """Doctors can edit a prescription to change amounts or frequency of use"""
     prescription = get_object_or_404(Prescription, pk=prescription_id)
 
     doctor = request.user.doctor
     if prescription.doctor != doctor:
+        """Doctors are only able to edit prescriptions they made"""
         raise PermissionDenied('Cannot edit prescriptions created by another doctor.')
 
     if request.method == 'POST':
@@ -95,6 +109,10 @@ def edit_prescription(request, prescription_id):
 @permission_required('medical.delete_prescription')
 @user_passes_test(lambda u: not u.is_superuser)
 def remove_prescription(request, prescription_id):
+    """
+    Doctors are able to remove a prescription for a patient but only
+    if they created it themselves
+    """
     prescription = get_object_or_404(Prescription, pk=prescription_id)
 
     doctor = request.user.doctor
@@ -114,6 +132,9 @@ def remove_prescription(request, prescription_id):
 @permission_required('account.view_patients')
 @user_passes_test(lambda u: not u.is_superuser)
 def view_patients(request):
+    """
+    Nurses and Doctors are able to view the patients in their hospital
+    """
     account = get_account_from_user(request.user)
     hospital = account.hospital
 
@@ -130,6 +151,10 @@ def view_patients(request):
 @permission_required('hospital.transfer_patient_any_hospital')
 @user_passes_test(lambda u: not u.is_superuser)
 def view_patients_admin(request):
+    """
+    Administrators are able to transfer patients to other hospitals
+    so they must also be able to see patients for any hospital
+    """
     admin = get_account_from_user(request.user)
     hospital = admin.hospital
     list_patients = []
@@ -148,6 +173,10 @@ def view_patients_admin(request):
 @permission_required('medical.remove_drug')
 @user_passes_test(lambda u: not u.is_superuser)
 def remove_drug(request, drug_id):
+    """
+    Administrators can remove drugs from the
+    drug list at the hospitals
+    """
     drug = get_object_or_404(Drug, pk=drug_id)
 
     if not drug.active:
@@ -165,6 +194,10 @@ def remove_drug(request, drug_id):
 @permission_required('medical.change_drug')
 @user_passes_test(lambda u: not u.is_superuser)
 def update_drug(request, drug_id):
+    """
+    Administrators are able to update the description
+    or name of a specific drug in a list
+    """
     drug = get_object_or_404(Drug, pk=drug_id)
     if not drug.active:
         raise Http404()
@@ -184,6 +217,11 @@ def update_drug(request, drug_id):
 @permission_required('medical.view_diagnosis')
 @permission_required('hospital.view_treatmentsession')
 def view_medical_information(request, patient_id):
+    """
+    Displays the medical information for a requested patient
+    Only nurses and doctors have this permission, as do patients
+    to view their own information
+    """
     patient = get_object_or_404(Patient, pk=patient_id)
 
     medical_information = list(Diagnosis.objects.filter(patient=patient).filter(treatment_session=None))
@@ -212,6 +250,7 @@ def view_medical_information(request, patient_id):
 @login_required
 @permission_required('medical.add_diagnosis')
 def create_diagnosis(request, patient_id):
+    """Doctors are able to create a diagnosis for a patient"""
     patient = get_object_or_404(Patient, pk=patient_id)
 
     if request.method == 'POST':
@@ -255,6 +294,7 @@ def update_diagnosis(request, diagnosis_id):
 @permission_required('medical.request_test')
 @user_passes_test(lambda u: not u.is_superuser)
 def request_test(request, diagnosis_id):
+    """Doctors must do a 3 step test request, edit, and release"""
     diagnosis = get_object_or_404(Diagnosis, pk=diagnosis_id)
     doctor = request.user.doctor
 
@@ -320,6 +360,7 @@ def export_information(request):
     tests = Test.objects.all()
 
     file_path = os.path.join(settings.MEDIA_ROOT, 'media/medical_information/%s.txt' % request.user.username)
+    """Write all the information to the file to be served"""
     with open(file_path, 'w') as info_file:
         info_file.write("Medical Information for " + patient.user.first_name + " " + patient.user.last_name +
                         "\n\nPrescriptions:\n\n")
@@ -358,6 +399,7 @@ def export_information(request):
 @login_required()
 @permission_required('medical.view_prescription')
 def medical_view_options(request):
+    """Second screen of options that a patient can view"""
     patient = get_account_from_user(request.user)
     context = {'patient': patient}
     return render(request, 'medical/patient/medical_view_options.html', context)
@@ -375,6 +417,7 @@ def test_view(request):
 @login_required()
 @permission_required('medical.view_test_results')
 def test_detail(request, test_id):
+    """display the specific test result with picture uploads if any"""
     test = get_object_or_404(Test, pk=test_id)
     if not test.released:
         raise Http404()

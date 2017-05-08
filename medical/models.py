@@ -46,6 +46,12 @@ class Test(models.Model):
     results = models.TextField()
 
     def content_file_name(self, filename):
+        """
+        Used to rename the file to pk of the doctor and test
+        gives a unique name for each file
+        :param filename: original filename
+        :return: new filename
+        """
         ext = filename.split('.')[-1]
         filename = "%s_%s.%s" % (self.doctor.id, self.id, ext)
         return os.path.join('medical/static/test_results', filename)
@@ -102,6 +108,10 @@ class Drug(models.Model):
 
 
 class Prescription(models.Model):
+    """
+    Prescription class that has a diagnosis, doctor, drug, instructions for use
+    which a prescribing doctor will create
+    """
     diagnosis = models.ForeignKey(Diagnosis, on_delete=models.CASCADE)
     doctor = models.ForeignKey(Doctor, on_delete=models.PROTECT)
     drug = models.ForeignKey(Drug, on_delete=models.PROTECT)
