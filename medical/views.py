@@ -275,6 +275,9 @@ def update_diagnosis(request, diagnosis_id):
     diagnosis = get_object_or_404(Diagnosis, pk=diagnosis_id)
 
     message = request.GET.get('message')
+    archived = False
+    if diagnosis.archived is True:
+        archived = True
 
     if request.method == 'POST':
         form = DiagnosisForm(request.POST, instance=diagnosis)
@@ -282,12 +285,12 @@ def update_diagnosis(request, diagnosis_id):
             form.save()
             CreateLogEntry(request.user.username, "Diagnosis updated.")
             return render(request, 'medical/diagnosis/update.html',
-                          {'form': form, 'message': 'All changes saved.'})
+                          {'form': form, 'message': 'All changes saved.', 'archived': archived})
     else:
         form = DiagnosisForm(instance=diagnosis)
 
     return render(request, 'medical/diagnosis/update.html',
-                  {'form': form, 'message': message})
+                  {'form': form, 'message': message, 'archived': archived})
 
 
 @login_required
@@ -417,7 +420,7 @@ def test_view(request):
 @login_required()
 @permission_required('medical.view_test_results')
 def test_detail(request, test_id):
-    """display the specific test result with picture uploads if any"""
+    """Display the specific test result with picture uploads if any"""
     test = get_object_or_404(Test, pk=test_id)
     if not test.released:
         raise Http404()
@@ -426,6 +429,7 @@ def test_detail(request, test_id):
     return render(request, 'medical/test/test_detail.html', context)
 
 
+@login_required()
 @permission_required('medical.view_own_diagnoses')
 def medical_overview(request):
     patient = request.user.patient
@@ -440,3 +444,19 @@ def medical_overview(request):
     context = {'patient': patient, 'medical_information': medical_information}
     return render(request, 'medical/patient/medical_overview.html', context)
 
+
+@login_required()
+@permission_required('medical.add_diagnosis')
+def archive_diagnosis(request, diagnosis_id):
+    diagnosis = get_object_or_404(Diagnosis, pk=diagnosis_id)
+
+    if diagnosis.archived is True:
+        return render(request, 'medical/diagnosis/already_archived.html', {'diagnosis': diagnosis})
+
+    if request.method == 'POST':
+        diagnosis.archived = True
+        diagnosis.save()
+        CreateLogEntry(request.user.username, "Diagnosis archived.")
+        return render(request, 'medical/diagnosis/archive_done.html', {'diagnosis': diagnosis})
+
+    return render(request, 'medical/diagnosis/archive.html', {'diagnosis': diagnosis})
