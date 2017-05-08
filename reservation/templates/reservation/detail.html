@@ -2,11 +2,9 @@
 
 
 <h4><a href="{% url 'reservation:edit' item.id %}">Appointment Name</a></h4>
-    <p>Patient Name: {{ item.patient }}<br />
-    Doctor Name: {{ item.doctor }}<br />
+<p>Patient Name: {{ item.patient }}<br/>
+    Doctor Name: {{ item.doctor }}<br/>
     Time: {{ item.date_time }}</p>
-
-{% endfor %}
 
 
 <button><a href="{% url 'reservation:create' %}" style="text-decoration:none">Create</a></button>

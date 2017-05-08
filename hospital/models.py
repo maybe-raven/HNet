@@ -55,11 +55,20 @@ class Statistics(models.Model):
         self.prescriptions_given += 1
         self.save()
 
-    def calculate_avarage_visit_per_patient(self):
+    def calculate_average_visit_per_patient(self):
         from account.models import Patient
         total_patients = Patient.objects.last().id
         self.avarage_visit_per_patient = self.num_of_patients / total_patients
         self.save()
+
+    def calculate(self):
+        self.find_appointments()
+        self.find_doctors()
+        self.find_nurses()
+        self.calculate_avarage_length_of_stay()
+        self.calculate_average_visit_per_patient()
+        stats_string = self.__str__()
+        return stats_string.split("\n")
 
     def __str__(self):
         string = ""
@@ -71,6 +80,11 @@ class Statistics(models.Model):
         string += "Number of Nurses : " + str(self.num_of_nurses) + "\n"
         string += "Appointments today : " + str(self.appointments_that_day) + "\n"
         return string
+
+    class Meta:
+        permissions = (
+            ('can_view_system_information', 'Can view system information'),
+        )
 
 
 class Hospital(models.Model):
