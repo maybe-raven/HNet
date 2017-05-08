@@ -90,9 +90,9 @@ def weekview(request, day=datetime.date.today().day, month=datetime.date.today()
         doctors = Doctor.objects.all().filter(hospital=hospital)
         if request.method == "POST":
             doctor_list = [parse_int(x) for x in request.POST.getlist("doctor_list")]
-            appointments = Appointment.objects.filter(doctor_id__in=doctor_list)
+            appointments = Appointment.objects.filter(cancelled=False).filter(doctor_id__in=doctor_list)
         else:
-            appointments = Appointment.objects.filter(doctor__hospital=hospital)
+            appointments = Appointment.objects.filter(cancelled=False).filter(doctor__hospital=hospital)
     else:
         appointments = Appointment.get_for_user_in_week_starting_at_date(request.user, week_starting_date)
 
@@ -134,8 +134,12 @@ def overview(request, day=None, month=None, year=None):
         elif account_type == Doctor.ACCOUNT_TYPE:
             appointments = Appointment.get_for_user_in_date(request.user.doctor, date)
             context['appointment_list'] = appointments
-
             return render(request, 'reservation/overview.html', context)
+        elif account_type == Nurse.ACCOUNT_TYPE:
+            hospital = request.user.nurse.hospital
+            appointments = Appointment.objects.filter(cancelled=False).filter(date=date).filter(doctor__hospital=hospital)
+            context['appointment_list'] = appointments
+            return render(request, 'reservation/overview_nurse.html', context)
 
     raise PermissionDenied()
 
