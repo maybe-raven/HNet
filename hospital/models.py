@@ -1,85 +1,69 @@
 from django.db import models
 from datetime import date, timedelta
+from functools import reduce
+
+
+def format_timedelta(delta):
+    total_seconds = delta.seconds
+    hours = total_seconds // 3600
+    minutes = total_seconds % 3600 // 60
+    seconds = total_seconds % 60
+
+    return '{} days {:02}h {:02}m {:02}s'.format(delta.days, hours, minutes, seconds)
 
 
 class Statistics(models.Model):
-    num_of_patients = models.DecimalField(max_digits=999, decimal_places=2)
-    avarage_visit_per_patient = models.DecimalField(max_digits=999, decimal_places=2)
-    avarage_length_of_stay = models.DecimalField(max_digits=999, decimal_places=4)
-    prescriptions_given = models.DecimalField(max_digits=999, decimal_places=2)
-    num_of_nurses = models.DecimalField(max_digits=999, decimal_places=0)
-    num_of_doctors = models.DecimalField(max_digits=999, decimal_places=0)
-    appointments_that_day = models.DecimalField(max_digits=999, decimal_places=0)
-
-    def add_patient(self):
-        self.num_of_patients += 1
-        self.save()
-
-    def find_doctors(self):
-        from account.models import Doctor
-        self.num_of_doctors = Doctor.objects.last().id
-        self.save()
-
-    def find_nurses(self):
-        from account.models import Nurse
-        self.num_of_nurses = Nurse.objects.last().id
-        self.save()
-
-    def find_appointments(self):
-        from reservation.models import Appointment
-        appointments_in_day = []
-        all_appointments = Appointment.objects.all()
-        for appointment in all_appointments:
-            if appointment.date == date.today():
-                appointments_in_day.append(appointment)
-
-        self.appointments_that_day = len(appointments_in_day)
-        self.save()
-
-    def calculate_avarage_length_of_stay(self):
-        all_stay = TreatmentSession.objects.all()
-        completed_stay = []
-        self.avarage_length_of_stay = 0
-        for ts in all_stay:
-            if ts.discharge_timestamp:
-                completed_stay.append(ts)
-
-        for ts in completed_stay:
-            len_of_stay = ts.discharge_timestamp - ts.admission_timestamp
-            timedelta()
-            self.avarage_length_of_stay = (self.avarage_length_of_stay + len_of_stay) / 2
-
-        self.save()
-
-    def add_prescription(self):
-        self.prescriptions_given += 1
-        self.save()
-
-    def calculate_average_visit_per_patient(self):
-        from account.models import Patient
-        total_patients = Patient.objects.last().id
-        self.avarage_visit_per_patient = self.num_of_patients / total_patients
-        self.save()
-
     def calculate(self):
-        self.find_appointments()
-        self.find_doctors()
-        self.find_nurses()
-        self.calculate_avarage_length_of_stay()
-        self.calculate_average_visit_per_patient()
-        stats_string = self.__str__()
-        return stats_string.split("\n")
+        return ["Number of patients visiting the hospital : " + str(self.num_of_patients()),
+                "Average visits per patient : " + str(self.average_visits_per_patient()),
+                "Average length of stay : " + format_timedelta(self.average_length_of_stay()),
+                "Number of prescriptions given : " + str(self.num_prescriptions_given()),
+                "Number of Doctors : " + str(self.num_of_doctors()),
+                "Number of Nurses : " + str(self.num_of_nurses()),
+                "Appointments today : " + str(self.num_of_appointments_today())]
+
+    def num_of_patients(self):
+        from account.models import Patient
+        treatment_session_query = TreatmentSession.objects.filter(discharge_timestamp=None).filter(treating_hospital=self.hospital)
+        return Patient.objects.filter(treatmentsession__in=treatment_session_query).count()
+
+    def num_of_doctors(self):
+        from account.models import Doctor
+        return Doctor.objects.filter(hospital=self.hospital).filter(user__is_active=True).count()
+
+    def num_of_nurses(self):
+        from account.models import Nurse
+        return Nurse.objects.filter(hospital=self.hospital).filter(user__is_active=True).count()
+
+    def num_of_appointments_today(self):
+        from reservation.models import Appointment
+        return Appointment.objects.filter(cancelled=False).filter(date=date.today()).filter(doctor__hospital=self.hospital).count()
+
+    def average_visits_per_patient(self):
+        treatment_session_query = TreatmentSession.objects.filter(treating_hospital=self.hospital)
+        query_results = treatment_session_query.aggregate(
+            visit_count=models.Count('id'),
+            patient_count=models.Count('patient', distinct=True)
+        )
+        if query_results['patient_count'] == 0:
+            return 0
+        else:
+            return query_results['visit_count'] / query_results['patient_count']
+
+    def average_length_of_stay(self):
+        treatment_session = TreatmentSession.objects.exclude(discharge_timestamp=None).filter(treating_hospital=self.hospital)
+        if treatment_session.count() == 0:
+            return timedelta()
+        else:
+            total_time = reduce(lambda acc, x: acc + (x.discharge_timestamp - x.admission_timestamp), treatment_session, timedelta())
+            return total_time / treatment_session.count()
+
+    def num_prescriptions_given(self):
+        from medical.models import Prescription
+        return Prescription.objects.filter(doctor__hospital=self.hospital).count()
 
     def __str__(self):
-        string = ""
-        string += "Number of patients visiting the hospital : " + str(self.num_of_patients) + "\n"
-        string += "Avarage visits per patient : " + str(self.avarage_visit_per_patient) + "\n"
-        string += "Avarage length of stay : " + str(self.avarage_length_of_stay) + "\n"
-        string += "Number of prescriptions given : " + str(self.prescriptions_given) + "\n"
-        string += "Number of Doctors : " + str(self.num_of_doctors) + "\n"
-        string += "Number of Nurses : " + str(self.num_of_nurses) + "\n"
-        string += "Appointments today : " + str(self.appointments_that_day) + "\n"
-        return string
+        return "Statistics for " + self.hospital.name
 
     class Meta:
         permissions = (

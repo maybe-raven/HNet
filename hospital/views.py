@@ -12,7 +12,6 @@ from hospital.forms import TransferForm
 @user_passes_test(lambda u: not u.is_superuser)
 def admit_patient(request, patient_id):
     patient = get_object_or_404(Patient, pk=patient_id)
-    get_account_from_user(request.user).hospital.statistics.add_patient()
     if request.method == 'POST':
         if patient.get_current_treatment_session() is None:
             hospital = get_account_from_user(request.user).hospital
