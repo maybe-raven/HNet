@@ -2,6 +2,8 @@ from django.db import models
 from datetime import date, timedelta
 from hospital.models import Hospital, TreatmentSession
 from account.models import Doctor, Patient
+from .validator import validate_file_extension
+import os
 
 
 class Diagnosis(models.Model):
@@ -44,7 +46,23 @@ class Test(models.Model):
 
     description = models.TextField()
     results = models.TextField()
-    file = models.FileField(default=None, upload_to="media/test_result")
+
+    def content_file_name(self, filename):
+        """
+        Used to rename the file to pk of the doctor and test
+        gives a unique name for each file
+        :param filename: original filename
+        :return: new filename
+        """
+        ext = filename.split('.')[-1]
+        filename = "%s_%s.%s" % (self.doctor.id, self.id, ext)
+        return os.path.join('medical/static/test_results', filename)
+
+    file = models.FileField(default=None, upload_to=content_file_name, validators=[validate_file_extension])
+
+    def extension(self):
+        name, extension = os.path.splitext(self.file.name)
+        return extension
 
     uploaded = models.BooleanField(default=False)
     released = models.BooleanField(default=False)
@@ -92,6 +110,10 @@ class Drug(models.Model):
 
 
 class Prescription(models.Model):
+    """
+    Prescription class that has a diagnosis, doctor, drug, instructions for use
+    which a prescribing doctor will create
+    """
     diagnosis = models.ForeignKey(Diagnosis, on_delete=models.CASCADE)
     doctor = models.ForeignKey(Doctor, on_delete=models.PROTECT)
     drug = models.ForeignKey(Drug, on_delete=models.PROTECT)

@@ -8,24 +8,23 @@ from .forms import StephenLoginForm
 
 
 def index(request):
-    profile_information = ProfileInformation.from_user(request.user)
-    if profile_information is not None:
-        account_type = profile_information.account_type
-
-        if account_type == Patient.ACCOUNT_TYPE:
-            CreateLogEntry(request.user.username, "Patient logged in.")
-            return redirect(reverse('index:patient'))
-        elif account_type == Doctor.ACCOUNT_TYPE:
-            CreateLogEntry(request.user.username, "Doctor logged in.")
-            return redirect(reverse('index:doctor'))
-        elif account_type == Nurse.ACCOUNT_TYPE:
-            CreateLogEntry(request.user.username, "Nurse logged in.")
-            return redirect(reverse('index:nurse'))
-        elif account_type == Administrator.ACCOUNT_TYPE:
-            CreateLogEntry(request.user.username, "Administrator logged in.")
-            return redirect(reverse('index:administrator'))
+    if request.user.is_superuser:
+        return redirect(reverse('index:system_administrator'))
     else:
-        return render(request, 'index/index.html')
+        profile_information = ProfileInformation.from_user(request.user)
+        if profile_information is not None:
+            account_type = profile_information.account_type
+
+            if account_type == Patient.ACCOUNT_TYPE:
+                return redirect(reverse('index:patient'))
+            elif account_type == Doctor.ACCOUNT_TYPE:
+                return redirect(reverse('index:doctor'))
+            elif account_type == Nurse.ACCOUNT_TYPE:
+                return redirect(reverse('index:nurse'))
+            elif account_type == Administrator.ACCOUNT_TYPE:
+                return redirect(reverse('index:administrator'))
+        else:
+            return render(request, 'index/index.html')
 
 
 def test_user_account_type(user, account_type):
@@ -49,7 +48,6 @@ def log(request):
 def patient(request):
     patient = get_account_from_user(request.user)
     context = {'patient': patient}
-    CreateLogEntry(request.user.username, "Patient logged in.")
     return render(request, 'index/patient.html', context)
 
 
@@ -57,7 +55,6 @@ def patient(request):
 @user_passes_test(lambda u: test_user_account_type(u, Doctor.ACCOUNT_TYPE))
 def doctor(request):
     doctor_name = get_account_from_user(request.user)
-    CreateLogEntry(request.user.username, "Doctor logged in.")
     return render(request, 'index/doctor.html', {'doctor': doctor_name})
 
 
@@ -65,15 +62,19 @@ def doctor(request):
 @user_passes_test(lambda u: test_user_account_type(u, Nurse.ACCOUNT_TYPE))
 def nurse(request):
     nurse_name = get_account_from_user(request.user)
-    CreateLogEntry(request.user.username, "Nurse logged in.")
     return render(request, 'index/nurse.html', {'nurse': nurse_name})
 
 
 @login_required
 @user_passes_test(lambda u: test_user_account_type(u, Administrator.ACCOUNT_TYPE))
 def administrator(request):
-    CreateLogEntry(request.user.username, "Administrator logged in.")
     return render(request, 'index/administrator.html')
+
+
+@login_required
+@user_passes_test(lambda u: u.is_superuser)
+def system_administrator(request):
+    return render(request, 'index/sys_admin.html')
 
 
 def stephen(request):

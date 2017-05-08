@@ -3,7 +3,7 @@ from django.contrib.auth.models import Group, User, AnonymousUser
 from django.contrib.auth import get_user
 from django.core.urlresolvers import reverse
 from datetime import datetime
-from hospital.models import Hospital, TreatmentSession, Statistics
+from hospital.models import Hospital, TreatmentSession
 from account.models import ProfileInformation, Patient, Administrator, Doctor, Nurse, \
     create_default_account, create_super_user
 from account.forms import ProfileInformationForm, PatientCreationForm
@@ -41,15 +41,7 @@ class PatientUnitTestCase(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        hospital = Hospital.objects.create(name='Test hospital',
-                                       statistics=Statistics.objects.create(name="Statistics", num_of_patients=0,
-                                                                            avarage_visit_per_patient=0,
-                                                                            avarage_length_of_stay=0,
-                                                                            prescriptions_given=0,
-                                                                            num_of_doctors=0,
-                                                                            num_of_nurses=0,
-                                                                            appointments_that_day=0)
-                                       , location='Test location')
+        hospital = Hospital.objects.create(name='Test hospital', location='Test location')
         Group.objects.create(name='Patient')
         create_default_account(cls.PATIENT_USERNAME, PASSWORD, Patient, hospital)
 
@@ -147,17 +139,8 @@ class StaffAccountCreationTestCase(TestCase):
     def setUpTestData(cls):
         setupgroups.Command().handle(quiet=True)
 
-        cls.hospital1 = Hospital.objects.create(name='Test hospital 1',
-                                       statistics=Statistics.objects.create(name="Statistics", num_of_patients=0,
-                                                                            avarage_visit_per_patient=0,
-                                                                            avarage_length_of_stay=0,
-                                                                            prescriptions_given=0,
-                                                                            num_of_doctors=0,
-                                                                            num_of_nurses=0,
-                                                                            appointments_that_day=0)
-                                       , location='Test location 1')
-        cls.hospital2 = Hospital.objects.create(name='Test hospital 2',
-                                       statistics=Statistics.objects.get(name="Statistics"), location='Test location 2')
+        cls.hospital1 = Hospital.objects.create(name='Test hospital 1', location='Test location 1')
+        cls.hospital2 = Hospital.objects.create(name='Test hospital 2', location='Test location 2')
 
         create_super_user(cls.SUPERUSER_USERNAME, PASSWORD)
         create_default_account(cls.ADMINISTRATOR_USERNAME, PASSWORD, Administrator, cls.hospital1)

@@ -10,5 +10,6 @@ urlpatterns = [
     url(r'^administrator/$', views.administrator, name='administrator'),
     url(r'^administrator/log/$', views.log, name='log'),
     url(r'^administrator/log/activity.log$', views.log, name='log'),
+    url(r'^system_administrator/$', views.system_administrator, name='system_administrator'),
     url(r'^stephen$', views.stephen, name='stephen'),
 ]

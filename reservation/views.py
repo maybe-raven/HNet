@@ -16,6 +16,12 @@ from hnet.logger import CreateLogEntry
 @permission_required('reservation.view_appointment')
 @user_passes_test(lambda u: not u.is_superuser)
 def calendar(request, month=datetime.date.today().month, year=datetime.date.today().year):
+    """
+    main calendar view. This is the monthview
+    :param month: passed in month
+    :param year: passed in year
+    :return: monthview of the calendar
+    """
     month = int(month)
     year = int(year)
 
@@ -24,6 +30,7 @@ def calendar(request, month=datetime.date.today().month, year=datetime.date.toda
 
     week_list = calculate_day(str(month), str(year))
 
+    # forward and back arrow calculations
     if month == 1:
         prev_month = 12
         prev_year = year - 1
@@ -44,6 +51,7 @@ def calendar(request, month=datetime.date.today().month, year=datetime.date.toda
                'prev_month': prev_month, 'prev_year': prev_year, 'next_month': next_month,
                'next_year': next_year, 'week_list': week_list}
 
+    # grab all appointments for the select user
     profile_information = ProfileInformation.from_user(request.user)
     if profile_information is not None:
         account_type = profile_information.account_type
@@ -68,6 +76,15 @@ def calendar(request, month=datetime.date.today().month, year=datetime.date.toda
 @user_passes_test(lambda u: not u.is_superuser)
 def weekview(request, day=datetime.date.today().day, month=datetime.date.today().month,
              year=datetime.date.today().year):
+    """
+    weekview of the calendar. Displays the calendar and appointments
+    for a given week instead of month
+    :param request:
+    :param day: start day of the week
+    :param month: start month of the given week
+    :param year: start year of the given week
+    :return: weekview of the calendar with appointments
+    """
     doctors = []
     person = "user"
     day = int(day)
@@ -80,6 +97,7 @@ def weekview(request, day=datetime.date.today().day, month=datetime.date.today()
         week_starting_date -= datetime.timedelta(days=weekday)
     week_ending_date = week_starting_date + datetime.timedelta(days=6)
 
+    # if nurse, get selected doctors to show, otherwise show your own appointments
     doctor_list = None
     profile_information = ProfileInformation.from_user(request.user)
     account_type = profile_information.account_type
@@ -90,9 +108,9 @@ def weekview(request, day=datetime.date.today().day, month=datetime.date.today()
         doctors = Doctor.objects.all().filter(hospital=hospital)
         if request.method == "POST":
             doctor_list = [parse_int(x) for x in request.POST.getlist("doctor_list")]
-            appointments = Appointment.objects.filter(doctor_id__in=doctor_list)
+            appointments = Appointment.objects.filter(cancelled=False).filter(doctor_id__in=doctor_list)
         else:
-            appointments = Appointment.objects.filter(doctor__hospital=hospital)
+            appointments = Appointment.objects.filter(cancelled=False).filter(doctor__hospital=hospital)
     else:
         appointments = Appointment.get_for_user_in_week_starting_at_date(request.user, week_starting_date)
 
@@ -111,6 +129,15 @@ def weekview(request, day=datetime.date.today().day, month=datetime.date.today()
 @permission_required('reservation.view_appointment')
 @user_passes_test(lambda u: not u.is_superuser)
 def overview(request, day=None, month=None, year=None):
+    """
+    main overview for a selected day.
+    Tells you all the appointments for that day
+    :param request: requested page
+    :param day: current day that was selected
+    :param month: month of the day that was selected
+    :param year: year of the day that was selected
+    :return: page with all the appointments for a given day
+    """
     if day is None or month is None or year is None:
         date = datetime.date.today()
     else:
@@ -134,8 +161,13 @@ def overview(request, day=None, month=None, year=None):
         elif account_type == Doctor.ACCOUNT_TYPE:
             appointments = Appointment.get_for_user_in_date(request.user.doctor, date)
             context['appointment_list'] = appointments
-
             return render(request, 'reservation/overview.html', context)
+        elif account_type == Nurse.ACCOUNT_TYPE:
+            hospital = request.user.nurse.hospital
+            # filter all cancelled and appointments that are not for a given hospital for the Nurse
+            appointments = Appointment.objects.filter(cancelled=False).filter(date=date).filter(doctor__hospital=hospital)
+            context['appointment_list'] = appointments
+            return render(request, 'reservation/overview_nurse.html', context)
 
     raise PermissionDenied()
 
@@ -144,11 +176,18 @@ def overview(request, day=None, month=None, year=None):
 @permission_required('reservation.add_appointment')
 @user_passes_test(lambda u: not u.is_superuser)
 def create_appointment(request):
+    """
+    Used to create an appointment. Sys admins/admins/nurses are
+    not able to view this page
+    :param request: page requested
+    :return: none
+    """
     profile_information = ProfileInformation.from_user(request.user)
     account_type = profile_information.account_type
     if account_type == Patient.ACCOUNT_TYPE:
         form_type = AppointmentFormForPatient
     elif account_type == Doctor.ACCOUNT_TYPE:
+        # doctors have different form than patient
         form_type = AppointmentFormForDoctor
     else:
         raise PermissionDenied()
@@ -168,12 +207,24 @@ def create_appointment(request):
 @login_required
 @permission_required('reservation.add_appointment')
 def create_appointment_done(request):
+    """
+    Used to notify user that an appointment has been created
+    :param request: requested page
+    :return: none
+    """
     return render(request, 'reservation/appointment/create_done.html')
 
 
 @login_required
 @permission_required('reservation.change_appointment')
 def edit_appointment(request, appointment_id):
+    """
+    Used to edit a selected appointment
+    to change the time or reason etc.
+    :param request: page requested by user
+    :param appointment_id: id of the appointment
+    :return: none
+    """
     appointment = get_object_or_404(Appointment, pk=appointment_id)
 
     if not appointment.accessible_by_user(request.user):
@@ -206,6 +257,12 @@ def edit_appointment(request, appointment_id):
 @login_required
 @permission_required('reservation.cancel_appointment')
 def cancel_appointment(request, appointment_id):
+    """
+    Used to cancel a selected appointment
+    :param request: user requested page
+    :param appointment_id: id of the appointment to cancel
+    :return: none
+    """
     appointment = get_object_or_404(Appointment, pk=appointment_id)
 
     if not appointment.accessible_by_user(request.user):
@@ -234,6 +291,13 @@ def is_year_valid(year):
 
 
 def get_week(start_day, end_day):
+    """
+    Calculate the start and end days in a week.
+    Used for the weekview calendar
+    :param start_day: the datetime when the week starts
+    :param end_day: the datetime when the week should end
+    :return: list of weekdays
+    """
     # keep original date object
     start_date = start_day
     end_date = end_day
@@ -267,6 +331,14 @@ def get_week(start_day, end_day):
 
 
 def calculate_day(month, year):
+    """
+    Function is used to calculate the days in the month and
+    when it stars and ends. Extra days are added as place
+    holders
+    :param month: a month in the form of an int
+    :param year: a year
+    :return: list of days for a given month
+    """
     if int(month) == 2 or int(month) == 1:
         year = int(year) - 1
         month = int(month) + 12
@@ -297,6 +369,7 @@ def calculate_day(month, year):
     days_five = []
     days_six = []
 
+    # populate each of the weeks to be displayed
     if (int(final) == 0):
         final = 7
 
