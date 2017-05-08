@@ -13,7 +13,7 @@
         <p style="text-align: center;">{{ message }}</p>
         {% endif %}
 
-        <form method="post" action="{% url 'medical:create_diagnosis' form.instance.id %}"
+        <form method="post" action="{% url 'medical:update_diagnosis' form.instance.id %}"
               style="margin-bottom: 44pt;">
             {% csrf_token %}
             <table>
