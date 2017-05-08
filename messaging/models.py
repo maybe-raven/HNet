@@ -3,6 +3,10 @@ from django.contrib.auth.models import User
 
 
 class Message(models.Model):
+    """
+    Message model has a sender and recipient which will be the username of a recipient
+    Each message has a timestamp when it is sent and the message text
+    """
     sender = models.ForeignKey(User, on_delete=models.PROTECT, related_name='sent_messages')
     recipient = models.ForeignKey(User, on_delete=models.PROTECT, related_name='received_messages')
 
