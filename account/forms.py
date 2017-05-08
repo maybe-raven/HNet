@@ -3,8 +3,25 @@ from django.contrib.auth import authenticate
 from django.contrib.auth import forms as auth_forms
 from django.contrib.auth.models import Group, User
 
+from hnet.logger import CreateLogEntry
 from .models import Patient, Administrator, ProfileInformation, Doctor, Nurse
 from .fields import PhoneField
+
+
+class UserAuthenticationForm(auth_forms.AuthenticationForm):
+    def confirm_login_allowed(self, user):
+        super(UserAuthenticationForm, self).confirm_login_allowed(user)
+        if user.is_active:
+            profile_information = ProfileInformation.from_user(user)
+            if profile_information is not None:
+                if profile_information.account_type == Patient.ACCOUNT_TYPE:
+                    CreateLogEntry(user, "Patient logged in.")
+                elif profile_information.account_type == Doctor.ACCOUNT_TYPE:
+                    CreateLogEntry(user, "Doctor logged in.")
+                elif profile_information.account_type == Nurse.ACCOUNT_TYPE:
+                    CreateLogEntry(user, "Nurse logged in.")
+                elif profile_information.account_type == Administrator.ACCOUNT_TYPE:
+                    CreateLogEntry(user, "Administrator logged in.")
 
 
 class UserCreationForm(auth_forms.UserCreationForm):

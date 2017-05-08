@@ -4,7 +4,7 @@ from django.db.models.deletion import ProtectedError
 from django.contrib.auth.models import Group, User
 from account.models import Doctor, Nurse, Patient, Administrator, ProfileInformation, \
     create_default_account, create_super_user
-from hospital.models import Hospital, Statistics
+from hospital.models import Hospital
 
 default_password = '$teamname'
 
@@ -55,15 +55,7 @@ class Command(BaseCommand):
                     elif response == 'n':
                         break
 
-            hospital = Hospital.objects.create(name='Test hospital',
-                                       statistics=Statistics.objects.create(name="Statistics", num_of_patients=0,
-                                                                            avarage_visit_per_patient=0,
-                                                                            avarage_length_of_stay=0,
-                                                                            prescriptions_given=0,
-                                                                            num_of_doctors=0,
-                                                                            num_of_nurses=0,
-                                                                            appointments_that_day=0)
-                                       , location='Test location')
+            hospital = Hospital.objects.create(name='Test hospital', location='Test location')
             self.stdout.write(self.style.SUCCESS('Successfully created test hospital record.'))
 
             create_default_account('patient', default_password, Patient, hospital)

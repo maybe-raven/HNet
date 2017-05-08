@@ -10,3 +10,4 @@ activity.log
 !*/migrations/__init__.py
 
 media/*
+medical/static/test_results/*

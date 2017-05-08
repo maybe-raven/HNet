@@ -27,7 +27,13 @@
             {% for diagnosis in diagnosis_list %}
             <tr>
                 <td>
+                    {% if diagnosis.archived %}
+                    <p>{{ diagnosis }}
+                        <t style="color: red; font-style: italic">Archived</t>
+                    </p>
+                    {% else %}
                     <p>{{ diagnosis }}</p>
+                    {% endif %}
                 </td>
             </tr>
             {% endfor %}

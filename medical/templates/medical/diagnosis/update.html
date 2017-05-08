@@ -9,11 +9,25 @@
             Diagnosis for {{ form.instance.get_patient.user.first_name }} {{ form.instance.patient.user.last_name }}
         </h3>
 
+        {% if archived %}
+        <p style="text-align: center; color: red">
+            Archived
+        </p>
+        {% else %}
+        <div class="parentbutton">
+            <div class="rightbutton">
+                <a href="{% url 'medical:archive_diagnosis' form.instance.id %}"
+                   class="btn btn-default btn-lg inactive" role="button">Archive</a>
+            </div>
+        </div>
+        <div class=col-xs-12" style="height:40px;"></div>
+        {% endif %}
+
         {% if message %}
         <p style="text-align: center;">{{ message }}</p>
         {% endif %}
 
-        <form method="post" action="{% url 'medical:create_diagnosis' form.instance.id %}"
+        <form method="post" action="{% url 'medical:update_diagnosis' form.instance.id %}"
               style="margin-bottom: 44pt;">
             {% csrf_token %}
             <table>
@@ -26,7 +40,7 @@
                 </div>
                 <div class="rightbutton">
                     <a href="{% url 'medical:view_medical_information' form.instance.patient.id %}"
-                       class="btn btn-default btn-lg inactive" role="button">Back to patient</a>
+                       class="btn btn-default btn-lg inactive" role="button">Back to Patient</a>
                 </div>
             </div>
         </form>

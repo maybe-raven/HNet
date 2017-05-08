@@ -30,10 +30,20 @@
             {% for diagnosis in diagnosis_list %}
             <tr>
                 <td>
+                    {% if diagnosis.archived %}
+                    {% if user_has_edit_permission %}
+                    <a href="{% url 'medical:update_diagnosis' diagnosis.id %}">{{ diagnosis }}</a>
+                    <t style="color: red; font-style: italic">Archived</t>
+                    {% else %}
+                    <p>{{ diagnosis }}</p>
+                    <t style="color: red; font-style: italic">Archived</t>
+                    {% endif %}
+                    {% else %}
                     {% if user_has_edit_permission %}
                     <a href="{% url 'medical:update_diagnosis' diagnosis.id %}">{{ diagnosis }}</a>
                     {% else %}
                     <p>{{ diagnosis }}</p>
+                    {% endif %}
                     {% endif %}
                 </td>
             </tr>
@@ -69,10 +79,15 @@
             <h1></h1>
             <div class="row">
                 <div class="col-md-3">
+                    {% if can_discharge %}
                     <input type="submit" class="btn btn-danger" value="Discharge Patient">
+                    {% else %}
+                    <input type="submit" class="btn btn-danger" value="Discharge Patient" disabled>
+                    {% endif %}
                 </div>
                 <div class="col-md-3 col-md-offset-3">
-                    <a href="{% url 'hospital:transfer_patient_as_doctor' patient.id %}" class="btn btn-success">
+                    <a href="{% url 'hospital:transfer_patient_as_doctor' patient.id %}"
+                       class="btn btn-success">
                         Transfer Patient
                     </a>
                 </div>
@@ -93,7 +108,11 @@
                     {% endif %}
                 </div>
                 <div class="col-md-3 col-md-offset-3">
+                    {% if can_discharge %}
                     <input type="submit" class="btn btn-danger" value="Discharge Patient">
+                    {% else %}
+                    <input type="submit" class="btn btn-danger" value="Discharge Patient" disabled>
+                    {% endif %}
                 </div>
             </div>
 
