@@ -11,11 +11,11 @@ Installation:
    6) execute command "python manage.py createsuperuser"
 
 Disclaimers:
-   - only super user (system admins) can create location
    - super user is required to get the server up and running. After the first administrator is created, it can run independently.
 
 Known Bugs:
-
+    - doctors have a "currently" url in the test results that they can click and will take them to a 404 error
+        - however, the picture that is uploaded will be displayed below that
 
 Once a doctor, patient, nurse has been made, they are able to visit the calendar and view/create appointments.
 Doctors, and nurses are able to view all patients in the database for their given hospital. From there they are able to click on a patient to view their relevant prescriptions and medical information.
@@ -42,7 +42,8 @@ Basic execution and usage instructions:
    4) open cmd.exe or Terminal.app and navigate to the project root folder
    5) execute command "python manage.py collectstatic“
    6) execute command "python manage.py runserver 0.0.0.0:8080"
-   6) now you can access the website at "<your_ip>:8080/"
+   7) now you can access the website at "<your_ip>:8080/"
+
 
 Sign in and sign up:
    pre) before any user is allowed to sign up, a hospital must be associated to the server in the admin console by the super user.

@@ -49,6 +49,7 @@ def discharge_patient(request, patient_id):
 @permission_required('hospital.can_view_system_information')
 def logView(request, page=0):
     logs = readLog()
+    logs.reverse()
 
     page = int(page)
     start = page * 20
@@ -60,7 +61,8 @@ def logView(request, page=0):
     next = page + 1 if end < total else None
 
     logs = logs[start:end]
-    return render(request, 'hospital/viewlog.html', {"log_list": logs, 'has_prev': has_prev, 'prev': prev, 'next': next})
+    return render(request, 'hospital/viewlog.html', {"log_list": logs, 'has_prev': has_prev, 'prev': prev,
+                                                     'next': next})
 
 
 @login_required
