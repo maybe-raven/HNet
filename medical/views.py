@@ -462,14 +462,3 @@ def archive_diagnosis(request, diagnosis_id):
 
     return render(request, 'medical/diagnosis/archive.html', {'diagnosis': diagnosis})
 
-@login_required()
-@permission_required('medical.view_test_results')
-def view_result(request, test_id):
-    """Display the specific test result with picture uploads if any"""
-    test = get_object_or_404(Test, pk=test_id)
-    if not test.released:
-        raise Http404()
-    file_path = "test_results/" + str(test.doctor.id) + "_" + str(test.id) + test.extension()
-    context = {'test': test, 'path': file_path}
-    return render(request, 'medical/test/view_image.html', context)
-
